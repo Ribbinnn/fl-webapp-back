@@ -10,6 +10,8 @@
 - database: [MongoDB](https://docs.mongodb.com/manual/installation/)
 
 API
-- POST /api/users ( Create new user, requestBody = (username, password) )
+- POST /api/auth/login ( requestBody = {username, password} )
+- POST /api/auth/logout ( requestBody = {user_id} )
+- POST /api/users ( Create new user, requestBody = {username, password} )
 - GET /api/users ( Get all users )
   
