@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const db = require('../../db/config')
+const db = require('../../db/webapp')
 
 const schema = new Schema(
     {
@@ -8,7 +8,8 @@ const schema = new Schema(
         password: { type: String, required: true },
         type: {type: String},
         name: { type: String },
-        role: {type: String}
+        role: {type: String},
+        token: {type: String}
     },
     {
         timestamps: true
@@ -16,8 +17,8 @@ const schema = new Schema(
     
 );
 
-// select webapp database
-// Create schema for users collection
-const User = db.webapp.model("users", schema);
+// import webapp database
+// schema for users collection
+const User = db.model("users", schema);
 
 module.exports = User;
