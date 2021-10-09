@@ -20,7 +20,7 @@ const login = async (req, res) => {
         }
 
         // generate jwt token
-        const data = tokenGenerator({user_id: user._id, username: req.body.username, name: user.name});
+        const data = tokenGenerator({id: user._id, username: req.body.username, name: user.name, role: user.role});
 
         // store token in database
         await webModel.User.findByIdAndUpdate(user._id, { token : data })

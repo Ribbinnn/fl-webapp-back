@@ -17,7 +17,7 @@ const create = async (req, res) => {
         return res.status(400).json({success: false, message: 'Invalid input'})
     }
     try {
-        
+        // req.user contains {id, username, name, role} of the user
         const project = await vitalsModdel.Project.create({...req.body, owner: req.user.name})
         // send status and message
         return res.status(200).json({

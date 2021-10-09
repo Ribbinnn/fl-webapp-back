@@ -37,6 +37,7 @@ const create = async (req, res) => {
             success: true, 
             message: 'Create user successfully', 
             data: {
+                user_id: user._id,
                 username: user.username,
                 name: user.name,
                 role: user.role
