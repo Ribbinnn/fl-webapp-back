@@ -1,35 +1,36 @@
 const bcrypt = require('bcryptjs');
 const dotenv = require('dotenv');
 const tokenGenerator = require('../middlewares/tokenGenerator');
-const User = require('../models/users');
+const webModel = require('../models/webapp')
 
 dotenv.config();
 
 const login = async (req, res) => {
     try {
         // check if username is in the database
-        const user = await User.findOne({username: req.body.username});
+        const user = await webModel.User.findOne({username: req.body.username});
         if (!user) {
-            return res.status(401).json({success: false, message: 'Wrong username or password'});
+            return res.status(401).json({success: false, message: 'Invalid username or password'});
         }
 
         // check if password is correct
         const result = await bcrypt.compare(req.body.password, user.password);
         if (!result) {
-            return res.status(401).json({success: false, message: 'Wrong username or password'});
+            return res.status(401).json({success: false, message: 'Invalid username or password'});
         }
 
         // generate jwt token
-        const data = tokenGenerator({username: req.body.username});
+        const data = tokenGenerator({user_id: user._id, username: req.body.username, name: user.name});
 
         // store token in database
-        await User.findByIdAndUpdate(user._id, { token : data })
+        await webModel.User.findByIdAndUpdate(user._id, { token : data })
         return res.status(200).json({
             success: true, 
             message: 'Login successfully', 
             data: {
                 user_id: user._id,
                 username: user.username,
+                name: user.name,
                 token: data
             }
         })
@@ -41,7 +42,7 @@ const login = async (req, res) => {
 const logout = async (req, res) => {
     try {
         // update token to be empty
-        await User.findByIdAndUpdate(req.body.user_id, { token : "" })
+        await webModel.User.findByIdAndUpdate(req.body.user_id, { token : "" })
         return res.status(200).json({success: true, message: 'Logout successfully'})
     } catch (e) {
         return res.status(500).json({success: false, message: 'Internal server error'})

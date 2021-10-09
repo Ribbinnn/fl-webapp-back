@@ -4,24 +4,9 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 
-const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/user');
+const indexRouter = require('./routes');
 
 const app = express();
-
-const mongoose = require("mongoose");
-
-// connect to local mongodb
-// database name: webapp
-mongoose
-    .connect('mongodb://localhost/webapp', { useNewUrlParser: true })
-    .catch(e => {
-        console.error('Connection error', e.message)
-    })
-
-const db = mongoose.connection
-// error handler
-db.on("error", console.error.bind(console, "MongoDB connection error:"));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
