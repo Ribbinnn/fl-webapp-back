@@ -3,9 +3,11 @@ const router = express.Router();
 
 const user = require('./user')
 const auth = require('./authentication')
+const vitalsProject = require('./vitalsProject')
 
 router.use('/api/users', user);
 router.use('/api/auth', auth);
+router.use('/api/vitals/projects', vitalsProject);
 
 // Express default homepage
 router.get('/', function(req, res, next) {

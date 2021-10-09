@@ -1,6 +1,6 @@
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
-const User = require('../models/users')
+const webModel = require('../models/webapp')
 
 dotenv.config();
 
@@ -19,7 +19,7 @@ const verifyToken = async (req, res, next) => {
     // check if token is not expired
     jwt.verify(token, secret, async (err, user) => {
         // check if user still login
-        const result = await User.findOne({token: token});
+        const result = await webModel.User.findOne({token: token});
         if (err || !result) {
             return res.status(401).json({success: false, message: 'Unauthorized'});
         }
