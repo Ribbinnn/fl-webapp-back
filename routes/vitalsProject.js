@@ -7,7 +7,7 @@ const userAuthentication = require('../middlewares/tokenVerification')
 router.post('/', userAuthentication, vitalsProjectController.create);
 
 // get project by owner name
-router.get('/', userAuthentication, vitalsProjectController.getByOwner)
+router.get('/owner', userAuthentication, vitalsProjectController.getByOwner)
 
 // get project by id
 router.get('/:id', userAuthentication, vitalsProjectController.getById)

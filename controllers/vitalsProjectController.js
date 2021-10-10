@@ -3,8 +3,9 @@ const vitalsModdel = require('../models/vitals');
 
 const schema = {
     name: Joi.string().required(),
-    HN: Joi.string().required(),
-    description: Joi.string(),
+    owner_first_name: Joi.string().required(),
+    owner_last_name: Joi.string().required(),
+    file_name: Joi.string(),
 };
 
 const validator = Joi.object(schema);
@@ -17,19 +18,13 @@ const create = async (req, res) => {
         return res.status(400).json({success: false, message: 'Invalid input'})
     }
     try {
-        // req.user contains {id, username, name, role} of the user
-        const project = await vitalsModdel.Project.create({...req.body, owner: req.user.name})
+        // req.user contains {_id, username, first_name, last_name, role} of the user
+        const project = await vitalsModdel.Project.create({...req.body})
         // send status and message
         return res.status(200).json({
             success: true, 
             message: 'Create project successfully', 
-            data: {
-                project_id: project._id,
-                name: project.name,
-                owner: project.owner,
-                HN: project.HN,
-                description: project.description,
-            }
+            data: project
         })
     } catch (e) {
         // error
@@ -40,7 +35,7 @@ const create = async (req, res) => {
 // get project by owner
 const getByOwner = async (req, res) => {
     try {
-        const data = await vitalsModdel.Project.find({owner: req.user.name})
+        const data = await vitalsModdel.Project.find({owner_first_name: req.query.first_name, owner_last_name: req.query.last_name})
 
         return res.status(200).json({message: 'Get projects successfully', data: data});
     } catch (e) {
