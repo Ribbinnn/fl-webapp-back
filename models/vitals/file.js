@@ -6,8 +6,12 @@ const db = require('../../db/vitals')
 const schema = new Schema(
     {
         project_id: { type: ObjectId, required: true, ref: "projects" },
-        file_name: {type: String, required: true},
-        file_type: {type: String, required: true}
+        filename: {type: String, required: true},
+        img:
+        {
+            data: Buffer,
+            contentType: String
+        }
     },
     {
         timestamps: true
@@ -17,6 +21,6 @@ const schema = new Schema(
 
 // import vitals database
 // schema for files collection
-const Record = db.model("records", schema);
+const File = db.model("files", schema);
 
-module.exports = Project;
+module.exports = File;

@@ -7,7 +7,7 @@ const schema = new Schema(
         name: { type: String, required: true, unique: false },
         owner_first_name: { type: String, required: true },
         owner_last_name: { type: String, required: true },
-        file_name: { type: String },
+        filename: { type: String },
     },
     {
         timestamps: true

@@ -15,7 +15,7 @@ API
 - POST /api/users ( Create new user, requestBody = {username, password, first_name, last_name, role} )
 - GET /api/users ( Get all users )
 - GET /api/users/:id ( Get user by id )
-<!-- - POST /api/vitals/projects ( Create vitals project, requestBody = {name, owner, description} ) -->
-- GET /api/vitals/projects/owner ( Get project by owner's full name, query = (first_name, last_name) )
+- POST /api/vitals/projects ( Create vitals project, requestBody = {name, owner_first_name, owner_last_name} + file )
+- GET /api/vitals/projects/owner ( Get project by owner's full name, query = (first, last) )
 - GET /api/vitals/projects/:id ( Get project by id )
-  
+- GET /api/vitals/projects ( Get all projects )

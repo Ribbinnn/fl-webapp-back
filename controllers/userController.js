@@ -77,7 +77,6 @@ const getAll = async (req, res) => {
 const getById = async (req, res) => {
     try {
         const user = await webModel.User.findById(req.params.id, ['_id', 'username', 'first_name', 'last_name', 'role']);
-
         return res.status(200).json({message: 'Get all users successfully', data: user});
     } catch (e) {
 

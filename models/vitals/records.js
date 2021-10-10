@@ -6,9 +6,7 @@ const db = require('../../db/vitals')
 const schema = new Schema(
     {
         project_id: { type: ObjectId, required: true, ref: "projects" },
-        pacs_no: { type: String },
-        lab_test: { type: Object },
-        clinical: { type: Object }
+        records: { type: Object }
     },
     {
         timestamps: true
@@ -20,4 +18,4 @@ const schema = new Schema(
 // schema for records collection
 const Record = db.model("records", schema);
 
-module.exports = Project;
+module.exports = Record;
