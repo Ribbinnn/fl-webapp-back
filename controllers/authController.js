@@ -20,7 +20,13 @@ const login = async (req, res) => {
         }
 
         // generate jwt token
-        const data = tokenGenerator({id: user._id, username: req.body.username, name: user.name, role: user.role});
+        const data = tokenGenerator({
+                        _id: user._id, 
+                        username: req.body.username, 
+                        first_name: user.first_name, 
+                        last_name: user.last_name, 
+                        role: user.role
+                    });
 
         // store token in database
         await webModel.User.findByIdAndUpdate(user._id, { token : data })
@@ -30,7 +36,8 @@ const login = async (req, res) => {
             data: {
                 user_id: user._id,
                 username: user.username,
-                name: user.name,
+                name: user.name,first_name: user.first_name, 
+                last_name: user.last_name, 
                 token: data
             }
         })
@@ -42,7 +49,7 @@ const login = async (req, res) => {
 const logout = async (req, res) => {
     try {
         // update token to be empty
-        await webModel.User.findByIdAndUpdate(req.body.user_id, { token : "" })
+        await webModel.User.findByIdAndUpdate(req.user._id, { token : "" })
         return res.status(200).json({success: true, message: 'Logout successfully'})
     } catch (e) {
         return res.status(500).json({success: false, message: 'Internal server error'})

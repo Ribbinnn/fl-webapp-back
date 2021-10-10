@@ -5,6 +5,6 @@ const userAuthentication = require('../middlewares/tokenVerification')
 
 router.post('/login', authController.login)
 
-router.post('/logout', authController.logout)
+router.post('/logout', userAuthentication, authController.logout)
 
 module.exports = router;

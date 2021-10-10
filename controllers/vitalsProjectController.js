@@ -1,35 +1,65 @@
 const Joi = require("joi"); 
-const vitalsModdel = require('../models/vitals');
+const vitalsModel = require('../models/vitals');
+const XLSX = require('xlsx');
 
 const schema = {
     name: Joi.string().required(),
-    HN: Joi.string().required(),
-    description: Joi.string(),
+    owner_first_name: Joi.string().required(),
+    owner_last_name: Joi.string().required(),
+    file: Joi.required()
 };
 
 const validator = Joi.object(schema);
 
 // create project
 const create = async (req, res) => {
-    // validate input (req.body)
-    const validatedResult = validator.validate(req.body)
+    // validate input
+    const validatedResult = validator.validate({
+                                name: req.body.name,
+                                owner_first_name: req.body.owner_first_name,
+                                owner_last_name: req.body.owner_last_name,
+                                file: req.file
+                            })
     if (validatedResult.error) {
         return res.status(400).json({success: false, message: 'Invalid input'})
     }
     try {
-        // req.user contains {id, username, name, role} of the user
-        const project = await vitalsModdel.Project.create({...req.body, owner: req.user.name})
+        // convert excel file to json
+        const workbook = XLSX.read(req.file.buffer);
+        const sheet_name_list = workbook.SheetNames;
+        const xdata = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]])
+        
+        const filename = req.file.originalname.replace('.', `-${Date.now()}.`);
+
+        // create project (vitals database)
+        const project = await vitalsModel.Project.create({
+                                name: req.body.name,
+                                owner_first_name: req.body.owner_first_name,
+                                owner_last_name: req.body.owner_last_name,
+                                filename
+                            })
+
+        // create file (vitals database)
+        const file = await vitalsModel.File.create({
+                            project_id: project._id, 
+                            filename, 
+                            img: {
+                                data: req.file.buffer, 
+                                contentType: req.file.mimetype
+                            }
+                        })
+
+        // create record (vitals database)
+        const record = await vitalsModel.Record.create({
+                            project_id: project._id, 
+                            records: xdata
+                        })
+
         // send status and message
         return res.status(200).json({
             success: true, 
             message: 'Create project successfully', 
-            data: {
-                project_id: project._id,
-                name: project.name,
-                owner: project.owner,
-                HN: project.HN,
-                description: project.description,
-            }
+            data: project
         })
     } catch (e) {
         // error
@@ -40,7 +70,7 @@ const create = async (req, res) => {
 // get project by owner
 const getByOwner = async (req, res) => {
     try {
-        const data = await vitalsModdel.Project.find({owner: req.user.name})
+        const data = await vitalsModel.Project.find({owner_first_name: req.query.first, owner_last_name: req.query.last})
 
         return res.status(200).json({message: 'Get projects successfully', data: data});
     } catch (e) {
@@ -51,8 +81,22 @@ const getByOwner = async (req, res) => {
 // get project by id
 const getById = async (req, res) => {
     try {
-        const data = await vitalsModdel.Project.findById(req.params.id);
-        return res.status(200).json({message: 'Get project successfully', data: data});
+        // get project info
+        const project = await vitalsModel.Project.findById(req.params.id);
+
+        // get all records from this project
+        const records = await vitalsModel.Record.find({project_id: req.params.id});
+        return res.status(200).json({message: 'Get project successfully', data: {project, records}});
+    } catch (e) {
+        return res.status(500).json({success: false, message: 'Internal server error'});
+    }
+}
+
+// get all projects
+const getAll = async (req, res) => {
+    try {
+        const data = await vitalsModel.Project.find();
+        return res.status(200).json({message: 'Get all projects successfully', data: data});
     } catch (e) {
         return res.status(500).json({success: false, message: 'Internal server error'});
     }
@@ -61,5 +105,6 @@ const getById = async (req, res) => {
 module.exports = {
     create,
     getByOwner,
-    getById
+    getById,
+    getAll
 }

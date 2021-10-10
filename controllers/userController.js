@@ -7,8 +7,10 @@ const webModel = require('../models/webapp')
 const schema = {
     username: Joi.string().required(),
     password: Joi.string().required().min(8).max(32),
-    name: Joi.string(),
-    role: Joi.string()
+    first_name: Joi.string(),
+    last_name: Joi.string(),
+    role: Joi.string(),
+    email: Joi.string().email()
 };
   
 const validator = Joi.object(schema);
@@ -39,7 +41,8 @@ const create = async (req, res) => {
             data: {
                 user_id: user._id,
                 username: user.username,
-                name: user.name,
+                first_name: user.first_name,
+                last_name: user.last_name,
                 role: user.role
             }
         })
@@ -60,7 +63,7 @@ const getAll = async (req, res) => {
         // Find all user from users collection
         const user = await webModel.User
                             .find()
-                            .select(['_id', 'username', 'name', 'role'])
+                            .select(['_id', 'username', 'first_name', 'last_name', 'role'])
 
         // send status and message
         return res.status(200).json({message: 'Get all users successfully', data: user});
@@ -73,8 +76,7 @@ const getAll = async (req, res) => {
 // get user by id
 const getById = async (req, res) => {
     try {
-        const user = await webModel.User.findById(req.params.id, ['_id', 'username', 'name', 'role']);
-
+        const user = await webModel.User.findById(req.params.id, ['_id', 'username', 'first_name', 'last_name', 'role']);
         return res.status(200).json({message: 'Get all users successfully', data: user});
     } catch (e) {
 
