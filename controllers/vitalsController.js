@@ -4,8 +4,8 @@ const XLSX = require('xlsx');
 
 const schema = {
     name: Joi.string().required(),
-    owner_first_name: Joi.string().required(),
-    owner_last_name: Joi.string().required(),
+    clinician_first_name: Joi.string().required(),
+    clinician_last_name: Joi.string().required(),
     file: Joi.required()
 };
 
@@ -16,8 +16,8 @@ const create = async (req, res) => {
     // validate input
     const validatedResult = validator.validate({
                                 name: req.body.name,
-                                owner_first_name: req.body.owner_first_name,
-                                owner_last_name: req.body.owner_last_name,
+                                clinician_first_name: req.body.clinician_first_name,
+                                clinician_last_name: req.body.clinician_last_name,
                                 file: req.file
                             })
     if (validatedResult.error) {
@@ -34,8 +34,8 @@ const create = async (req, res) => {
         // create project (vitals database)
         const project = await vitalsModel.Project.create({
                                 name: req.body.name,
-                                owner_first_name: req.body.owner_first_name,
-                                owner_last_name: req.body.owner_last_name,
+                                clinician_first_name: req.body.clinician_first_name,
+                                clinician_last_name: req.body.clinician_last_name,
                                 filename
                             })
 
@@ -67,12 +67,12 @@ const create = async (req, res) => {
     }
 }
 
-// get project by owner
-const getByOwner = async (req, res) => {
+// get project by clinician
+const getByClinician = async (req, res) => {
     try {
-        const data = await vitalsModel.Project.find({owner_first_name: req.query.first, owner_last_name: req.query.last})
+        const data = await vitalsModel.Project.find({clinician_first_name: req.query.first, clinician_last_name: req.query.last})
 
-        return res.status(200).json({message: 'Get projects successfully', data: data});
+        return res.status(200).json({success: true, message: 'Get projects successfully', data: data});
     } catch (e) {
         return res.status(500).json({success: false, message: 'Internal server error'});
     }
@@ -83,7 +83,7 @@ const getRecordByProjectId = async (req, res) => {
     try {
         // get all records from this project
         const records = await vitalsModel.Record.find({project_id: req.params.id});
-        return res.status(200).json({message: 'Get project successfully', data: records});
+        return res.status(200).json({success: true, message: 'Get project successfully', data: records});
     } catch (e) {
         return res.status(500).json({success: false, message: 'Internal server error'});
     }
@@ -93,7 +93,7 @@ const getRecordByProjectId = async (req, res) => {
 const getAll = async (req, res) => {
     try {
         const data = await vitalsModel.Project.find();
-        return res.status(200).json({message: 'Get all projects successfully', data: data});
+        return res.status(200).json({success: true, message: 'Get all projects successfully', data: data});
     } catch (e) {
         return res.status(500).json({success: false, message: 'Internal server error'});
     }
@@ -101,7 +101,7 @@ const getAll = async (req, res) => {
 
 module.exports = {
     create,
-    getByOwner,
+    getByClinician,
     getRecordByProjectId,
     getAll
 }

@@ -9,7 +9,7 @@ const project = require('./project')
 router.use('/api/users', user);
 router.use('/api/auth', auth);
 router.use('/api/projects/', project);
-router.use('/api/vitals/projects', vitalsProject);
+router.use('/api/vitals/', vitalsProject);
 
 // Express default homepage
 router.get('/', function(req, res, next) {

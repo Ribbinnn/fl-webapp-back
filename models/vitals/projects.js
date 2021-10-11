@@ -5,8 +5,8 @@ const db = require('../../db/vitals')
 const schema = new Schema(
     {
         name: { type: String, required: true, unique: false },
-        owner_first_name: { type: String, required: true },
-        owner_last_name: { type: String, required: true },
+        clinician_first_name: { type: String, required: true },
+        clinician_last_name: { type: String, required: true },
         filename: { type: String },
     },
     {
