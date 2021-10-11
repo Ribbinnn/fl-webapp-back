@@ -31,7 +31,8 @@ const create = async (req, res) => {
         const user = await webModel.User.create({
             ...req.body,
             password: passwordHash,
-            token: ""
+            token: "",
+            projects: []
         })
 
         // send status and message

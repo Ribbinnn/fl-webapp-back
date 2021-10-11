@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+const ObjectId = mongoose.Schema.Types.ObjectId;
 const db = require('../../db/webapp')
 
 const schema = new Schema(
@@ -7,11 +8,11 @@ const schema = new Schema(
         username: { type: String, required: true, unique: true, index: true },
         password: { type: String, required: true },
         email: { type: String },
-        type: {type: String},
         first_name: { type: String },
         last_name: {type: String},
         role: {type: String},
-        token: {type: String}
+        token: {type: String},
+        projects: [{type: ObjectId, ref: "projects"}]
     },
     {
         timestamps: true

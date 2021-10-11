@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const ObjectId = mongoose.Schema.Types.ObjectId;
-const db = require('../../db/vitals')
+const db = require('../../db/webapp')
 
 const schema = new Schema(
     {
@@ -11,11 +11,10 @@ const schema = new Schema(
     {
         timestamps: true
     }
-    
 );
 
-// import vitals database
-// schema for records collection
-const Record = db.model("records", schema);
+// import webapp database
+// schema for projects collection
+const MedRecord = db.model("medRecords", schema);
 
-module.exports = Record;
+module.exports = MedRecord;

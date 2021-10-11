@@ -78,15 +78,12 @@ const getByOwner = async (req, res) => {
     }
 }
 
-// get project by id
-const getById = async (req, res) => {
+// get record by project id
+const getRecordByProjectId = async (req, res) => {
     try {
-        // get project info
-        const project = await vitalsModel.Project.findById(req.params.id);
-
         // get all records from this project
         const records = await vitalsModel.Record.find({project_id: req.params.id});
-        return res.status(200).json({message: 'Get project successfully', data: {project, records}});
+        return res.status(200).json({message: 'Get project successfully', data: records});
     } catch (e) {
         return res.status(500).json({success: false, message: 'Internal server error'});
     }
@@ -105,6 +102,6 @@ const getAll = async (req, res) => {
 module.exports = {
     create,
     getByOwner,
-    getById,
+    getRecordByProjectId,
     getAll
 }
