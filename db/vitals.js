@@ -1,8 +1,8 @@
-const mongoose = require('mongoose');
+let mongoose = require('mongoose');
 
 // vitals database
-db = mongoose
+mongoose = mongoose
         .createConnection('mongodb://localhost/vitals')
         .on('error', console.error.bind(console, 'MongoDB connection error:'));
 
-module.exports = db;
+module.exports = mongoose;
