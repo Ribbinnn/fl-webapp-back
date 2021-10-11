@@ -9,15 +9,15 @@ const upload = multer({ storage: storage });
 
 // create project
 // use multer to upload file
-router.post('/', userAuthentication, upload.single('file'), vitalsController.create);
+router.post('/records/', userAuthentication, upload.single('file'), vitalsController.create);
 
-// get all projects by owner's full name
-router.get('/owner', userAuthentication, vitalsController.getByOwner)
+// get all projects by clinician's full name
+router.get('/projects/clinician', userAuthentication, vitalsController.getByClinician)
 
 // get records by project id
-router.get('/:id/medrec', userAuthentication, vitalsController.getRecordByProjectId)
+router.get('/projects/:id/medrec', userAuthentication, vitalsController.getRecordByProjectId)
 
 // get all projects
-router.get('/', userAuthentication, vitalsController.getAll)
+router.get('/projects', userAuthentication, vitalsController.getAll)
 
 module.exports = router;

@@ -7,9 +7,9 @@ const userAuthentication = require('../middlewares/tokenVerification')
 router.post('/', userController.create);
 
 // Get all users
-router.get('/', userController.getAll);
+router.get('/', userAuthentication, userController.getAll);
 
 // Get user by id
-router.get('/:id', userController.getById);
+router.get('/:id', userAuthentication, userController.getById);
 
 module.exports = router;
