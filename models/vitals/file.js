@@ -7,7 +7,7 @@ const schema = new Schema(
     {
         project_id: { type: ObjectId, required: true, ref: "projects" },
         filename: {type: String, required: true},
-        img:
+        file:
         {
             data: Buffer,
             contentType: String
