@@ -7,7 +7,8 @@ const schema = {
     description: Joi.string(),
     cover_img: Joi.string(),
     users: Joi.array().items(Joi.string()),
-    fields: Joi.object()
+    predClasses: Joi.array().items(Joi.string()),
+    requirements: Joi.array()
 };
 
 const validator = Joi.object(schema);

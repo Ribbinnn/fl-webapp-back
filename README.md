@@ -3,7 +3,7 @@
    ```
    npm install
    ```
-- run the appliaction (server will be running on port 3000)
+- run the appliaction (server will be running on port 5000)
   ```
   npm start
   ```
@@ -16,7 +16,7 @@ Authentication
 User
 - POST /api/users ( Create new user, reqBody = {username, password, first_name, last_name, role, email} )
 Webapp Project
-- POST /api/projects ( Create new project, reqBody = {name, task, description, users, fields} )
+- POST /api/projects ( Create new project, reqBody = {name, task, description, users, requirements, predClasses} )
 - GET /api/projects/HN/:HN ( Get patient info by HN )
 - GET /api/projects/user/:id ( Get all projects by user id )
 - GET /api/projects/:id ( Get project by id )
