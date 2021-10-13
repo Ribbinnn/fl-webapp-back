@@ -43,7 +43,7 @@ const create = async (req, res) => {
         const file = await vitalsModel.File.create({
                             project_id: project._id, 
                             filename, 
-                            img: {
+                            file: {
                                 data: req.file.buffer, 
                                 contentType: req.file.mimetype
                             }
