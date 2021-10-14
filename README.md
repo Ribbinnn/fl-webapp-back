@@ -17,6 +17,7 @@ Authentication <br />
 
 User 
 - POST /api/users ( Create new user, reqBody = {username, password, first_name, last_name, role, email} )
+
 Webapp Project
 - POST /api/projects ( Create new project, reqBody = {name, task, description, users, requirements, predClasses} )
 - GET /api/projects/HN/:HN ( Get patient info by HN )
