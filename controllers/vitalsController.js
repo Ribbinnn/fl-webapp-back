@@ -1,5 +1,6 @@
 const Joi = require("joi"); 
 const vitalsModel = require('../models/vitals');
+const webModel = require('../models/webapp')
 const XLSX = require('xlsx');
 
 const schema = {
@@ -40,14 +41,14 @@ const create = async (req, res) => {
                             })
 
         // create file (vitals database)
-        const file = await vitalsModel.File.create({
-                            project_id: project._id, 
-                            filename, 
-                            file: {
-                                data: req.file.buffer, 
-                                contentType: req.file.mimetype
-                            }
-                        })
+        // const file = await vitalsModel.File.create({
+        //                     project_id: project._id, 
+        //                     filename, 
+        //                     file: {
+        //                         data: req.file.buffer, 
+        //                         contentType: req.file.mimetype
+        //                     }
+        //                 })
 
         // create record (vitals database)
         const record = await vitalsModel.Record.create({
@@ -70,7 +71,8 @@ const create = async (req, res) => {
 // get project by clinician
 const getByClinician = async (req, res) => {
     try {
-        const data = await vitalsModel.Project.find({clinician_first_name: req.query.first, clinician_last_name: req.query.last})
+        const user = await webModel.User.findById(req.params.id);
+        const data = await vitalsModel.Project.find({clinician_first_name: user.first_name, clinician_last_name: user.last_name})
 
         return res.status(200).json({success: true, message: 'Get projects successfully', data: data});
     } catch (e) {
