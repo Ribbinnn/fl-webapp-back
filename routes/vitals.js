@@ -10,7 +10,7 @@ const medRecController = require('../controllers/medRecController');
 router.post('/records/', userAuthentication, upload.single('file'), vitalsController.create);
 
 // get all projects by clinician's full name
-router.get('/projects/clinician', userAuthentication, vitalsController.getByClinician)
+router.get('/projects/clinician/:id', userAuthentication, vitalsController.getByClinician)
 
 // get records by project id
 router.get('/projects/:id/medrec', userAuthentication, vitalsController.getRecordByProjectId)

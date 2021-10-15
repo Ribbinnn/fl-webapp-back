@@ -19,8 +19,6 @@ const schema = new Schema(
     
 );
 
-// import vitals database
-// schema for files collection
 const File = db.model("files", schema);
 
-module.exports = File;
+// module.exports = File;
