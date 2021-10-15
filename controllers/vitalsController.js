@@ -10,7 +10,13 @@ const schema = {
     file: Joi.required()
 };
 
+const delete_schema = {
+    record_id: Joi.string().required(),
+    record_index: Joi.number().integer()
+}
+
 const validator = Joi.object(schema);
+const delete_validator = Joi.object(delete_schema);
 
 // create project
 const create = async (req, res) => {
@@ -101,9 +107,73 @@ const getAll = async (req, res) => {
     }
 }
 
+//delete a single row of record by record id and index of row to remove
+const deleteRecRow = async (req, res) => {
+    const validatedResult = delete_validator.validate(req.body)
+    if (validatedResult.error) {
+        console.log(validatedResult.error)
+        return res.status(400).json({success: false, message: 'Invalid input'})
+    }
+    try {
+        vitalsModel.Record.findById(req.body.record_id, (err, record) => {
+            let new_records = (record.records).filter((item, i) => i !== req.body.record_index)
+            record.records = new_records
+            record.save((err) => {
+                if (err) {
+                    console.log(err)
+                    return res.status(500).json({success: false, message: 'Internal server error'})
+                }
+                let updated_time = new Date();
+                vitalsModel.Project.findByIdAndUpdate(record.project_id,{"updatedAt": updated_time}, (err, result) => {
+                    if(err){
+                        console.log(err)
+                        return res.status(500).json({success: false, message: 'Internal server error'})
+                    }
+                    return res.status(200).json({
+                        success: true,
+                        message: 'Delete one record successfully'
+                    })
+                })
+            })
+        })
+    } catch (e) {
+        console.log(e)
+        return res.status(500).json({success: false, message: 'Internal server error'})
+    }
+}
+
+const deleteRecFile = async (req, res) => {
+    const validatedResult = delete_validator.validate({record_id: req.params.id})
+    console.log(req.params)
+    if (validatedResult.error) {
+        return res.status(400).json({success: false, message: 'Invalid input'})
+    }
+    try {
+        vitalsModel.Record.findByIdAndRemove(req.params.id, (err, record) => {
+            if (err){
+                console.log(err)
+                return res.status(500).json({success: false, message: 'Internal server error'})
+            }
+            vitalsModel.Project.findByIdAndRemove(record.project_id, (err, result) => {
+                if (err){
+                    console.log(err)
+                    return res.status(500).json({success: false, message: 'Internal server error'})
+                }
+                return res.status(200).json({success: true, message: `remove record ${record.id} successfully`})
+            })
+        });
+    } catch (e) {
+        console.log(e)
+        return res.status(500).json({success: false, message: 'Internal server error'})
+    } 
+
+} 
+
 module.exports = {
     create,
     getByClinician,
     getRecordByProjectId,
-    getAll
+    getAll,
+    deleteRecRow,
+    deleteRecFile
 }
