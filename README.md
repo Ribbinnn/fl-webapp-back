@@ -30,6 +30,7 @@ Vitals
 - POST /api/vitals/records ( Create vitals project and upload medical records, reqBody = {name, clinician_first_name, clinician_last_name} + file )
 - GET /api/vitals/projects/clinician/:id ( Get all projects by clinician's user id )
 - GET /api/vitals/projects/:id/medrec ( Get all records by project id )
+- POST /api/vitals/records/updaterow (Update selected row in record file, reqBody = {record_id, HN, update_data})
 - DELETE /api/vitals/records/deleterow/ (Delete selected row in record file req.boy = {record_id, record_index}) 
 - DELETE /api/vitals/records/deletefile/:id (Delete entire record file by record_id) 
 

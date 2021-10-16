@@ -1,10 +1,17 @@
 const Joi = require("joi"); 
 const webModel = require('../models/webapp')
+const vitalsModel = require('../models/vitals')
 
 const schema = {
     project_id: Joi.string().required(),
     record: Joi.object()
 };
+
+const update_schema = {
+    record_id: Joi.string().required(),
+    HN: Joi.number().integer().required(),
+    update_data: Joi.object(),
+}
 
 const delete_schema = {
     record_id: Joi.string().required(),
@@ -12,6 +19,7 @@ const delete_schema = {
 }
 
 const validator = Joi.object(schema);
+const update_validator = Joi.object(update_schema);
 const delete_validator = Joi.object(delete_schema);
 
 const insertMedRec = async (req, res) => {
@@ -28,6 +36,30 @@ const insertMedRec = async (req, res) => {
             message: 'Insert medical record successfully', 
             data: medRec 
         })
+    } catch (e) {
+        console.log(e)
+        return res.status(500).json({success: false, message: 'Internal server error'})
+    }
+}
+
+const updateRecRow = async (req, res) => {
+    const validatedResult = update_validator.validate(req.body)
+    if (validatedResult.error) {
+        console.log(validatedResult.error)
+        return res.status(400).json({success: false, message: 'Invalid input'})
+    }
+    try {
+        // change req.body.update_data key from [key] to [records.$.key] to update nested object
+        for (const key in req.body.update_data) {
+            req.body.update_data["records.$." + key] = req.body.update_data[key];
+            delete req.body.update_data[key];
+        }
+        vitalsModel.Record.findOneAndUpdate(
+            {_id: req.body.record_id, "records.HN": req.body.HN}, 
+            req.body.update_data, 
+            (err) => {
+                return res.status(200).json({success: true, message: `Update record ${req.body.record_id}, HN ${req.body.HN} successfully`});
+            })
     } catch (e) {
         console.log(e)
         return res.status(500).json({success: false, message: 'Internal server error'})
@@ -86,6 +118,7 @@ const deleteRecFile = async (req, res) => {
 
 module.exports = {
     insertMedRec,
+    updateRecRow,
     deleteRecRow,
     deleteRecFile
 }
