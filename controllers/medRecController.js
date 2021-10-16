@@ -1,5 +1,6 @@
 const Joi = require("joi"); 
 const webModel = require('../models/webapp')
+const vitalsModel = require('../models/vitals')
 
 const schema = {
     project_id: Joi.string().required(),

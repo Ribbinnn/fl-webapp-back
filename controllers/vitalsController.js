@@ -10,12 +10,19 @@ const schema = {
     file: Joi.required()
 };
 
+const update_schema = {
+    record_id: Joi.string().required(),
+    HN: Joi.number().integer().required(),
+    update_data: Joi.object(),
+}
+
 const delete_schema = {
     record_id: Joi.string().required(),
     record_index: Joi.number().integer()
 }
 
 const validator = Joi.object(schema);
+const update_validator = Joi.object(update_schema);
 const delete_validator = Joi.object(delete_schema);
 
 // create project
@@ -107,6 +114,31 @@ const getAll = async (req, res) => {
     }
 }
 
+// update selected row in record file by record id and patient HN with update data
+const updateRecRow = async (req, res) => {
+    const validatedResult = update_validator.validate(req.body)
+    if (validatedResult.error) {
+        console.log(validatedResult.error)
+        return res.status(400).json({success: false, message: 'Invalid input'})
+    }
+    try {
+        // change req.body.update_data key from [key] to [records.$.key] to update nested object
+        for (const key in req.body.update_data) {
+            req.body.update_data["records.$." + key] = req.body.update_data[key];
+            delete req.body.update_data[key];
+        }
+        vitalsModel.Record.findOneAndUpdate(
+            {_id: req.body.record_id, "records.HN": req.body.HN}, 
+            req.body.update_data, 
+            (err) => {
+                return res.status(200).json({success: true, message: `Update record ${req.body.record_id}, HN ${req.body.HN} successfully`});
+            })
+    } catch (e) {
+        console.log(e)
+        return res.status(500).json({success: false, message: 'Internal server error'})
+    }
+}
+
 //delete a single row of record by record id and index of row to remove
 const deleteRecRow = async (req, res) => {
     const validatedResult = delete_validator.validate(req.body)
@@ -174,6 +206,7 @@ module.exports = {
     getByClinician,
     getRecordByProjectId,
     getAll,
+    updateRecRow,
     deleteRecRow,
     deleteRecFile
 }
