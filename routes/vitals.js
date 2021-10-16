@@ -3,7 +3,6 @@ const router = express.Router();
 const vitalsController = require('../controllers/vitalsController')
 const userAuthentication = require('../middlewares/tokenVerification')
 const upload = require('../middlewares/uploadFile')
-const medRecController = require('../controllers/medRecController');
 
 // create project
 // use multer to upload file
@@ -18,13 +17,13 @@ router.get('/projects/:id/medrec', userAuthentication, vitalsController.getRecor
 // get all projects
 router.get('/projects', userAuthentication, vitalsController.getAll)
 
-// update record row by id and patient HN
-router.post('/records/updaterow', userAuthentication, medRecController.updateRecRow);
+// update record row by record id and patient HN
+router.post('/records/updaterow', userAuthentication, vitalsController.updateRecRow);
 
 // delete record row by id and index
-router.delete('/records/deleterow', userAuthentication, medRecController.deleteRecRow);
+router.delete('/records/deleterow', userAuthentication, vitalsController.deleteRecRow);
 
 // delete record row by id and index
-router.delete('/records/deletefile/:id', userAuthentication, medRecController.deleteRecFile);
+router.delete('/records/deletefile/:id', userAuthentication, vitalsController.deleteRecFile);
 
 module.exports = router;
