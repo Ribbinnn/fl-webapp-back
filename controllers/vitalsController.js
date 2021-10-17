@@ -81,8 +81,8 @@ const create = async (req, res) => {
     }
 }
 
-// get project by clinician
-const getByClinician = async (req, res) => {
+// get vitals project by clinician
+const getProjectByClinician = async (req, res) => {
     try {
         const user = await webModel.User.findById(req.params.id);
         const data = await vitalsModel.Project.find({clinician_first_name: user.first_name, clinician_last_name: user.last_name})
@@ -98,6 +98,32 @@ const getRecordByProjectId = async (req, res) => {
     try {
         // get all records from this project
         const records = await vitalsModel.Record.find({project_id: req.params.id});
+        return res.status(200).json({success: true, message: 'Get project successfully', data: records});
+    } catch (e) {
+        return res.status(500).json({success: false, message: 'Internal server error'});
+    }
+}
+
+// get all records by patient HN
+const getRecordByHN = async (req, res) => {
+    try {
+        const records = await vitalsModel.Record.aggregate([
+            { $lookup: {
+                from: "projects",
+                localField: "project_id",
+                foreignField: "_id",
+                as: "project"
+            }},
+            { $unwind: {path: '$records'} },
+            { $addFields: {
+                'records.project_id': { "$arrayElemAt": ['$project._id', 0] },
+                'records.record_id': '$_id',
+                'records.clinician_first_name': { "$arrayElemAt": ['$project.clinician_first_name', 0] },
+                'records.uploaded_time': '$updatedAt'
+            }},
+            { $replaceRoot: {newRoot: '$records'} },
+            { $match: {HN: Number(req.params.HN)} }
+        ])
         return res.status(200).json({success: true, message: 'Get project successfully', data: records});
     } catch (e) {
         return res.status(500).json({success: false, message: 'Internal server error'});
@@ -203,8 +229,9 @@ const deleteRecFile = async (req, res) => {
 
 module.exports = {
     create,
-    getByClinician,
+    getProjectByClinician,
     getRecordByProjectId,
+    getRecordByHN,
     getAll,
     updateRecRow,
     deleteRecRow,
