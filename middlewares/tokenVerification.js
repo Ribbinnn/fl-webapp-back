@@ -13,7 +13,7 @@ const verifyToken = async (req, res, next) => {
 
     // if no token, send error message
     if (!token) {
-        return res.status(401).json({success: false, message: 'Unauthorized'});
+        return res.status(401).json({success: false, message: 'Token not found in the header'});
     }
 
     // check if token is not expired
@@ -21,7 +21,7 @@ const verifyToken = async (req, res, next) => {
         // check if user still login
         const result = await webModel.User.findOne({token: token});
         if (err || !result) {
-            return res.status(401).json({success: false, message: 'Unauthorized'});
+            return res.status(401).json({success: false, message: 'Token is invalid, please login again'});
         }
         req.user = user;
         next();

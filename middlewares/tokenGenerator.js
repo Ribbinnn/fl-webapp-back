@@ -5,10 +5,10 @@ dotenv.config();
 
 const secret = process.env.SECRET_TOKEN;
 
-const generateToken = (data) => {
+const generateToken = (data, remember) => {
   // generate jwt token when user login
   return jwt.sign(data, secret, {
-    expiresIn: "900m",
+    expiresIn: remember? "90d": "24h",
   });
 }
 

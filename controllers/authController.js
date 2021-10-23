@@ -26,7 +26,7 @@ const login = async (req, res) => {
                         first_name: user.first_name, 
                         last_name: user.last_name, 
                         role: user.role
-                    });
+                    }, req.body.remember? true: false);
 
         // store token in database
         await webModel.User.findByIdAndUpdate(user._id, { token : data })
