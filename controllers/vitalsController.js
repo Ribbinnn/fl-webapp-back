@@ -5,8 +5,7 @@ const XLSX = require('xlsx');
 
 const schema = {
     name: Joi.string().required(),
-    clinician_first_name: Joi.string().required(),
-    clinician_last_name: Joi.string().required(),
+    user_id: Joi.string().required(),
     file: Joi.required()
 };
 
@@ -29,28 +28,29 @@ const delete_validator = Joi.object(delete_schema);
 const create = async (req, res) => {
     // validate input
     const validatedResult = validator.validate({
-                                name: req.body.name,
-                                clinician_first_name: req.body.clinician_first_name,
-                                clinician_last_name: req.body.clinician_last_name,
-                                file: req.file
+                                name: req.body.project_name,
+                                user_id: req.body.user_id,
+                                record_name: req.body.record_name
                             })
     if (validatedResult.error) {
         return res.status(400).json({success: false, message: 'Invalid input'})
     }
     try {
         // convert excel file to json
-        const workbook = XLSX.read(req.file.buffer);
-        const sheet_name_list = workbook.SheetNames;
-        const xdata = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]])
+        // const workbook = XLSX.read(req.file.buffer);
+        // const sheet_name_list = workbook.SheetNames;
+        // const xdata = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]])
         
-        const filename = req.file.originalname.replace('.', `-${Date.now()}.`);
+        // const filename = req.file.originalname.replace('.', `-${Date.now()}.`);
+
+        const user = await webModel.User.findById(req.body.user_id, ['_id', 'first_name', 'last_name'])
 
         // create project (vitals database)
         const project = await vitalsModel.Project.create({
-                                name: req.body.name,
-                                clinician_first_name: req.body.clinician_first_name,
-                                clinician_last_name: req.body.clinician_last_name,
-                                filename
+                                name: req.body.project_name,
+                                clinician_first_name: user.first_name,
+                                clinician_last_name: user.last_name,
+                                record_name: req.body.record_name
                             })
 
         // create file (vitals database)
@@ -66,7 +66,7 @@ const create = async (req, res) => {
         // create record (vitals database)
         const record = await vitalsModel.Record.create({
                             project_id: project._id, 
-                            records: xdata
+                            records: req.body.records
                         })
 
         // send status and message
