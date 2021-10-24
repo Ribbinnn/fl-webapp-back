@@ -1,12 +1,12 @@
 const Joi = require("joi"); 
 const vitalsModel = require('../models/vitals');
 const webModel = require('../models/webapp')
-const XLSX = require('xlsx');
 
 const schema = {
-    name: Joi.string().required(),
+    project_name: Joi.string().required(),
     user_id: Joi.string().required(),
-    file: Joi.required()
+    record_name: Joi.string().required(),
+    records: Joi.array().items(Joi.object({'entry_id': Joi.required()}).unknown(true)).unique('entry_id')
 };
 
 const update_schema = {
@@ -23,26 +23,22 @@ const delete_schema = {
 const validator = Joi.object(schema);
 const update_validator = Joi.object(update_schema);
 const delete_validator = Joi.object(delete_schema);
+// const record_validator = Joi.array().items(Joi.object().custom(record_schema))
 
 // create project
 const create = async (req, res) => {
     // validate input
     const validatedResult = validator.validate({
-                                name: req.body.project_name,
+                                project_name: req.body.project_name,
                                 user_id: req.body.user_id,
-                                record_name: req.body.record_name
+                                record_name: req.body.record_name,
+                                records: req.body.records
                             })
     if (validatedResult.error) {
-        return res.status(400).json({success: false, message: 'Invalid input'})
+        // console.log(validatedResult.error.message)
+        return res.status(400).json({success: false, message: `Invalid input: ${(validatedResult.error.message)}`})
     }
     try {
-        // convert excel file to json
-        // const workbook = XLSX.read(req.file.buffer);
-        // const sheet_name_list = workbook.SheetNames;
-        // const xdata = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]])
-        
-        // const filename = req.file.originalname.replace('.', `-${Date.now()}.`);
-
         const user = await webModel.User.findById(req.body.user_id, ['_id', 'first_name', 'last_name'])
 
         // create project (vitals database)
@@ -52,16 +48,6 @@ const create = async (req, res) => {
                                 clinician_last_name: user.last_name,
                                 record_name: req.body.record_name
                             })
-
-        // create file (vitals database)
-        // const file = await vitalsModel.File.create({
-        //                     project_id: project._id, 
-        //                     filename, 
-        //                     file: {
-        //                         data: req.file.buffer, 
-        //                         contentType: req.file.mimetype
-        //                     }
-        //                 })
 
         // create record (vitals database)
         const record = await vitalsModel.Record.create({
@@ -119,10 +105,10 @@ const getRecordByHN = async (req, res) => {
                 'records.project_id': { "$arrayElemAt": ['$project._id', 0] },
                 'records.record_id': '$_id',
                 'records.clinician_first_name': { "$arrayElemAt": ['$project.clinician_first_name', 0] },
-                'records.uploaded_time': '$updatedAt'
+                'records.updatedAt': '$updatedAt'
             }},
             { $replaceRoot: {newRoot: '$records'} },
-            { $match: {HN: Number(req.params.HN)} }
+            { $match: {hn: Number(req.params.HN)} }
         ])
         return res.status(200).json({success: true, message: 'Get project successfully', data: records});
     } catch (e) {
@@ -145,7 +131,7 @@ const updateRecRow = async (req, res) => {
     const validatedResult = update_validator.validate(req.body)
     if (validatedResult.error) {
         console.log(validatedResult.error)
-        return res.status(400).json({success: false, message: 'Invalid input'})
+        return res.status(400).json({success: false, message: `Invalid input: ${(validatedResult.error.message)}`})
     }
     try {
         // change req.body.update_data key from [key] to [records.$.key] to update nested object
@@ -170,7 +156,7 @@ const deleteRecRow = async (req, res) => {
     const validatedResult = delete_validator.validate(req.body)
     if (validatedResult.error) {
         console.log(validatedResult.error)
-        return res.status(400).json({success: false, message: 'Invalid input'})
+        return res.status(400).json({success: false, message: `Invalid input: ${(validatedResult.error.message)}`})
     }
     try {
         vitalsModel.Record.findById(req.body.record_id, (err, record) => {
@@ -204,7 +190,7 @@ const deleteRecFile = async (req, res) => {
     const validatedResult = delete_validator.validate({record_id: req.params.id})
     console.log(req.params)
     if (validatedResult.error) {
-        return res.status(400).json({success: false, message: 'Invalid input'})
+        return res.status(400).json({success: false, message: `Invalid input: ${(validatedResult.error.message)}`})
     }
     try {
         vitalsModel.Record.findByIdAndRemove(req.params.id, (err, record) => {

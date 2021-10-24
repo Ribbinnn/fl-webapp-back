@@ -8,7 +8,6 @@ const schema = new Schema(
         name: { type: String, required: true, unique: false },
         task: { type: String, required: true },
         description: { type: String },
-        cover_img: { type: String },
         requirements: { type: Object },
         predClasses: [{type: String}],
         users: [{type: ObjectId, ref: "users"}]

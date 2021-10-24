@@ -21,7 +21,7 @@ const create = async (req, res) => {
     // validate input (req.body)
     const validatedResult = validator.validate(req.body)
     if (validatedResult.error) {
-        return res.status(400).json({success: false, message: 'Invalid input'})
+        return res.status(400).json({success: false, message: `Invalid input: ${(validatedResult.error.message)}`})
     }
     try {
         // hash password
