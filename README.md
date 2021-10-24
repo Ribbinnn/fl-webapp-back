@@ -8,7 +8,7 @@
   npm start
   ```
 - Database: [MongoDB](https://docs.mongodb.com/manual/installation/)
-- Import sample data into database
+   - Import sample data into database
   ```
   npm run initDB
   ```
