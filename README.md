@@ -7,11 +7,15 @@
   ```
   npm start
   ```
-- database: [MongoDB](https://docs.mongodb.com/manual/installation/)
+- Database: [MongoDB](https://docs.mongodb.com/manual/installation/)
+   - Import sample data into database
+  ```
+  npm run initDB
+  ```
 
 ## API PATH
 Authentication <br />
-- POST /api/auth/login ( reqBody = {username, password} )
+- POST /api/auth/login ( reqBody = {username, password, remember} )
 - POST /api/auth/logout 
 
 
@@ -27,7 +31,7 @@ Webapp Project
 
 
 Vitals
-- POST /api/vitals/records ( Create vitals project and upload medical records, reqBody = {name, clinician_first_name, clinician_last_name} + file )
+- POST /api/vitals/records ( Create vitals project and upload medical records, reqBody = {project_name, record_name, user_id, records} )
 - GET /api/vitals/projects/clinician/:id ( Get all projects by clinician's user id )
 - GET /api/vitals/projects/:id/medrec ( Get all records by project id )
 - GET /api/vitals/records/HN/:HN ( Get all records by patient's HN )

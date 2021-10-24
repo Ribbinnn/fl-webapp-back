@@ -6,7 +6,7 @@ const db = require('../../db/webapp')
 const schema = new Schema(
     {
         project_id: { type: ObjectId, required: true, ref: "projects" },
-        records: [{ type: Object }]
+        record: { type: Object }
     },
     {
         timestamps: true
@@ -15,6 +15,6 @@ const schema = new Schema(
 
 // import webapp database
 // schema for projects collection
-const MedRecord = db.model("medRecords", schema);
+const MedRecord = db.model("medrecords", schema);
 
 module.exports = MedRecord;

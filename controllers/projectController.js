@@ -3,9 +3,8 @@ const webModel = require('../models/webapp')
 
 const schema = {
     name: Joi.string().required(),
-    task: Joi.string(),
+    task: Joi.string().required(),
     description: Joi.string(),
-    cover_img: Joi.string(),
     users: Joi.array().items(Joi.string()),
     predClasses: Joi.array().items(Joi.string()),
     requirements: Joi.array()
@@ -18,19 +17,21 @@ const create = async (req, res) => {
     // validate input
     const validatedResult = validator.validate(req.body)
     if (validatedResult.error) {
-        return res.status(400).json({success: false, message: 'Invalid input'})
+        return res.status(400).json({success: false, message: `Invalid input: ${(validatedResult.error.message)}`})
     }
     try {
         // create project
         const project = await webModel.Project.create({...req.body})
 
         // update project list of associated user
-        await Promise.all(req.body.users.map(async (id) => {
-            await webModel.User.findByIdAndUpdate(id, {$push: {projects: project.id}})
-        }))
-
+        if(req.body.users) {
+            await Promise.all(req.body.users.map(async (id) => {
+                await webModel.User.findByIdAndUpdate(id, {$push: {projects: project.id}})
+            }))
+        }
+        
         // create medical record for the project
-        await webModel.MedRecord.create({project_id: project.id, records: []})
+        // await webModel.MedRecord.create({project_id: project.id, records: []})
         return res.status(200).json({
             success: true, 
             message: 'Create project successfully', 

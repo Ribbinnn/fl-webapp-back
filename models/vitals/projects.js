@@ -7,7 +7,7 @@ const schema = new Schema(
         name: { type: String, required: true, unique: false },
         clinician_first_name: { type: String, required: true },
         clinician_last_name: { type: String, required: true },
-        filename: { type: String },
+        record_name: {type: String}
     },
     {
         timestamps: true
