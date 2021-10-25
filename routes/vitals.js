@@ -29,4 +29,7 @@ router.delete('/records/deletefile/:id', userAuthentication, vitalsController.de
 // get all records by patient HN
 router.get('/records/HN/:HN', userAuthentication, vitalsController.getRecordByHN)
 
+// generate template by project name
+router.get('/template/:project_name', userAuthentication, vitalsController.generateTemplate)
+
 module.exports = router;
