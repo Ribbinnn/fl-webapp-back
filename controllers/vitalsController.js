@@ -1,6 +1,7 @@
 const Joi = require("joi"); 
 const vitalsModel = require('../models/vitals');
 const webModel = require('../models/webapp')
+const XLSX = require('xlsx')
 
 const schema = {
     project_name: Joi.string().required(),
@@ -210,8 +211,31 @@ const deleteRecFile = async (req, res) => {
         console.log(e)
         return res.status(500).json({success: false, message: 'Internal server error'})
     } 
-
 } 
+
+// generate template from project's requirements
+const generateTemplate = async (req, res) => {
+    try {
+        const project = await webModel.Project.findOne({name: req.params.project_name})
+
+        const requirements = project.requirements.map(item => item.name)
+        const headerField = ["entry_id", "hn", "gender", "age", ...requirements]
+
+        const ws = XLSX.utils.json_to_sheet([], {header:headerField})
+        const wb = XLSX.utils.book_new();
+
+        XLSX.utils.book_append_sheet(wb, ws);
+        const wbbuf = XLSX.write(wb, { type: 'buffer' });
+
+        res.writeHead(200, [
+            ['Content-Type',  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
+        ]);
+        return res.end(wbbuf)
+    } catch (e) {
+        return res.status(500).json({success: false, message: `Internal server error`})
+    }
+
+}
 
 module.exports = {
     create,
@@ -221,5 +245,6 @@ module.exports = {
     getAll,
     updateRecRow,
     deleteRecRow,
-    deleteRecFile
+    deleteRecFile,
+    generateTemplate
 }
