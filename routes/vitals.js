@@ -2,11 +2,9 @@ const express = require('express');
 const router = express.Router();
 const vitalsController = require('../controllers/vitalsController')
 const userAuthentication = require('../middlewares/tokenVerification')
-const upload = require('../middlewares/uploadFile')
 
 // create project
-// use multer to upload file
-router.post('/records/', userAuthentication, upload.single('file'), vitalsController.create);
+router.post('/records/', userAuthentication, vitalsController.create);
 
 // get all projects by clinician's user id
 router.get('/projects/clinician/:id', userAuthentication, vitalsController.getProjectByClinician)
