@@ -1,1 +1,5 @@
 node_modules/
+
+resources/uploads/*
+
+!resources/uploads/0041018.dcm
