@@ -21,7 +21,7 @@ router.get('/projects', userAuthentication, vitalsController.getAll)
 router.patch('/records/updaterow', userAuthentication, vitalsController.updateRecRow);
 
 // delete record row by id and index
-router.delete('/records/deleterow', userAuthentication, vitalsController.deleteRecRow);
+router.patch('/records/deleterow', userAuthentication, vitalsController.deleteRecRow);
 
 // delete record row by id and index
 router.delete('/records/deletefile/:id', userAuthentication, vitalsController.deleteRecFile);
