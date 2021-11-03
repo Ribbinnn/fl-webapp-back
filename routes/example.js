@@ -11,6 +11,7 @@ router.post('/', upload.single('file'), async (req, res) => {
 
 // get file
 router.get('/:filename', async (req, res) => {
+    console.log(req.params.filename)
     const uploadPath = path.join(__dirname, '../resources/uploads/', req.params.filename)
     return res.status(200).sendFile(uploadPath)
 })

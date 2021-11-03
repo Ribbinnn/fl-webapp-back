@@ -3,3 +3,7 @@ node_modules/
 resources/uploads/*
 
 !resources/uploads/0041018.dcm
+
+resources/results/*
+
+!resources/results/dummy.txt
