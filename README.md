@@ -40,6 +40,12 @@ Vitals
 - DELETE /api/vitals/records/deleterow/ (Delete selected row in record file req.boy = {record_id, record_index}) 
 - DELETE /api/vitals/records/deletefile/:id (Delete entire record file by record_id) 
 
+Infer
+- POST /api/infer (start inference, reqBody (multipart/form-data) = (file, project_id, record) )
+
+Image
+- GET /api/image (get image, reqQuery = (result_id, finding))
+
 **Path ที่ไม่ได้ใช้ แต่อาจมีประโยชน์** <br />
 User <br />
 - GET /api/users ( Get all users )

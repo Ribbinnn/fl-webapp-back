@@ -6,6 +6,8 @@ const axios = require('axios')
 const FormData = require('form-data');
 const extract = require('extract-zip')
 
+/* Validate Record */
+
 const imageSchema = {
     project_id: Joi.string().required(),
     filepath: Joi.string().required(),
@@ -21,21 +23,12 @@ const recordSchema = {
 const imageValidator = Joi.object(imageSchema);
 const recordValidator = Joi.object(recordSchema)
 
-const createResult = async (req, res) => {
-
-    /*
-    req body:
-    {
-        file (dicom/png),
-        record (object),
-        project id
-    }
-    */
+const inferResult = async (req, res) => {
 
     const validatedImage = imageValidator.validate({ 
-        project_id: req.body.project_id?? "617978ad0fc7ab3ebbba2db4", 
-        filepath: req.file? req.file.filename: undefined, 
-        filetype: req.file? req.file.mimetype: undefined 
+        project_id: req.body.project_id, 
+        filepath: req.file.filename, 
+        filetype: req.file.mimetype 
     })
     if (validatedImage.error) {
         return res.status(400).json({ success: false, message: `Invalid image input: ${(validatedImage.error.message)}` })
@@ -53,13 +46,15 @@ const createResult = async (req, res) => {
     }
 
     const root = path.join(__dirname, "..");
-    const resDir = path.join(root, "/resources/results/", req.file.filename.split('.')[0])
+    const resultDir = path.join(root, "/resources/results/", req.file.filename.split('.')[0])
     const url = "http://localhost:7000/api/infer";
 
     try {
+        const project = await webModel.Project.findById(req.body.project_id)
+
         console.log('Start')
         const image = await webModel.Image.create({ 
-            project_id: req.body.project_id?? "617978ad0fc7ab3ebbba2db4", 
+            project_id: req.body.project_id, 
             filepath: 'uploads/' + req.file.filename, 
             filetype: req.file.mimetype 
         })
@@ -76,13 +71,12 @@ const createResult = async (req, res) => {
             record_id: record? record._id: undefined,
             image_id: image._id, 
             status: "in progress", 
-            label: {},
-            note: ""
+            label: "",
+            note: "",
+            clinician_id: req.body.clinician_id
         })
 
         const predClass = await webModel.PredClass.create({result_id: result._id, prediction: {}})
-
-        const project = await webModel.Project.findById(req.body.project_id)
 
         const data = new FormData() 
         data.append('file', fs.createReadStream(root + '\\resources\\uploads\\' + req.file.filename))
@@ -95,31 +89,48 @@ const createResult = async (req, res) => {
             responseType: 'arraybuffer'
         })
         .then(async res => { // then print response status
-            if (!fs.existsSync(resDir)){
-                fs.mkdirSync(resDir);
+            if (!fs.existsSync(resultDir)){
+                fs.mkdirSync(resultDir);
             }
-            fs.writeFile(resDir + '/result.zip', res.data, (err) => {
+            fs.writeFile(resultDir + '/result.zip', res.data, (err) => {
                 if (err) throw err
             });
-            await extract(resDir + '/result.zip', { dir: resDir })
+            await extract(resultDir + '/result.zip', { dir: resultDir })
 
-            const prediction = JSON.parse(fs.readFileSync(resDir + '/prediction.txt'));
+            const prediction = JSON.parse(fs.readFileSync(resultDir + '/prediction.txt'));
 
-            await webModel.PredResult.findByIdAndUpdate(result._id, {status:"annotated"})
-            await webModel.PredClass.findByIdAndUpdate(predClass._id, {prediction: prediction})
-            console.log('Finish')
+            fs.unlink(resultDir + '/result.zip', (err) => {
+                if (err) throw err
+            })
+
+            fs.unlink(resultDir + '/prediction.txt', (err) => {
+                if (err) throw err
+            })
+
+            fs.readdir(resultDir, async (err, files) => {
+                if(err) throw err
+                await Promise.all(files.map( async (item, i) => {
+                    await webModel.Gradcam.create({
+                        result_id: result._id,
+                        finding: item.split('.')[0],
+                        gradcam_path: `results/${req.file.filename.split('.')[0]}/${item}`
+                    })
+                }))
+                await webModel.PredResult.findByIdAndUpdate(result._id, {status:"annotated"})
+                await webModel.PredClass.findByIdAndUpdate(predClass._id, {prediction: prediction})
+                console.log('Finish')
+            })
         }).catch(e => {
             throw e
         })
 
         return res.status(200).json({ success: true, message: `Start inference` })
     } catch (e) {
-        if (fs.existsSync(resDir)){
-            fs.rm(resDir, { recursive: true, force: true }, (err) => {
+        if (fs.existsSync(resultDir)){
+            fs.rm(resultDir, { recursive: true, force: true }, (err) => {
                 console.log(err)
             });
         }
-        console.log(e.message)
         return res.status(500).json({ success: false, message: 'Internal server error' });
     }
 }
@@ -135,22 +146,7 @@ const getAllResult = async (req, res) => {
     }
 }
 
-const getImage = async (req, res) => {
-    try {
-        const root = path.join(__dirname, "..");
-
-        const mask = await webModel.Mask.findOne({ res_id: req.query.res_id, finding: req.query.finding })
-
-        let fullPath = path.join(root, "/resources/results/", mask.filename);
-        let imageAsBase64 = fs.readFileSync(fullPath, 'base64');
-        res.send('data:image/png;base64,' + imageAsBase64)
-    } catch (e) {
-        return res.status(500).json({ success: false, message: 'Internal server error' });
-    }
-}
-
 module.exports = {
-    createResult,
-    getAllResult,
-    getImage
+    inferResult,
+    getAllResult
 }
