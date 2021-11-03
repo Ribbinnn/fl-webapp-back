@@ -44,7 +44,9 @@ Infer
 - POST /api/infer (start inference, reqBody (multipart/form-data) = (file, project_id, record) )
 
 Image
-- GET /api/image (get image, reqQuery = (result_id, finding))
+- GET /api/image (get image, reqQuery = (result_id, finding)) <br />
+  example: /image/?result_id=6181884fdb269acd1bf1bd77&finding=original (original file) <br />
+  example: /image/?result_id=6181884fdb269acd1bf1bd77&finding=Mass (overlay file)
 
 **Path ที่ไม่ได้ใช้ แต่อาจมีประโยชน์** <br />
 User <br />
