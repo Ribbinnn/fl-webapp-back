@@ -6,8 +6,8 @@ const db = require('../../db/webapp')
 const schema = new Schema(
     {
         project_id: { type: ObjectId, required: true, ref: "projects" },
-        filepath: { type: String, required: true },
-        filetype: { type: String, required: true }
+        accession_no: { type: String, required: true },
+        filetype: { type: String } // not used
     },
     {
         timestamps: true

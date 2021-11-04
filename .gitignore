@@ -3,6 +3,8 @@ node_modules/
 resources/uploads/*
 
 !resources/uploads/0041018.dcm
+!resources/uploads/0041054.dcm
+!resources/uploads/0041099.dcm
 
 resources/results/*
 

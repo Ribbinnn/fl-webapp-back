@@ -124,10 +124,10 @@ const webappSeed = async () => {
         },
         {
             name: 'Pneumonia',
-            task: '2D-classification',
+            task: 'classification_pylon_1024',
             description: '2D-classification for Pneumonia',
             requirements: [{ name: 'fever', type: 'string', unit: 'none' }],
-            predClasses: ['normal', 'Nodule'],
+            predClasses: pylon_classes,
             users: [user.insertedIds[1]],
             createdAt: new Date('10/16/2021'),
             updatedAt: new Date('10/16/2021')

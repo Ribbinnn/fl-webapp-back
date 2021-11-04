@@ -11,9 +11,6 @@ router.post('/', userAuthentication, projectController.create);
 // get all projects
 router.get('/', userAuthentication, projectController.getAll);
 
-// get all projects
-router.get('/HN/:HN', userAuthentication, pacsController.getByHN);
-
 // get all projects by user id
 router.get('/user/:id', userAuthentication, projectController.getByUserId);
 

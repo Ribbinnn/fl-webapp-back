@@ -24,7 +24,6 @@ User
 
 Webapp Project
 - POST /api/projects ( Create new project, reqBody = {name, task, description, users, requirements, predClasses} )
-- GET /api/projects/HN/:HN ( Get patient info by HN )
 - GET /api/projects/user/:id ( Get all projects by user id )
 - GET /api/projects/:id ( Get project by id )
 - POST /api/projects/:id/insert ( Insert medical record to project, reqBody = Object ) 
@@ -41,12 +40,16 @@ Vitals
 - DELETE /api/vitals/records/deletefile/:id (Delete entire record file by record_id) 
 
 Infer
-- POST /api/infer (start inference, reqBody (multipart/form-data) = (file, project_id, record) )
+- POST /api/infer (start inference, reqBody = (accession_no, project_id, record, clinician_id) )
 
 Image
 - GET /api/image (get image, reqQuery = (result_id, finding)) <br />
-  example: /image/?result_id=6181884fdb269acd1bf1bd77&finding=original (original file) <br />
+  example: /image/?accession_no=74 (original file from PACS) <br />
   example: /image/?result_id=6181884fdb269acd1bf1bd77&finding=Mass (overlay file)
+
+PACS
+- GET /api/pacs/HN/:HN ( Get all patient's data from pacs by HN )
+- GET /api/pacs/HN/:HN/info ( Get patient info by HN )
 
 **Path ที่ไม่ได้ใช้ แต่อาจมีประโยชน์** <br />
 User <br />
