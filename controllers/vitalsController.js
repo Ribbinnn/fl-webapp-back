@@ -12,8 +12,7 @@ const schema = {
 
 const update_schema = {
     record_id: Joi.string().required(),
-    HN: Joi.number().integer().required(),
-    update_data: Joi.object(),
+    update_data: Joi.array().items(Joi.object({'entry_id': Joi.required()}).unknown(true)).unique('entry_id'),
 }
 
 const delete_schema = {
@@ -136,15 +135,15 @@ const updateRecRow = async (req, res) => {
     }
     try {
         // change req.body.update_data key from [key] to [records.$.key] to update nested object
-        for (const key in req.body.update_data) {
-            req.body.update_data["records.$." + key] = req.body.update_data[key];
-            delete req.body.update_data[key];
+        for (const key in req.body.update_data[0]) {
+            req.body.update_data[0]["records.$." + key] = req.body.update_data[0][key];
+            delete req.body.update_data[0][key];
         }
         vitalsModel.Record.findOneAndUpdate(
-            {_id: req.body.record_id, "records.HN": req.body.HN}, 
-            req.body.update_data, 
+            {_id: req.body.record_id, "records.entry_id": req.body.update_data[0]["records.$.entry_id"]}, 
+            req.body.update_data[0], 
             (err) => {
-                return res.status(200).json({success: true, message: `Update record ${req.body.record_id}, HN ${req.body.HN} successfully`});
+                return res.status(200).json({success: true, message: `Update record ${req.body.record_id} successfully`});
             })
     } catch (e) {
         console.log(e)
