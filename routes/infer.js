@@ -4,8 +4,10 @@ const inferController = require('../controllers/inferController')
 const userAuthentication = require('../middlewares/tokenVerification')
 const upload = require('../middlewares/uploadFile')
 
-router.post('/', userAuthentication, upload.single('file'), inferController.inferResult);
+// predict result from dicom file
+router.post('/', userAuthentication, inferController.inferResult);
 
+// get all results
 router.get('/', userAuthentication, inferController.getAllResult);
 
 module.exports = router;
