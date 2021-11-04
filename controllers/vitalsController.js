@@ -13,7 +13,7 @@ const schema = {
             'hn': Joi.required(),
             'gender': Joi.required(),
             'age': Joi.required(),
-            'measurd_time': Joi.required() 
+            'measured_time': Joi.required() 
         }).unknown(true)).unique('entry_id')
 };
 
@@ -25,7 +25,7 @@ const update_schema = {
             'hn': Joi.required(),
             'gender': Joi.required(),
             'age': Joi.required(),
-            'measurd_time': Joi.required() 
+            'measured_time': Joi.required() 
         }).unknown(true)).unique('entry_id'),
 }
 
