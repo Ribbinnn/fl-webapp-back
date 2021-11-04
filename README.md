@@ -36,8 +36,8 @@ Vitals
 - GET /api/vitals/projects/:id/medrec ( Get all records by project id )
 - GET /api/vitals/records/HN/:HN ( Get all records by patient's HN )
 - GET /api/vitals/template/:project_name (Get .xlsx template from project's requirements)
-- PATCH /api/vitals/records/updaterow (Update selected row in record file, reqBody = {record_id, HN, update_data})
-- DELETE /api/vitals/records/deleterow/ (Delete selected row in record file req.boy = {record_id, record_index}) 
+- PATCH /api/vitals/records/updaterow (Update selected row in record file, reqBody = {record_id, update_data})
+- PATCH /api/vitals/records/deleterow/ (Delete selected row in record file req.boy = {record_id, record_index}) 
 - DELETE /api/vitals/records/deletefile/:id (Delete entire record file by record_id) 
 
 **Path ที่ไม่ได้ใช้ แต่อาจมีประโยชน์** <br />

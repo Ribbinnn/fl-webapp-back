@@ -15,7 +15,7 @@ router.get('/projects/:id/medrec', userAuthentication, vitalsController.getRecor
 // get all projects
 router.get('/projects', userAuthentication, vitalsController.getAll)
 
-// update record row by record id and patient HN
+// update record row by record id
 router.patch('/records/updaterow', userAuthentication, vitalsController.updateRecRow);
 
 // delete record row by id and index
