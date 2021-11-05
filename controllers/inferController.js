@@ -31,6 +31,7 @@ const inferResult = async (req, res) => {
     const root = path.join(__dirname, "..");
     const url = "http://localhost:7000/api/infer";
 
+    // mock-up
     // get filepath (from PACS) by accession no
     let pacs = {}
     try {
@@ -49,6 +50,10 @@ const inferResult = async (req, res) => {
     try {
         // get project's requirements
         const project = await webModel.Project.findById(req.body.project_id)
+
+        if (!project) 
+            return res.status(400).json({ success: false, message: 'Project not found' });
+
         const requirements = [
             {name: "entry_id", type: "string"}, 
             {name: "hn", type: "number"}, 
@@ -89,7 +94,8 @@ const inferResult = async (req, res) => {
             status: "in progress", 
             label: "",
             note: "",
-            clinician_id: req.body.clinician_id
+            created_by: req.body.clinician_id,
+            finalized_by: undefined
         })
 
         // create predicted classes
@@ -123,7 +129,16 @@ const inferResult = async (req, res) => {
 
             // extract zip file and get probability prediction + overlay files
             await extract(resultDir + '/result.zip', { dir: resultDir })
-            const prediction = JSON.parse(fs.readFileSync(resultDir + '/prediction.txt'));
+            const modelResult = JSON.parse(fs.readFileSync(resultDir + '/prediction.txt'));
+            let prediction = []
+
+            for (let i=0; i<modelResult["Finding"].length; i++) {
+                prediction.push({
+                    finding: modelResult["Finding"][i],
+                    confidence: modelResult["Confidence"][i],
+                    selected: false
+                })
+            }
 
             // delete zip file
             fs.unlink(resultDir + '/result.zip', (err) => {
@@ -187,6 +202,17 @@ const getAllResult = async (req, res) => {
         return res.status(500).json({ success: false, message: 'Internal server error' });
     }
 }
+
+// const viewHistory = async (req, res) => {
+//     // req: clinician id
+//     // res: status, hn, patient name, finding, created date time, last modified, clinician 
+    
+//     try {
+
+//     } catch (e) {
+//         return res.status(500).json({ success: false, message: 'Internal server error' });
+//     }
+// }
 
 module.exports = {
     inferResult,

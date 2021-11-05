@@ -10,7 +10,8 @@ const schema = new Schema(
         status: { type: String }, // in progress, annotated, finalized
         label: { type: Object },
         note: { type: String },
-        clinician_id: {type: ObjectId, ref: "users"}
+        created_by: {type: ObjectId, ref: "users"},
+        finalized_by: {type: ObjectId, ref: "users"},
     },
     {
         timestamps: true

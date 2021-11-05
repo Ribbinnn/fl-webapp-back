@@ -1,4 +1,4 @@
-// mock up database
+// mock-up
 const PACS = require('../db/pacs').PACS
 
 // get patient information from PACS by HN
