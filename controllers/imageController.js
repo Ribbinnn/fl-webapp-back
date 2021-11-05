@@ -7,12 +7,13 @@ const getImage = async (req, res) => {
     try {
         const root = path.join(__dirname, "..")
         
+        // mock-up
         // PACS
         if (req.query.accession_no) {
             const data = await PACS.findOne({'Accession No': req.query.accession_no})
 
             if(!data){
-                return res.status(200).json({ success: false, message: 'File not found' });
+                return res.status(200).json({ success: true, message: 'File not found' });
             }
 
             resPath = path.join(root, "/resources/", data.filepath)
@@ -31,7 +32,7 @@ const getImage = async (req, res) => {
             })
 
             if(!gradcam){
-                return res.status(200).json({ success: false, message: 'File not found' });
+                return res.status(200).json({ success: true, message: 'File not found' });
             }
 
             resPath = path.join(root, "/resources/", gradcam.gradcam_path)
