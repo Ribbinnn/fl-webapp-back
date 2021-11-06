@@ -10,4 +10,6 @@ router.post('/', userAuthentication, inferController.inferResult);
 // get all results
 router.get('/', userAuthentication, inferController.getAllResult);
 
+router.get('/list/project/:project_id', userAuthentication, inferController.viewHistory)
+
 module.exports = router;

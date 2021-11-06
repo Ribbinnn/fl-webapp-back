@@ -245,7 +245,7 @@ const prediction = [
       "confidence": 0.003902374068275094,
       "selected": false
     }
-  ]
+]
 
 const webappSeed = async () => {
     mongoose.connect('mongodb://localhost/webapp');
@@ -372,6 +372,7 @@ const webappSeed = async () => {
         {
             record_id: record.insertedIds[0],
             image_id: image.insertedIds[0],
+            project_id: project.insertedIds[0],
             status: "annotated",
             label: "",
             note: "",
