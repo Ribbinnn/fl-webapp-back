@@ -40,7 +40,8 @@ Vitals
 - DELETE /api/vitals/records/deletefile/:id (Delete entire record file by record_id) 
 
 Infer
-- POST /api/infer (start inference, reqBody = (accession_no, project_id, record, clinician_id) )
+- POST /api/infer (Start inference, reqBody = (accession_no, project_id, record, clinician_id) )
+- GET /api/infer/list/project/:project_id (View history by project id)
 
 Image
 - GET /api/image (get image, reqQuery = (result_id, finding)) <br />

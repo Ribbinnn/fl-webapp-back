@@ -7,6 +7,7 @@ const schema = new Schema(
     {
         record_id: { type: ObjectId, ref: "medrecords" },
         image_id: { type: ObjectId, required: true, ref: "images" },
+        project_id: { type: ObjectId, required: true, ref: "projects" },
         status: { type: String }, // in progress, annotated, finalized
         label: { type: Object },
         note: { type: String },
