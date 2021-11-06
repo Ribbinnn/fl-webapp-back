@@ -7,7 +7,7 @@ const axios = require('axios')
 const FormData = require('form-data');
 const extract = require('extract-zip')
 
-// USER AND PROJECT VALIDATION
+/* USER AND PROJECT VALIDATION */
 
 const imageSchema = {
     project_id: Joi.string().required(),
@@ -213,6 +213,7 @@ const viewHistory = async (req, res) => {
         return res.status(400).json({ success: false, message: `Invalid query: "project_id" is required` })
     }
     try {
+        // get predicted result
         const results = await webModel.PredResult.find({ project_id: req.params.project_id })
             .populate("record_id")
             .populate("created_by")
@@ -224,7 +225,8 @@ const viewHistory = async (req, res) => {
             await Promise.all(results.map(async (item) => {
                 let finding = ""
 
-                if (item.status==="annotated") {
+                // get finding with the most confidence
+                if (item.status==="annotated" || item.status==="finalized") {
                     const predClass = await webModel.PredClass.findOne({ result_id: item._id })
                     let mx = -1
                     let mk = -1
@@ -237,9 +239,9 @@ const viewHistory = async (req, res) => {
                     finding = predClass.prediction[mk].finding
                 }
 
-                if (item.status==="finalized") {
-                    finding = item.label.finding
-                }
+                // if (item.status==="finalized") {
+                //     finding = item.label.finding
+                // }
 
                 const hn = item.record_id.record.hn
                 const patientName = await PACS.findOne({ 'Patient ID': String(hn) }, ['Patient Name'])
