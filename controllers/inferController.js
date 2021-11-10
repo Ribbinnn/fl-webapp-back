@@ -6,8 +6,9 @@ const fs = require('fs')
 const axios = require('axios')
 const FormData = require('form-data');
 const extract = require('extract-zip')
+const dotenv = require('dotenv')
 
-/* USER AND PROJECT VALIDATION */
+dotenv.config()
 
 const imageSchema = {
     project_id: Joi.string().required(),
@@ -17,6 +18,7 @@ const imageSchema = {
 
 const imageValidator = Joi.object(imageSchema);
 
+/* ROLLBACK TRANSACTION */
 const inferResult = async (req, res) => {
 
     // validate input
@@ -32,7 +34,7 @@ const inferResult = async (req, res) => {
     }
 
     const root = path.join(__dirname, "..");
-    const url = "http://localhost:7000/api/infer";
+    const url = process.env.PY_SERVER + '/api/infer';
 
     // mock-up
     // get filepath (from PACS) by accession no
@@ -261,7 +263,6 @@ const viewHistory = async (req, res) => {
         }
         return res.status(200).json({success: true, message: `Get all results by project ${req.params.project_id} successfully`, data});
     } catch (e) {
-        console.log(e.message)
         return res.status(500).json({ success: false, message: 'Internal server error' });
     }
 }

@@ -7,6 +7,7 @@ const vitalsProject = require('./vitals')
 const project = require('./project')
 const infer = require('./infer')
 const image = require('./image')
+const mask = require('./masks')
 const pacs = require('./pacs')
 const report = require('./report')
 
@@ -18,6 +19,7 @@ router.use('/api/projects/', project);
 router.use('/api/vitals/', vitalsProject);
 router.use('/api/infer/', infer)
 router.use('/api/image/', image)
+router.use('/api/masks/', mask)
 router.use('/api/pacs/', pacs)
 router.use('/api/report/', report)
 
