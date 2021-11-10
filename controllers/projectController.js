@@ -45,7 +45,7 @@ const create = async (req, res) => {
 // get project by id
 const getById = async (req, res) => {
     try {
-        const project = await webModel.Project.findById(req.params.id);
+        const project = await webModel.Project.findById(req.params.project_id);
         return res.status(200).json({success: true, message: 'Get project successfully', data: project});
     } catch (e) {
         return res.status(500).json({success: false, message: 'Internal server error'})

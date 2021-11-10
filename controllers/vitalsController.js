@@ -25,7 +25,8 @@ const update_schema = {
             'hn': Joi.required(),
             'gender': Joi.required(),
             'age': Joi.required(),
-            'measured_time': Joi.required() 
+            'measured_time': Joi.required(),
+            // 'updated_time': Joi.required()
         }).unknown(true)).unique('entry_id'),
 }
 
@@ -37,7 +38,6 @@ const delete_schema = {
 const validator = Joi.object(schema);
 const update_validator = Joi.object(update_schema);
 const delete_validator = Joi.object(delete_schema);
-// const record_validator = Joi.array().items(Joi.object().custom(record_schema))
 
 // create project
 const create = async (req, res) => {
@@ -53,6 +53,10 @@ const create = async (req, res) => {
         return res.status(400).json({ success: false, message: `Invalid input: ${(validatedResult.error.message)}` })
     }
     try {
+        const records = req.body.records.map((item) => {
+            item["updated_time"] = new Date()
+            return item
+        })
         const user = await webModel.User.findById(req.body.user_id, ['_id', 'first_name', 'last_name'])
 
         // create project (vitals database)
@@ -66,7 +70,7 @@ const create = async (req, res) => {
         // create record (vitals database)
         const record = await vitalsModel.Record.create({
             project_id: project._id,
-            records: req.body.records
+            records
         })
 
         // send status and message

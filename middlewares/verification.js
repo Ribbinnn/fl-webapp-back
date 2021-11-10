@@ -10,7 +10,8 @@ const userVerification = (req, res, next) => {
 }
 
 const projectVerification = async (req, res, next) => {
-    const project = await webModel.Project.findById(req.body.project_id)
+    const project_id = req.body.project_id?? req.params.project_id
+    const project = await webModel.Project.findById(project_id)
     if (!project || !project.users.includes(req.user._id)) {
         return res.status(403).json({success: false, message: `User have no permission to access project ${req.body.project_id}`})
     }
