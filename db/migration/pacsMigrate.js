@@ -1,7 +1,10 @@
 const mongoose = require('mongoose')
+const dotenv = require('dotenv');
+
+dotenv.config()
 
 const pacsSeed = async () => {
-    mongoose.connect('mongodb://localhost/pacs');
+    mongoose.connect(process.env.pacsDB);
 
     const schema = new mongoose.Schema()
 

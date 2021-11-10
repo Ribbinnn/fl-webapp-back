@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
+const dotenv = require('dotenv');
 
 const pylon_classes = [
   'No Finding',
@@ -251,8 +252,10 @@ const focusingFinding = ['Pneumothorax', 'Mass', 'Nodule', 'Mediastinal Mass', '
   'Pleural Effusion', 'Atelectasis', 'Tracheal-Mediastinal Shift', 'Volume Loss',
   'Osteolytic Lesion', 'Fracture', 'Sclerotic Lesion', 'Cardiomegaly', 'Bronchiectasis',]
 
+dotenv.config();
+
 const webappSeed = async () => {
-  mongoose.connect('mongodb://localhost/webapp');
+  mongoose.connect(process.env.webappDB);
 
   const schema = new mongoose.Schema()
 
@@ -283,7 +286,7 @@ const webappSeed = async () => {
       email: 'john@gmail.com',
       first_name: 'John',
       last_name: 'Doe',
-      role: 'clinician',
+      role: 'radiologist',
       token: '',
       projects: [],
       createdAt: new Date('10/13/2021'),
@@ -295,7 +298,7 @@ const webappSeed = async () => {
       email: 'jane@gmail.com',
       first_name: 'Jane',
       last_name: 'Smith',
-      role: 'radiologist',
+      role: 'clinician',
       token: '',
       projects: [],
       createdAt: new Date('10/13/2021'),

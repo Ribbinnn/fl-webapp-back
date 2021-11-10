@@ -1,7 +1,10 @@
 const mongoose = require('mongoose')
+const dotenv = require('dotenv');
+
+dotenv.config()
 
 const vitalsSeed = async () => {
-  mongoose.connect('mongodb://localhost/vitals');
+  mongoose.connect(process.env.vitalsDB);
   
   const schema = new mongoose.Schema()
 
@@ -52,7 +55,9 @@ const vitalsSeed = async () => {
           age: 20,
           pulse: 82,
           weight: 41,
-          height: 154
+          height: 154,
+          measured_time: new Date('10/14/2021'),
+          updated_time: new Date('10/14/2021'),
         },
         {
           entry_id: 2,
@@ -61,7 +66,9 @@ const vitalsSeed = async () => {
           age: 42,
           pulse: 75,
           weight: 65,
-          height: 167
+          height: 167,
+          measured_time: new Date('10/14/2021'),
+          updated_time: new Date('10/14/2021'),
         },
         {
           entry_id: 3,
@@ -70,7 +77,9 @@ const vitalsSeed = async () => {
           age: 67,
           pulse: 73,
           weight: 49,
-          height: 158
+          height: 158,
+          measured_time: new Date('10/14/2021'),
+          updated_time: new Date('10/14/2021'),
         },
       ],
       createdAt: new Date('10/15/2021'),

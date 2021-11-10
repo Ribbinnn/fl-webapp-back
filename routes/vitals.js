@@ -1,33 +1,44 @@
 const express = require('express');
 const router = express.Router();
 const vitalsController = require('../controllers/vitalsController')
-const userAuthentication = require('../middlewares/tokenVerification')
+const tokenValidation = require('../middlewares/tokenVerification')
+const verification = require('../middlewares/verification')
 
 // create project
-router.post('/records/', userAuthentication, vitalsController.create);
+router.post(
+    '/records/',
+    tokenValidation,
+    verification.userVerification,
+    vitalsController.create
+);
 
 // get all projects by clinician's user id
-router.get('/projects/clinician/:id', userAuthentication, vitalsController.getProjectByClinician)
+router.get(
+    '/projects/clinician/:id',
+    tokenValidation,
+    verification.userVerification,
+    vitalsController.getProjectByClinician
+    )
 
 // get records by project id
-router.get('/projects/:id/medrec', userAuthentication, vitalsController.getRecordByProjectId)
+router.get('/projects/:id/medrec', tokenValidation, vitalsController.getRecordByProjectId)
 
 // get all projects
-router.get('/projects', userAuthentication, vitalsController.getAll)
+router.get('/projects', tokenValidation, vitalsController.getAll)
 
 // update record row by record id
-router.patch('/records/updaterow', userAuthentication, vitalsController.updateRecRow);
+router.patch('/records/updaterow', tokenValidation, vitalsController.updateRecRow);
 
 // delete record row by id and index
-router.patch('/records/deleterow', userAuthentication, vitalsController.deleteRecRow);
+router.patch('/records/deleterow', tokenValidation, vitalsController.deleteRecRow);
 
 // delete record row by id and index
-router.delete('/records/deletefile/:id', userAuthentication, vitalsController.deleteRecFile);
+router.delete('/records/deletefile/:id', tokenValidation, vitalsController.deleteRecFile);
 
 // get all records by patient HN
-router.get('/records/HN/:HN', userAuthentication, vitalsController.getRecordByHN)
+router.get('/records/HN/:HN', tokenValidation, vitalsController.getRecordByHN)
 
 // generate template by project name
-router.get('/template/:project_name', userAuthentication, vitalsController.generateTemplate)
+router.get('/template/:project_name', tokenValidation, vitalsController.generateTemplate)
 
 module.exports = router;
