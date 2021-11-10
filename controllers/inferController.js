@@ -7,8 +7,6 @@ const axios = require('axios')
 const FormData = require('form-data');
 const extract = require('extract-zip')
 
-/* USER AND PROJECT VALIDATION */
-
 const imageSchema = {
     project_id: Joi.string().required(),
     accession_no: Joi.string().required(),
@@ -261,7 +259,6 @@ const viewHistory = async (req, res) => {
         }
         return res.status(200).json({success: true, message: `Get all results by project ${req.params.project_id} successfully`, data});
     } catch (e) {
-        console.log(e.message)
         return res.status(500).json({ success: false, message: 'Internal server error' });
     }
 }
