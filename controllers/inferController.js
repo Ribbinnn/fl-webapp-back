@@ -7,6 +7,7 @@ const axios = require('axios')
 const FormData = require('form-data');
 const extract = require('extract-zip')
 const dotenv = require('dotenv')
+// let con1 = require('../db/webapp')
 
 dotenv.config()
 
@@ -52,6 +53,9 @@ const inferResult = async (req, res) => {
 
     const resultDir = path.join(root, "/resources/results/", filename.split('.')[0])
 
+    // let session = await con1.startSession()
+    // session.startTransaction();
+
     try {
         // get project's requirements
         const project = await webModel.Project.findById(req.body.project_id)
@@ -67,7 +71,7 @@ const inferResult = async (req, res) => {
             { name: "measured_time", type: "object" },
             ...project.requirements
         ]
-
+        
         // record can be null (might be changed in the future)
         let record = ""
         if (req.body.record) {
@@ -84,6 +88,12 @@ const inferResult = async (req, res) => {
                 project_id: req.body.project_id,
                 record: req.body.record
             })
+            // record = await webModel.MedRecord.create([{
+            //     project_id: req.body.project_id,
+            //     record: req.body.record
+            // }], { session: session })
+            // await session.commitTransaction()
+            // session.endSession();
         }
 
         // create image
@@ -184,6 +194,8 @@ const inferResult = async (req, res) => {
 
         return res.status(200).json({ success: true, message: `Start inference` })
     } catch (e) {
+        // await session.abortTransaction()
+        // session.endSession();
         console.log(e.message)
         if (e.message.includes('Invalid record input'))
             return res.status(400).json({ success: false, message: e.message });

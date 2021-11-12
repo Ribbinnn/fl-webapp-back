@@ -315,6 +315,42 @@ const webappSeed = async () => {
       projects: [],
       createdAt: new Date('10/13/2021'),
       updatedAt: new Date('10/13/2021')
+    },
+    {
+      username: 'gigi',
+      password: passwordHash,
+      email: 'gigi@hotmail.com',
+      first_name: 'Gigi',
+      last_name: 'Hadid',
+      role: 'clinician',
+      token: '',
+      projects: [],
+      createdAt: new Date('10/13/2021'),
+      updatedAt: new Date('10/13/2021')
+    },
+    {
+      username: 'ian',
+      password: passwordHash,
+      email: 'ian@hotmail.com',
+      first_name: 'Ian',
+      last_name: 'Boston',
+      role: 'clinician',
+      token: '',
+      projects: [],
+      createdAt: new Date('10/13/2021'),
+      updatedAt: new Date('10/13/2021')
+    },
+    {
+      username: 'edward',
+      password: passwordHash,
+      email: 'edward@yahoo.com',
+      first_name: 'Edward',
+      last_name: 'Cullen',
+      role: 'radiologist',
+      token: '',
+      projects: [],
+      createdAt: new Date('10/13/2021'),
+      updatedAt: new Date('10/13/2021')
     }
   ])
 
@@ -329,7 +365,7 @@ const webappSeed = async () => {
         { name: 'height', type: 'number', unit: 'cm' }
       ],
       predClasses: pylon_classes,
-      users: [user.insertedIds[0]],
+      users: [user.insertedIds[0], user.insertedIds[4], user.insertedIds[5]],
       createdAt: new Date('10/14/2021'),
       updatedAt: new Date('10/14/2021')
     },
@@ -339,7 +375,17 @@ const webappSeed = async () => {
       description: '2D-classification for Pneumonia',
       requirements: [{ name: 'fever', type: 'string', unit: 'none' }],
       predClasses: pylon_classes,
-      users: [user.insertedIds[1], user.insertedIds[0]],
+      users: [user.insertedIds[0], user.insertedIds[1], user.insertedIds[3]],
+      createdAt: new Date('10/16/2021'),
+      updatedAt: new Date('10/16/2021')
+    },
+    {
+      name: 'Tuberculosis',
+      task: 'classification_pylon_1024',
+      description: '2D-classification for Tuberculosis',
+      requirements: [{ name: 'cough', type: 'string', unit: 'none' }],
+      predClasses: pylon_classes,
+      users: [user.insertedIds[2], user.insertedIds[3], user.insertedIds[4]],
       createdAt: new Date('10/16/2021'),
       updatedAt: new Date('10/16/2021')
     },
@@ -347,6 +393,10 @@ const webappSeed = async () => {
 
   await User.collection.updateOne({ _id: user.insertedIds[0] }, { $set: { projects: [project.insertedIds[0], project.insertedIds[1]] } })
   await User.collection.updateOne({ _id: user.insertedIds[1] }, { $set: { projects: [project.insertedIds[1]] } })
+  await User.collection.updateOne({ _id: user.insertedIds[2] }, { $set: { projects: [project.insertedIds[0], project.insertedIds[1]] } })
+  await User.collection.updateOne({ _id: user.insertedIds[3] }, { $set: { projects: [project.insertedIds[2]] } })
+  await User.collection.updateOne({ _id: user.insertedIds[4] }, { $set: { projects: [project.insertedIds[0], project.insertedIds[2]] } })
+  await User.collection.updateOne({ _id: user.insertedIds[5] }, { $set: { projects: [project.insertedIds[0]] } })
 
   const record = await MedRecord.collection.insertMany([
     {
@@ -359,7 +409,8 @@ const webappSeed = async () => {
         pulse: 76,
         weight: 53,
         height: 162,
-        measured_time: "2021-10-10T17:00:00.000Z"
+        measured_time: new Date("2021-10-10T17:00:00.000Z"),
+        updated_time: new Date("2021-10-10T17:00:00.000Z")
       },
       createdAt: new Date('10/16/2021'),
       updatedAt: new Date('10/16/2021')
@@ -375,7 +426,8 @@ const webappSeed = async () => {
         weight: 47,
         height: 159,
         fever: "None",
-        measured_time: "2021-10-11T17:00:00.000Z"
+        measured_time: new Date("2021-10-11T17:00:00.000Z"),
+        updated_time: new Date("2021-10-11T17:00:00.000Z")
       },
       createdAt: new Date('10/17/2021'),
       updatedAt: new Date('10/17/2021')
@@ -383,7 +435,7 @@ const webappSeed = async () => {
     {
       project_id: project.insertedIds[1],
       record: {
-        entry_id: 2,
+        entry_id: 3,
         hn: 4149,
         gender: "female",
         age: 42,
@@ -391,31 +443,56 @@ const webappSeed = async () => {
         weight: 53,
         height: 162,
         fever: "down",
-        measured_time: "2021-10-12T17:00:00.000Z"
+        measured_time: new Date("2021-10-12T17:00:00.000Z"),
+        updated_time: new Date("2021-10-12T17:00:00.000Z")
       },
       createdAt: new Date('10/18/2021'),
       updatedAt: new Date('10/18/2021')
-    }
+    },
+    {
+      project_id: project.insertedIds[2],
+      record: {
+        entry_id: 4,
+        hn: 5566,
+        gender: "female",
+        age: 37,
+        cough: "down",
+        measured_time: new Date("2021-10-11T17:00:00.000Z"),
+        updated_time: new Date("2021-10-11T17:00:00.000Z")
+      },
+      createdAt: new Date('10/19/2021'),
+      updatedAt: new Date('10/19/2021')
+    },
   ])
 
   const image = await Image.collection.insertMany([
     {
       project_id: project.insertedIds[0],
       accession_no: "74",
+      hn: 4149,
       createdAt: new Date('10/16/2021'),
       updatedAt: new Date('10/16/2021')
     },
     {
       project_id: project.insertedIds[1],
       accession_no: "82",
+      hn: 5566,
       createdAt: new Date('10/17/2021'),
       updatedAt: new Date('10/17/2021')
     },
     {
       project_id: project.insertedIds[1],
       accession_no: "74",
+      hn: 4149,
       createdAt: new Date('10/18/2021'),
       updatedAt: new Date('10/18/2021')
+    },
+    {
+      project_id: project.insertedIds[2],
+      accession_no: "82",
+      hn: 5566,
+      createdAt: new Date('10/19/2021'),
+      updatedAt: new Date('10/19/2021')
     }
   ])
 
@@ -424,10 +501,11 @@ const webappSeed = async () => {
       record_id: record.insertedIds[0],
       image_id: image.insertedIds[0],
       project_id: project.insertedIds[0],
+      hn: 4149,
       status: "annotated",
       label: "",
       note: "",
-      created_by: user.insertedIds[0],
+      created_by: user.insertedIds[5],
       createdAt: new Date('10/16/2021'),
       updatedAt: new Date('10/16/2021')
     },
@@ -435,10 +513,11 @@ const webappSeed = async () => {
       record_id: record.insertedIds[1],
       image_id: image.insertedIds[1],
       project_id: project.insertedIds[1],
+      hn: 5566,
       status: "annotated",
       label: "",
       note: "",
-      created_by: user.insertedIds[0],
+      created_by: user.insertedIds[3],
       createdAt: new Date('10/17/2021'),
       updatedAt: new Date('10/17/2021')
     },
@@ -446,39 +525,44 @@ const webappSeed = async () => {
       record_id: record.insertedIds[2],
       image_id: image.insertedIds[2],
       project_id: project.insertedIds[1],
+      hn: 4149,
       status: "finalized",
       label: {"finding": "Pneumothorax"},
-      note: "Pneumothorax -John",
+      note: "Pneumothorax -Gigi",
       created_by: user.insertedIds[1],
-      finalized_by: user.insertedIds[0],
+      finalized_by: user.insertedIds[3],
+      createdAt: new Date('10/18/2021'),
+      updatedAt: new Date('10/18/2021')
+    },
+    {
+      record_id: record.insertedIds[3],
+      image_id: image.insertedIds[3],
+      project_id: project.insertedIds[2],
+      hn: 5566,
+      status: "finalized",
+      label: {"finding": "Mass"},
+      note: "Mass -Edward",
+      created_by: user.insertedIds[2],
+      finalized_by: user.insertedIds[4],
       createdAt: new Date('10/18/2021'),
       updatedAt: new Date('10/18/2021')
     }
   ])
 
-  await PredClass.collection.insertMany([
-    {
-      result_id: predResult.insertedIds[0],
-      prediction: prediction,
-      createdAt: new Date('10/16/2021'),
-      updatedAt: new Date('10/16/2021')
-    },
-    {
-      result_id: predResult.insertedIds[1],
-      prediction: prediction,
-      createdAt: new Date('10/17/2021'),
-      updatedAt: new Date('10/17/2021')
-    },
-    {
-      result_id: predResult.insertedIds[2],
-      prediction: prediction,
-      createdAt: new Date('10/18/2021'),
-      updatedAt: new Date('10/18/2021')
-    }
-  ])
+  let predClass = []
+  for (let i=0; i<4; i++){
+    const date = 16+i
+    predClass.push({
+      "result_id": predResult.insertedIds[i],
+      "prediction": prediction,
+      "createdAt": new Date(`10/${date.toString()}/2021`),
+      "updatedAt": new Date(`10/${date.toString()}/2021`)
+    })
+  }
+  await PredClass.collection.insertMany(predClass)
 
   let gradcam = []
-  for (let i=0; i<3; i++){
+  for (let i=0; i<4; i++){
     const date = 16+i
     focusingFinding.map(finding => {
       gradcam.push({

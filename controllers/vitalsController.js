@@ -44,6 +44,7 @@ const create = async (req, res) => {
     // validate input
     const validatedResult = validator.validate({
         project_name: req.body.project_name,
+        // project_id: req.body.project_id,
         user_id: req.body.user_id,
         record_name: req.body.record_name,
         records: req.body.records
@@ -53,6 +54,35 @@ const create = async (req, res) => {
         return res.status(400).json({ success: false, message: `Invalid input: ${(validatedResult.error.message)}` })
     }
     try {
+
+        // validate requirements
+        // const webProject = await webModel.Project.findById(req.body.project_id)
+
+        // if (!webProject)
+        //     return res.status(400).json({ success: false, message: 'Project not found' });
+
+        // const requirements = [
+        //     { name: "entry_id", type: "string" },
+        //     { name: "hn", type: "number" },
+        //     { name: "gender", type: "string" },
+        //     { name: "age", type: "string" },
+        //     { name: "measured_time", type: "object" },
+        //     ...webProject.requirements
+        // ]
+
+        // const records = req.body.records.map((item) => {
+        //     requirements.forEach((requirement) => {
+        //         if (!req.body.record[requirement.name])
+        //             throw new Error(`Invalid record input: "${requirement.name}" is required`)
+        //         // check fields' type
+        //         // if (typeof(req.body.record[item.name])!==item.type) 
+        //         //     throw new Error(`Invalid record input: "${item.name}" must be a ${item.type}`)
+        //     })
+        //     item["measured_time"] = new Date(item.measured_time)
+        //     item["updated_time"] = new Date()
+        //     return item
+        // })
+
         const records = req.body.records.map((item) => {
             item["updated_time"] = new Date()
             return item
