@@ -3,12 +3,17 @@ const webModel = require("../models/webapp");
 
 const schema = {
   report_id: Joi.string().required(),
-  user_id: Joi.string().required(),
 };
 
 const validator = Joi.object(schema);
 
 const getById = async (req, res) => {
+    const validatedResult = validator.validate({
+        report_id: req.params.rid,
+    })
+    if (validatedResult.error) {
+        return res.status(400).json({ success: false, message: `Invalid Report ID: ${(validatedResult.error.message)}` })
+    }
   try {
     const result = await webModel.PredResult.findById(req.params.rid);
     const classes = await webModel.PredClass.findOne({ result_id: result._id });
@@ -42,20 +47,29 @@ const getById = async (req, res) => {
         },
         HN: record.record.hn,
         patient: Object.keys(record.record).reduce((json, item) => {
-            if (["gender", "age", "height", "weight"].includes(item)) {
-              json[item.charAt(0).toUpperCase() + item.slice(1)] = record.record[item];
-            }
-            return json;
-          }, {}),
+          if (["gender", "age", "height", "weight"].includes(item)) {
+            json[item.charAt(0).toUpperCase() + item.slice(1)] =
+              record.record[item];
+          }
+          return json;
+        }, {}),
         record: Object.keys(record.record).reduce((json, item) => {
-          if (!["hn", "gender", "age", "height", "weight"].includes(item) && item !== "entry_id" && item !== "measured_time") {
-            json[item.charAt(0).toUpperCase() + item.slice(1)] = record.record[item];
+          if (
+            !["hn", "gender", "age", "height", "weight"].includes(item) &&
+            item !== "entry_id" &&
+            item !== "measured_time" &&
+            item !== "updated_time"
+          ) {
+            json[item.charAt(0).toUpperCase() + item.slice(1)] =
+              record.record[item];
           }
           return json;
         }, {}),
         image: image.accession_no,
         classes: classes.prediction,
-        gradCam: gradCam.map((item) => {return item.finding}),
+        gradCam: gradCam.map((item) => {
+          return item.finding;
+        }),
         note: result.note,
       },
     });
