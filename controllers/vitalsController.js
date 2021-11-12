@@ -32,7 +32,7 @@ const update_schema = {
 
 const delete_schema = {
     record_id: Joi.string().required(),
-    record_index: Joi.number().integer()
+    entry_id: Joi.number().required()
 }
 
 const validator = Joi.object(schema);
@@ -188,7 +188,7 @@ const updateRecRow = async (req, res) => {
     }
 }
 
-//delete a single row of record by record id and index of row to remove
+//delete a single row of record by record id and entry id of row to be removed
 const deleteRecRow = async (req, res) => {
     const validatedResult = delete_validator.validate(req.body)
     if (validatedResult.error) {
@@ -197,7 +197,7 @@ const deleteRecRow = async (req, res) => {
     }
     try {
         vitalsModel.Record.findById(req.body.record_id, (err, record) => {
-            let new_records = (record.records).filter((item, i) => i !== req.body.record_index)
+            let new_records = (record.records).filter((item) => item.entry_id !== req.body.entry_id)
             record.records = new_records
             record.save((err) => {
                 if (err) {
