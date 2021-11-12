@@ -29,11 +29,11 @@ router.get('/projects', tokenValidation, vitalsController.getAll)
 // update record row by record id
 router.patch('/records/updaterow', tokenValidation, vitalsController.updateRecRow);
 
-// delete record row by id and index
+// delete record row by id and entry id
 router.patch('/records/deleterow', tokenValidation, vitalsController.deleteRecRow);
 
-// delete record row by id and index
-router.delete('/records/deletefile/:id', tokenValidation, vitalsController.deleteRecFile);
+// delete record row by id 
+router.patch('/records/deletefile/:id', tokenValidation, vitalsController.deleteRecFile);
 
 // get all records by patient HN
 router.get('/records/HN/:HN', tokenValidation, vitalsController.getRecordByHN)
