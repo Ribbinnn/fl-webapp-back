@@ -9,6 +9,7 @@ const infer = require('./infer')
 const image = require('./image')
 const mask = require('./masks')
 const pacs = require('./pacs')
+const report = require('./report')
 
 const example = require('./example')
 
@@ -20,6 +21,7 @@ router.use('/api/infer/', infer)
 router.use('/api/image/', image)
 router.use('/api/masks/', mask)
 router.use('/api/pacs/', pacs)
+router.use('/api/report/', report)
 
 router.use('/api/example/', example)
 
