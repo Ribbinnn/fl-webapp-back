@@ -25,7 +25,7 @@ const update_schema = {
             'hn': Joi.required(),
             'gender': Joi.required(),
             'age': Joi.required(),
-            'measured_time': Joi.required(),
+            'measured_time': Joi.required(), 
             // 'updated_time': Joi.required()
         }).unknown(true)).unique('entry_id'),
 }
@@ -161,12 +161,27 @@ const updateRecRow = async (req, res) => {
             req.body.update_data[0]["records.$." + key] = req.body.update_data[0][key];
             delete req.body.update_data[0][key];
         }
+        let updated_time = new Date();
+        req.body.update_data[0]["records.$.updated_time"] = updated_time;
         vitalsModel.Record.findOneAndUpdate(
             { _id: req.body.record_id, "records.entry_id": req.body.update_data[0]["records.$.entry_id"] },
             req.body.update_data[0],
             (err) => {
-                return res.status(200).json({ success: true, message: `Update record ${req.body.record_id} successfully` });
-            })
+                if (err) {
+                    console.log(err)
+                    return res.status(500).json({ success: false, message: 'Internal server error' })
+                }
+                vitalsModel.Record.findOneAndUpdate(
+                    { _id: req.body.record_id }, 
+                    { updatedAt: updated_time },
+                    (err) => {
+                        if (err) {
+                            console.log(err)
+                            return res.status(500).json({ success: false, message: 'Internal server error' })
+                        }
+                        return res.status(200).json({ success: true, message: `Update record ${req.body.record_id} successfully` });
+                    });
+            });
     } catch (e) {
         console.log(e)
         return res.status(500).json({ success: false, message: 'Internal server error' })
