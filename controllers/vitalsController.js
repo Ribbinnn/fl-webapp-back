@@ -23,16 +23,16 @@ const update_schema = {
         Joi.object({ 
             'entry_id': Joi.required(),
             'hn': Joi.required(),
-            'gender(male/female)': Joi.required(),
-            'age(year)': Joi.required(),
-            'measured_time(yyyy-MM-ddTHH:mm:ssZ)': Joi.required(),
-            'updated_time': Joi.required()
+            'gender': Joi.required(),
+            'age': Joi.required(),
+            'measured_time': Joi.required(), 
+            // 'updated_time': Joi.required()
         }).unknown(true)).unique('entry_id'),
 }
 
 const delete_schema = {
     record_id: Joi.string().required(),
-    record_index: Joi.number().integer()
+    entry_id: Joi.number().required()
 }
 
 const validator = Joi.object(schema);
@@ -213,19 +213,34 @@ const updateRecRow = async (req, res) => {
             req.body.update_data[0]["records.$." + key] = req.body.update_data[0][key];
             delete req.body.update_data[0][key];
         }
+        let updated_time = new Date();
+        req.body.update_data[0]["records.$.updated_time"] = updated_time;
         vitalsModel.Record.findOneAndUpdate(
             { _id: req.body.record_id, "records.entry_id": req.body.update_data[0]["records.$.entry_id"] },
             req.body.update_data[0],
             (err) => {
-                return res.status(200).json({ success: true, message: `Update record ${req.body.record_id} successfully` });
-            })
+                if (err) {
+                    console.log(err)
+                    return res.status(500).json({ success: false, message: 'Internal server error' })
+                }
+                vitalsModel.Record.findOneAndUpdate(
+                    { _id: req.body.record_id }, 
+                    { updatedAt: updated_time },
+                    (err) => {
+                        if (err) {
+                            console.log(err)
+                            return res.status(500).json({ success: false, message: 'Internal server error' })
+                        }
+                        return res.status(200).json({ success: true, message: `Update record ${req.body.record_id} successfully` });
+                    });
+            });
     } catch (e) {
         console.log(e)
         return res.status(500).json({ success: false, message: 'Internal server error' })
     }
 }
 
-//delete a single row of record by record id and index of row to remove
+//delete a single row of record by record id and entry id of row to be removed
 const deleteRecRow = async (req, res) => {
     const validatedResult = delete_validator.validate(req.body)
     if (validatedResult.error) {
@@ -234,7 +249,7 @@ const deleteRecRow = async (req, res) => {
     }
     try {
         vitalsModel.Record.findById(req.body.record_id, (err, record) => {
-            let new_records = (record.records).filter((item, i) => i !== req.body.record_index)
+            let new_records = (record.records).filter((item) => item.entry_id !== req.body.entry_id)
             record.records = new_records
             record.save((err) => {
                 if (err) {
