@@ -7,13 +7,13 @@ const axios = require('axios')
 const FormData = require('form-data');
 const extract = require('extract-zip')
 const dotenv = require('dotenv')
+// let con1 = require('../db/webapp')
 
 dotenv.config()
 
 const imageSchema = {
     project_id: Joi.string().required(),
     accession_no: Joi.string().required(),
-    filetype: Joi.string(),
 };
 
 const imageValidator = Joi.object(imageSchema);
@@ -42,7 +42,7 @@ const inferResult = async (req, res) => {
     try {
         pacs = await PACS.findOne({ 'Accession No': req.body.accession_no })
         if (!pacs) {
-            return res.status(200).json({ success: false, message: 'File not found' });
+            return res.status(400).json({ success: false, message: 'File not found' });
         }
     } catch {
         return res.status(500).json({ success: false, message: 'Internal server error' });
@@ -52,6 +52,9 @@ const inferResult = async (req, res) => {
 
     const resultDir = path.join(root, "/resources/results/", filename.split('.')[0])
 
+    // let session = await con1.startSession()
+    // session.startTransaction();
+
     try {
         // get project's requirements
         const project = await webModel.Project.findById(req.body.project_id)
@@ -60,36 +63,45 @@ const inferResult = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Project not found' });
 
         const requirements = [
-            { name: "entry_id", type: "string" },
-            { name: "hn", type: "number" },
-            { name: "gender", type: "string" },
-            { name: "age", type: "string" },
-            { name: "measured_time", type: "object" },
+            { name: "entry_id", type: "number", unit: "none" },
+            { name: "hn", type: "number", unit: "none" },
+            { name: "gender", type: "string", unit: "male/female" },
+            { name: "age", type: "number", unit: "year" },
+            { name: "measured_time", type: "object", unit: "yyyy-MM-ddTHH:mm:ssZ" },
             ...project.requirements
         ]
 
         // record can be null (might be changed in the future)
-        let record = ""
-        if (req.body.record) {
-            // check required fields
-            requirements.forEach((item) => {
-                if (!req.body.record[item.name])
-                    throw new Error(`Invalid record input: "${item.name}" is required`)
-                // check fields' type
-                // if (typeof(req.body.record[item.name])!==item.type) 
-                //     throw new Error(`Invalid record input: "${item.name}" must be a ${item.type}`)
-            })
-            // create record
-            record = await webModel.MedRecord.create({
-                project_id: req.body.project_id,
-                record: req.body.record
-            })
-        }
+        if (!req.body.record) 
+            throw new Error(`Invalid record input: "record" is required`)
+        // check required fields
+        requirements.forEach((requirement) => {
+            const fieldName = requirement.name
+            if (!req.body.record[fieldName])
+                throw new Error(`Invalid record input: "${fieldName}" is required`)
+            // check fields' type
+            if (typeof(req.body.record[fieldName])!==requirement.type && fieldName !== "measured_time") 
+                throw new Error(`Invalid record input: "${fieldName}" must be a ${requirement.type}`)
+            if(fieldName == "measured_time" && new Date(req.body.record[fieldName]) == "Invalid Date")
+                throw new Error(`Invalid record input: Incorrect "${fieldName}" date format`)
+        })
+        // create record
+        record = await webModel.MedRecord.create({
+            project_id: req.body.project_id,
+            record: req.body.record
+        })
+        // record = await webModel.MedRecord.create([{
+        //     project_id: req.body.project_id,
+        //     record: req.body.record
+        // }], { session: session })
+        // await session.commitTransaction()
+        // session.endSession();
 
         // create image
         const image = await webModel.Image.create({
             project_id: req.body.project_id,
-            accession_no: req.body.accession_no
+            accession_no: req.body.accession_no,
+            hn: req.body.record.hn
         })
 
         // create predicted result referenced to image and record    
@@ -101,7 +113,8 @@ const inferResult = async (req, res) => {
             label: "",
             note: "",
             created_by: req.body.clinician_id,
-            finalized_by: undefined
+            finalized_by: undefined,
+            hn: req.body.record.hn
         })
 
         // create predicted classes
@@ -177,19 +190,22 @@ const inferResult = async (req, res) => {
                     await webModel.PredClass.findByIdAndUpdate(predClass._id, { prediction: prediction })
                     console.log('Finish')
                 })
-            }).catch(e => {
+            }).catch(async e => {
                 // console.log((e.response.data).toString())
+                await webModel.PredResult.findByIdAndUpdate(result._id, { status: "canceled" })
                 console.log(e)
             })
 
         return res.status(200).json({ success: true, message: `Start inference` })
     } catch (e) {
+        // await session.abortTransaction()
+        // session.endSession();
         console.log(e.message)
         if (e.message.includes('Invalid record input'))
             return res.status(400).json({ success: false, message: e.message });
 
         // delete result folder if error occurs
-        if (fs.existsSync(resultDir)) {
+        if (!['0041018.dcm', '0041054.dcm', '0041099.dcm'].includes(filename) && fs.existsSync(resultDir)) {
             fs.rm(resultDir, { recursive: true, force: true }, (err) => {
                 console.log(err)
             });
@@ -228,7 +244,7 @@ const viewHistory = async (req, res) => {
                 let finding = ""
 
                 // get finding with the most confidence
-                if (item.status==="annotated" || item.status==="finalized") {
+                if (item.status === "annotated" || item.status === "finalized") {
                     const predClass = await webModel.PredClass.findOne({ result_id: item._id })
                     let mx = -1
                     let mk = -1
@@ -261,7 +277,7 @@ const viewHistory = async (req, res) => {
                 })
             }))
         }
-        return res.status(200).json({success: true, message: `Get all results by project ${req.params.project_id} successfully`, data});
+        return res.status(200).json({ success: true, message: `Get all results by project ${req.params.project_id} successfully`, data });
     } catch (e) {
         return res.status(500).json({ success: false, message: 'Internal server error' });
     }

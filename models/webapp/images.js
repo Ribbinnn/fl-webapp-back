@@ -7,7 +7,7 @@ const schema = new Schema(
     {
         project_id: { type: ObjectId, required: true, ref: "projects" },
         accession_no: { type: String, required: true },
-        filetype: { type: String } // not used
+        hn: { type: Number }
     },
     {
         timestamps: true

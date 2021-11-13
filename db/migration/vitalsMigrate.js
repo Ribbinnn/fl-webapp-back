@@ -25,8 +25,16 @@ const vitalsSeed = async () => {
     },
     {
       name: 'Pneumonia',
-      clinician_first_name: 'Jane',
+      clinician_first_name: 'Lavy',
       clinician_last_name: 'Smith',
+      record_name: 'pneumonia_record',
+      createdAt: new Date('10/17/2021'),
+      updatedAt: new Date('10/17/2021')
+    },
+    {
+      name: 'Tuberculosis',
+      clinician_first_name: 'Ian',
+      clinician_last_name: 'Boston',
       record_name: 'pneumonia_record',
       createdAt: new Date('10/17/2021'),
       updatedAt: new Date('10/17/2021')
@@ -36,11 +44,13 @@ const vitalsSeed = async () => {
   let records = [];
   for (let i=0;i<10;i++) {
     records.push({
-      entry_id: 10 + i,
+      entry_id: 20 + i,
       hn: 1011 + i,
       gender: i%2==0? 'male': 'female',
       age: 12 + i,
-      fever: i%4==0? 'none': i%4==1? 'stay': i%4==2? 'up': 'down'
+      fever: i%4==0? 'none': i%4==1? 'stay': i%4==2? 'up': 'down',
+      measured_time: new Date('10/14/2021'),
+      updated_time: new Date('10/14/2021'),
     })
   }
 
@@ -50,6 +60,17 @@ const vitalsSeed = async () => {
       records: [
         {
           entry_id: 1,
+          hn: 4149,
+          gender: "female",
+          age: 42,
+          pulse: 76,
+          weight: 53,
+          height: 162,
+          measured_time: new Date("2021-10-10T17:00:00.000Z"),
+          updated_time: new Date("2021-10-10T17:00:00.000Z")
+        },
+        {
+          entry_id: 11,
           hn: 1001,
           gender: 'female',
           age: 20,
@@ -60,7 +81,7 @@ const vitalsSeed = async () => {
           updated_time: new Date('10/14/2021'),
         },
         {
-          entry_id: 2,
+          entry_id: 12,
           hn: 1002,
           gender: 'male',
           age: 42,
@@ -71,7 +92,7 @@ const vitalsSeed = async () => {
           updated_time: new Date('10/14/2021'),
         },
         {
-          entry_id: 3,
+          entry_id: 13,
           hn: 1003,
           gender: 'female',
           age: 67,
@@ -90,6 +111,12 @@ const vitalsSeed = async () => {
       records: records,
       createdAt: new Date('10/17/2021'),
       updatedAt: new Date('10/17/2021')
+    },
+    {
+      project_id: project.insertedIds[2],
+      records: records,
+      createdAt: new Date('10/19/2021'),
+      updatedAt: new Date('10/19/2021')
     }
   ])
 
