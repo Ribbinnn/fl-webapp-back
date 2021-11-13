@@ -4,16 +4,16 @@ const webModel = require('../models/webapp')
 const XLSX = require('xlsx')
 
 const schema = {
-    project_name: Joi.string().required(),
+    project_id: Joi.string().required(),
     user_id: Joi.string().required(),
     record_name: Joi.string().required(),
     records: Joi.array().items(
         Joi.object({ 
             'entry_id': Joi.required(),
             'hn': Joi.required(),
-            'gender': Joi.required(),
-            'age': Joi.required(),
-            'measured_time': Joi.required() 
+            'gender(male/female)': Joi.required(),
+            'age(year)': Joi.required(),
+            'measured_time(yyyy-MM-ddTHH:mm:ssZ)': Joi.required() 
         }).unknown(true)).unique('entry_id')
 };
 
@@ -23,10 +23,10 @@ const update_schema = {
         Joi.object({ 
             'entry_id': Joi.required(),
             'hn': Joi.required(),
-            'gender': Joi.required(),
-            'age': Joi.required(),
-            'measured_time': Joi.required(),
-            // 'updated_time': Joi.required()
+            'gender(male/female)': Joi.required(),
+            'age(year)': Joi.required(),
+            'measured_time(yyyy-MM-ddTHH:mm:ssZ)': Joi.required(),
+            'updated_time': Joi.required()
         }).unknown(true)).unique('entry_id'),
 }
 
@@ -43,8 +43,7 @@ const delete_validator = Joi.object(delete_schema);
 const create = async (req, res) => {
     // validate input
     const validatedResult = validator.validate({
-        project_name: req.body.project_name,
-        // project_id: req.body.project_id,
+        project_id: req.body.project_id,
         user_id: req.body.user_id,
         record_name: req.body.record_name,
         records: req.body.records
@@ -56,42 +55,47 @@ const create = async (req, res) => {
     try {
 
         // validate requirements
-        // const webProject = await webModel.Project.findById(req.body.project_id)
+        const webProject = await webModel.Project.findById(req.body.project_id)
 
-        // if (!webProject)
-        //     return res.status(400).json({ success: false, message: 'Project not found' });
+        if (!webProject)
+            return res.status(400).json({ success: false, message: 'Project not found' });
 
-        // const requirements = [
-        //     { name: "entry_id", type: "string" },
-        //     { name: "hn", type: "number" },
-        //     { name: "gender", type: "string" },
-        //     { name: "age", type: "string" },
-        //     { name: "measured_time", type: "object" },
-        //     ...webProject.requirements
-        // ]
-
-        // const records = req.body.records.map((item) => {
-        //     requirements.forEach((requirement) => {
-        //         if (!req.body.record[requirement.name])
-        //             throw new Error(`Invalid record input: "${requirement.name}" is required`)
-        //         // check fields' type
-        //         // if (typeof(req.body.record[item.name])!==item.type) 
-        //         //     throw new Error(`Invalid record input: "${item.name}" must be a ${item.type}`)
-        //     })
-        //     item["measured_time"] = new Date(item.measured_time)
-        //     item["updated_time"] = new Date()
-        //     return item
-        // })
+        const requirements = [
+            { name: "entry_id", type: "number", unit: "none" },
+            { name: "hn", type: "number", unit: "none" },
+            { name: "gender", type: "string", unit: "male/female" },
+            { name: "age", type: "number", unit: "year" },
+            { name: "measured_time", type: "object", unit: "yyyy-MM-ddTHH:mm:ssZ" },
+            ...webProject.requirements
+        ]
 
         const records = req.body.records.map((item) => {
+            requirements.forEach((requirement) => {
+                const fieldName = requirement.name + (requirement.unit == 'none' ? "" : "(" + requirement.unit + ")")
+                if (!item[fieldName])
+                    throw new Error(`Invalid record input: "${fieldName}" is required`)
+                // check fields' type
+                if (typeof(item[fieldName])!==requirement.type && requirement.name !== "measured_time") 
+                    throw new Error(`Invalid record input: "${fieldName}" must be a ${requirement.type}`)
+                if(requirement.name == "measured_time" && new Date(item[fieldName]) == "Invalid Date")
+                    throw new Error(`Invalid record input: Incorrect "${fieldName}" date format`)
+            })
+            for (const k in item) {
+                if (k.includes("(")) {
+                    item[k.split("(")[0]] = item[k]
+                    delete item[k]
+                }
+            }
+            item["measured_time"] = new Date(item.measured_time)
             item["updated_time"] = new Date()
             return item
         })
+
         const user = await webModel.User.findById(req.body.user_id, ['_id', 'first_name', 'last_name'])
 
         // create project (vitals database)
         const project = await vitalsModel.Project.create({
-            name: req.body.project_name,
+            name: webProject.name,
             clinician_first_name: user.first_name,
             clinician_last_name: user.last_name,
             record_name: req.body.record_name
@@ -111,15 +115,43 @@ const create = async (req, res) => {
         })
     } catch (e) {
         // error
+        if (e.message.includes('Invalid record input'))
+            return res.status(400).json({ success: false, message: e.message });
         return res.status(500).json({ success: false, message: 'Internal server error' })
     }
 }
 
 // get vitals project by clinician
-const getProjectByClinician = async (req, res) => {
+const getProject = async (req, res) => {
     try {
-        const user = await webModel.User.findById(req.params.id);
-        const data = await vitalsModel.Project.find({ clinician_first_name: user.first_name, clinician_last_name: user.last_name })
+        const user = await webModel.User.findById(req.query.user_id);
+        // const project = await webModel.Project.findById(req.query.project_id)
+        if (!user)
+            return res.status(400).json({ success: false, message: 'User not found' })
+        const data = await vitalsModel.Record.aggregate([
+            {
+                $lookup: {
+                    from: "projects",
+                    localField: "project_id",
+                    foreignField: "_id",
+                    as: "project"
+                },
+            },
+            { 
+                $match: { 
+                    "project.clinician_first_name": user.first_name,
+                    "project.clinician_last_name": user.last_name,
+                    // "project.project_name": project.name
+                } 
+            },
+            {
+                $addFields: {
+                    "createdAt": { "$arrayElemAt": ['$project.createdAt', 0] },
+                    "record_name": { "$arrayElemAt": ['$project.record_name', 0] }
+                }
+            },
+            { $unset: ["project", "_id"] },
+        ])
 
         return res.status(200).json({ success: true, message: 'Get projects successfully', data: data });
     } catch (e) {
@@ -163,16 +195,6 @@ const getRecordByHN = async (req, res) => {
             { $match: { hn: Number(req.params.HN) } }
         ])
         return res.status(200).json({ success: true, message: 'Get project successfully', data: records });
-    } catch (e) {
-        return res.status(500).json({ success: false, message: 'Internal server error' });
-    }
-}
-
-// get all projects
-const getAll = async (req, res) => {
-    try {
-        const data = await vitalsModel.Project.find();
-        return res.status(200).json({ success: true, message: 'Get all projects successfully', data: data });
     } catch (e) {
         return res.status(500).json({ success: false, message: 'Internal server error' });
     }
@@ -269,8 +291,8 @@ const generateTemplate = async (req, res) => {
     try {
         const project = await webModel.Project.findOne({ name: req.params.project_name })
 
-        const requirements = project.requirements.map(item => item.name)
-        const headerField = ["entry_id", "hn", "gender", "age", "measured_time", ...requirements]
+        const requirements = project.requirements.map(item => `${item.name}${item.unit=='none'? "": "(" + item.unit + ")"}`)
+        const headerField = ["entry_id", "hn", "measured_time(yyyy-MM-ddTHH:mm:ssZ)", "gender(male/female)", "age(year)", ...requirements]
 
         const ws = XLSX.utils.json_to_sheet([], { header: headerField })
         const wb = XLSX.utils.book_new();
@@ -290,10 +312,9 @@ const generateTemplate = async (req, res) => {
 
 module.exports = {
     create,
-    getProjectByClinician,
+    getProject,
     getRecordByProjectId,
     getRecordByHN,
-    getAll,
     updateRecRow,
     deleteRecRow,
     deleteRecFile,

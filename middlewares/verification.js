@@ -1,7 +1,7 @@
 const webModel = require('../models/webapp')
 
 const userVerification = (req, res, next) => {
-    const user_id = req.body.user_id?? req.body.clinician_id?? req.params.id?? undefined
+    const user_id = req.body.user_id?? req.body.clinician_id?? req.params.id?? req.query.user_id?? undefined
     if (user_id) {
         if (user_id !== req.user._id)
             return res.status(403).json({success: false, message: `User have no permission to access user ${user_id}'s resource'`})

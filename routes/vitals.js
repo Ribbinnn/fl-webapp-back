@@ -12,19 +12,16 @@ router.post(
     vitalsController.create
 );
 
-// get all projects by clinician's user id
+// get projects
 router.get(
-    '/projects/clinician/:id',
+    '/',
     tokenValidation,
     verification.userVerification,
-    vitalsController.getProjectByClinician
+    vitalsController.getProject
     )
 
 // get records by project id
 router.get('/projects/:id/medrec', tokenValidation, vitalsController.getRecordByProjectId)
-
-// get all projects
-router.get('/projects', tokenValidation, vitalsController.getAll)
 
 // update record row by record id
 router.patch('/records/updaterow', tokenValidation, vitalsController.updateRecRow);
