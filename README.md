@@ -25,13 +25,13 @@ User
 Webapp Project
 - POST /api/projects ( Create new project, reqBody = {name, task, description, users, requirements, predClasses} )
 - GET /api/projects/user/:id ( Get all projects by user id )
-- GET /api/projects/:id ( Get project by id )
+- GET /api/projects/:project_id ( Get project by id )
 - POST /api/projects/:id/insert ( Insert medical record to project, reqBody = Object ) 
 
 
 Vitals
 - POST /api/vitals/records ( Create vitals project and upload medical records, reqBody = {project_name, record_name, user_id, records} )
-- GET /api/vitals/projects/clinician/:id ( Get all projects by clinician's user id )
+- GET /api/vitals/ ( Get projects by field, reqQuery = (user_id) )
 - GET /api/vitals/projects/:id/medrec ( Get all records by project id )
 - GET /api/vitals/records/HN/:HN ( Get all records by patient's HN )
 - GET /api/vitals/template/:project_name (Get .xlsx template from project's requirements)
@@ -44,9 +44,9 @@ Infer
 - GET /api/infer/list/project/:project_id (View history by project id)
 
 Image
-- GET /api/image (get image, reqQuery = (result_id, finding)) <br />
-  example: /image/?accession_no=74 (original file from PACS) <br />
-  example: /image/?result_id=6181884fdb269acd1bf1bd77&finding=Mass (overlay file)
+- GET /api/image (get image, reqQuery = (result_id, finding, accession_no)) <br />
+  example: /api/image/?accession_no=74 (original file from PACS) <br />
+  example: /api/image/?result_id=6181884fdb269acd1bf1bd77&finding=Mass (overlay file)
 
 PACS
 - GET /api/pacs/HN/:HN ( Get all patient's data from pacs by HN )
@@ -57,9 +57,5 @@ User <br />
 - GET /api/users ( Get all users )
 - GET /api/users/:id ( Get user by id )
 
-
 Webapp Project
 - GET /api/projects ( Get all projects )
-
-Vitals 
-- GET /api/vitals/projects ( Get all vitals projects )

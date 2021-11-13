@@ -21,7 +21,7 @@ router.get(
 
 // get project by id
 router.get(
-    '/:id',
+    '/:project_id',
     tokenValidation,
     verification.projectVerification,
     projectController.getById
