@@ -87,7 +87,7 @@ const getById = async (req, res) => {
   }
 };
 
-// finalized report when label is defined
+// update report when label is defined (finalized only when label is defined)
 const update = async (req, res) => {
   const validatedResult = updatedValidator.validate(req.body)
   if (validatedResult.error) {
@@ -97,9 +97,10 @@ const update = async (req, res) => {
     const data = await webModel.PredResult.findByIdAndUpdate(req.body.report_id, {
       note: req.body.note,
       label: req.body.label,
-      status: req.body.label? "finalized": undefined
+      status: req.body.label? "finalized": undefined,
+      finalized_by: req.body.label? req.user._id: undefined
     })
-    return res.status(200).json({success: true, message: `Update report ${req.body.report_id} successfully`})
+    return res.status(200).json({success: true, message: `Update report ${req.body.report_id} successfully`, data})
   } catch (e) {
     return res.status(500).json({ success: false, message: "Internal server error" });
   }
