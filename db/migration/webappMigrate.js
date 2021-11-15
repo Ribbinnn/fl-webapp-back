@@ -393,8 +393,8 @@ const webappSeed = async () => {
 
   await User.collection.updateOne({ _id: user.insertedIds[0] }, { $set: { projects: [project.insertedIds[0], project.insertedIds[1]] } })
   await User.collection.updateOne({ _id: user.insertedIds[1] }, { $set: { projects: [project.insertedIds[1]] } })
-  await User.collection.updateOne({ _id: user.insertedIds[2] }, { $set: { projects: [project.insertedIds[0], project.insertedIds[1]] } })
-  await User.collection.updateOne({ _id: user.insertedIds[3] }, { $set: { projects: [project.insertedIds[2]] } })
+  await User.collection.updateOne({ _id: user.insertedIds[2] }, { $set: { projects: [project.insertedIds[2]] } })
+  await User.collection.updateOne({ _id: user.insertedIds[3] }, { $set: { projects: [project.insertedIds[1], project.insertedIds[2]] } })
   await User.collection.updateOne({ _id: user.insertedIds[4] }, { $set: { projects: [project.insertedIds[0], project.insertedIds[2]] } })
   await User.collection.updateOne({ _id: user.insertedIds[5] }, { $set: { projects: [project.insertedIds[0]] } })
 
