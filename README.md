@@ -31,7 +31,7 @@ Webapp Project
 
 Vitals
 - POST /api/vitals/records ( Create vitals project and upload medical records, reqBody = {project_name, record_name, user_id, records} )
-- GET /api/vitals/ ( Get projects by field, reqQuery = (user_id) )
+- GET /api/vitals/ ( Get projects by field, reqQuery = (user_id, project_id) )
 - GET /api/vitals/projects/:id/medrec ( Get all records by project id )
 - GET /api/vitals/records/HN/:HN ( Get all records by patient's HN )
 - GET /api/vitals/template/:project_name (Get .xlsx template from project's requirements)
@@ -39,9 +39,10 @@ Vitals
 - PATCH /api/vitals/records/deleterow/ (Delete selected row in record file req.boy = {record_id, record_index}) 
 - DELETE /api/vitals/records/deletefile/:id (Delete entire record file by record_id) 
 
-Infer
+Infer & Report
 - POST /api/infer (Start inference, reqBody = (accession_no, project_id, record, clinician_id) )
 - GET /api/infer/list/project/:project_id (View history by project id)
+- PATCH /api/report/ (Update or finalize report, reqBody = ( note, label(optional) ) )
 
 Image
 - GET /api/image (get image, reqQuery = (result_id, finding, accession_no)) <br />
@@ -51,6 +52,10 @@ Image
 PACS
 - GET /api/pacs/HN/:HN ( Get all patient's data from pacs by HN )
 - GET /api/pacs/HN/:HN/info ( Get patient info by HN )
+
+Mask
+- POST /api/masks/ ( Crete bounding box position, reqBody=(report_id, data, user_id) )
+- GET /api/report/:report_id ( Get bounding box position by report id )
 
 **Path ที่ไม่ได้ใช้ แต่อาจมีประโยชน์** <br />
 User <br />

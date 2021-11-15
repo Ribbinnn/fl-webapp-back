@@ -125,9 +125,9 @@ const create = async (req, res) => {
 const getProject = async (req, res) => {
     try {
         const user = await webModel.User.findById(req.query.user_id);
-        // const project = await webModel.Project.findById(req.query.project_id)
-        if (!user)
-            return res.status(400).json({ success: false, message: 'User not found' })
+        const project = await webModel.Project.findById(req.query.project_id)
+        if (!user || !project)
+            return res.status(400).json({ success: false, message: 'User or project not found' })
         const data = await vitalsModel.Record.aggregate([
             {
                 $lookup: {
@@ -141,7 +141,7 @@ const getProject = async (req, res) => {
                 $match: { 
                     "project.clinician_first_name": user.first_name,
                     "project.clinician_last_name": user.last_name,
-                    // "project.project_name": project.name
+                    "project.name": project.name
                 } 
             },
             {
@@ -304,6 +304,7 @@ const deleteRecFile = async (req, res) => {
 // generate template from project's requirements
 const generateTemplate = async (req, res) => {
     try {
+        // should find by web project id
         const project = await webModel.Project.findOne({ name: req.params.project_name })
 
         const requirements = project.requirements.map(item => `${item.name}${item.unit=='none'? "": "(" + item.unit + ")"}`)

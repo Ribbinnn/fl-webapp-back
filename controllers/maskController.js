@@ -2,7 +2,7 @@ const Joi = require("joi");
 const webModel = require('../models/webapp')
 
 const schema = {
-    result_id: Joi.string().required(),
+    report_id: Joi.string().required(),
     data: Joi.array().items(Joi.object()),
     user_id: Joi.string()
 };
@@ -17,7 +17,7 @@ const insertBBox = async (req, res) => {
     try {
         await Promise.all(req.body.data.map(async (item) => {
             await webModel.Mask.create({
-                result_id: req.body.result_id,
+                result_id: req.body.report_id,
                 finding: item.finding,
                 position: item,
                 user_id: req.body.user_id
@@ -34,7 +34,7 @@ const insertBBox = async (req, res) => {
 
 const getBBox = async (req, res) => {
     try {
-        const data = await webModel.Mask.find({result_id: req.params.result_id})
+        const data = await webModel.Mask.find({result_id: req.params.report_id})
         return res.status(200).json({
             success: true, 
             message: 'Get all bounding boxes successfully', 

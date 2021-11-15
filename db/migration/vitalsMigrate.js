@@ -17,24 +17,24 @@ const vitalsSeed = async () => {
   const project = await Project.collection.insertMany([
     {
       name: 'COVID-19',
-      clinician_first_name: 'John',
-      clinician_last_name: 'Doe',
+      clinician_first_name: 'Ian',
+      clinician_last_name: 'Boston',
       record_name: 'covid_record',
       createdAt: new Date('10/15/2021'),
       updatedAt: new Date('10/15/2021')
     },
     {
       name: 'Pneumonia',
-      clinician_first_name: 'Lavy',
-      clinician_last_name: 'Smith',
+      clinician_first_name: 'John',
+      clinician_last_name: 'Doe',
       record_name: 'pneumonia_record',
       createdAt: new Date('10/17/2021'),
       updatedAt: new Date('10/17/2021')
     },
     {
       name: 'Tuberculosis',
-      clinician_first_name: 'Ian',
-      clinician_last_name: 'Boston',
+      clinician_first_name: 'Lavy',
+      clinician_last_name: 'Smith',
       record_name: 'pneumonia_record',
       createdAt: new Date('10/17/2021'),
       updatedAt: new Date('10/17/2021')

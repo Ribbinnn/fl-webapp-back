@@ -5,7 +5,14 @@ const schema = {
   report_id: Joi.string().required(),
 };
 
+const updatedSchema = {
+  report_id: Joi.string().required(),
+  note: Joi.string(),
+  label: Joi.object()
+}
+
 const validator = Joi.object(schema);
+const updatedValidator = Joi.object(updatedSchema);
 
 const getById = async (req, res) => {
     const validatedResult = validator.validate({
@@ -80,6 +87,25 @@ const getById = async (req, res) => {
   }
 };
 
+// finalized report when label is defined
+const update = async (req, res) => {
+  const validatedResult = updatedValidator.validate(req.body)
+  if (validatedResult.error) {
+    return res.status(400).json({ success: false, message: `Invalid report input: ${(validatedResult.error.message)}` })
+  }
+  try {
+    const data = await webModel.PredResult.findByIdAndUpdate(req.body.report_id, {
+      note: req.body.note,
+      label: req.body.label,
+      status: req.body.label? "finalized": undefined
+    })
+    return res.status(200).json({success: true, message: `Update report ${req.body.report_id} successfully`})
+  } catch (e) {
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+}
+
 module.exports = {
   getById,
+  update
 };
