@@ -10,7 +10,7 @@ const updatedSchema = {
   report_id: Joi.string().required(),
   note: Joi.string(),
   label: Joi.object(),
-  user_id: Joi.object().required()
+  user_id: Joi.string().required()
 }
 
 const validator = Joi.object(schema);

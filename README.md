@@ -42,7 +42,7 @@ Vitals
 Infer & Report
 - POST /api/infer (Start inference, reqBody = (accession_no, project_id, record, clinician_id) )
 - GET /api/report/list/project/:project_id (View history by project id)
-- PATCH /api/report/ (Update or finalize report, reqBody = ( note, label(optional) ) )
+- PATCH /api/report/ (Update or finalize report, reqBody = ( report_id, note, user_id, label(optional) ) )
 
 Image
 - GET /api/image (get image, reqQuery = (result_id, finding, accession_no)) <br />
