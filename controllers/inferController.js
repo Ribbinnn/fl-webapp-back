@@ -39,11 +39,15 @@ const inferResult = async (req, res) => {
     // mock-up
     // get filepath (from PACS) by accession no
     let pacs = {}
+    let project = {}
     try {
         pacs = await PACS.findOne({ 'Accession No': req.body.accession_no })
+        project = await webModel.Project.findById(req.body.project_id)
         if (!pacs) {
             return res.status(400).json({ success: false, message: 'File not found' });
         }
+        if (!project)
+            return res.status(400).json({ success: false, message: 'Project not found' });
     } catch {
         return res.status(500).json({ success: false, message: 'Internal server error' });
     }
@@ -51,17 +55,13 @@ const inferResult = async (req, res) => {
     filename = pacs.filepath.split('/')[1]
 
     const resultDir = path.join(root, "/resources/results/", filename.split('.')[0])
+    const taskDir = path.join(resultDir, project.task)
 
     // let session = await con1.startSession()
     // session.startTransaction();
 
     try {
-        // get project's requirements
-        const project = await webModel.Project.findById(req.body.project_id)
-
-        if (!project)
-            return res.status(400).json({ success: false, message: 'Project not found' });
-
+        // project's requirements
         const requirements = [
             { name: "entry_id", type: "number", unit: "none" },
             { name: "hn", type: "number", unit: "none" },
@@ -139,33 +139,47 @@ const inferResult = async (req, res) => {
                 // make new directory if does not exist
                 if (!fs.existsSync(resultDir)) {
                     fs.mkdirSync(resultDir);
+                    fs.mkdirSync(taskDir)
+                }
+
+                if (!fs.existsSync(taskDir)) {
+                    fs.mkdirSync(taskDir)
                 }
 
                 // save zip file
-                fs.writeFile(resultDir + '/result.zip', res.data, (err) => {
+                fs.writeFile(taskDir + '/result.zip', res.data, (err) => {
                     if (err) throw err
                 });
 
                 // extract zip file and get probability prediction + overlay files
-                await extract(resultDir + '/result.zip', { dir: resultDir })
-                const modelResult = JSON.parse(fs.readFileSync(resultDir + '/prediction.txt'));
+                await extract(taskDir + '/result.zip', { dir: taskDir })
+                const modelResult = JSON.parse(fs.readFileSync(taskDir + '/prediction.txt'));
                 let prediction = []
 
-                for (let i = 0; i < modelResult["Finding"].length; i++) {
-                    prediction.push({
-                        finding: modelResult["Finding"][i],
-                        confidence: modelResult["Confidence"][i],
-                        selected: false
-                    })
+                switch (project.task) {
+                    case "classification_pylon_1024":
+                        for (let i = 0; i < modelResult["Finding"].length; i++) {
+                            prediction.push({
+                                finding: modelResult["Finding"][i],
+                                confidence: modelResult["Confidence"][i],
+                                selected: false
+                            })
+                        }
+                        break;
+                    case "covid19-admission":
+                        prediction = modelResult
+                        break;
+                    default:
+                        break;
                 }
 
                 // delete zip file
-                fs.unlink(resultDir + '/result.zip', (err) => {
+                fs.unlink(taskDir + '/result.zip', (err) => {
                     if (err) throw err
                 })
 
                 // delete probability prediction file
-                fs.unlink(resultDir + '/prediction.txt', (err) => {
+                fs.unlink(taskDir + '/prediction.txt', (err) => {
                     if (err) throw err
                 })
 
@@ -183,7 +197,7 @@ const inferResult = async (req, res) => {
                         await webModel.Gradcam.create({
                             result_id: result._id,
                             finding: item.split('.')[0],
-                            gradcam_path: `results/${filename.split('.')[0]}/${item}`
+                            gradcam_path: `results/${filename.split('.')[0]}/${project.task}/${item}`
                         })
                     }))
                     await webModel.PredResult.findByIdAndUpdate(result._id, { status: "annotated" })
@@ -205,8 +219,8 @@ const inferResult = async (req, res) => {
             return res.status(400).json({ success: false, message: e.message });
 
         // delete result folder if error occurs
-        if (!['0041018.dcm', '0041054.dcm', '0041099.dcm'].includes(filename) && fs.existsSync(resultDir)) {
-            fs.rm(resultDir, { recursive: true, force: true }, (err) => {
+        if (!['0041018.dcm', '0041054.dcm', '0041099.dcm'].includes(filename) && fs.existsSync(taskDir)) {
+            fs.rm(taskDir, { recursive: true, force: true }, (err) => {
                 console.log(err)
             });
         }
@@ -225,66 +239,7 @@ const getAllResult = async (req, res) => {
     }
 }
 
-// view predicted reults log by project id
-const viewHistory = async (req, res) => {
-    if (!req.params.project_id) {
-        return res.status(400).json({ success: false, message: `Invalid query: "project_id" is required` })
-    }
-    try {
-        // get predicted result
-        const results = await webModel.PredResult.find({ project_id: req.params.project_id })
-            .populate("record_id")
-            .populate("created_by")
-            .populate("image_id")
-
-        let data = []
-
-        if (results) {
-            await Promise.all(results.map(async (item) => {
-                let finding = ""
-
-                // get finding with the most confidence
-                if (item.status === "annotated" || item.status === "finalized") {
-                    const predClass = await webModel.PredClass.findOne({ result_id: item._id })
-                    let mx = -1
-                    let mk = -1
-                    predClass.prediction.forEach((v, k) => {
-                        if (v.confidence > mx) {
-                            mx = v.confidence
-                            mk = k
-                        }
-                    })
-                    finding = predClass.prediction[mk].finding
-                }
-
-                // if (item.status==="finalized") {
-                //     finding = item.label.finding
-                // }
-
-                const hn = item.record_id.record.hn
-                const patientName = await PACS.findOne({ 'Patient ID': String(hn) }, ['Patient Name'])
-
-                data.push({
-                    pred_result_id: item.id,
-                    status: item.status,
-                    hn: hn,
-                    patient_name: patientName['Patient Name'],
-                    clinician_name: item.created_by.first_name,
-                    finding: finding,
-                    accession_no: item.image_id.accession_no,
-                    createdAt: item.createdAt,
-                    updatedAt: item.updatedAt,
-                })
-            }))
-        }
-        return res.status(200).json({ success: true, message: `Get all results by project ${req.params.project_id} successfully`, data });
-    } catch (e) {
-        return res.status(500).json({ success: false, message: 'Internal server error' });
-    }
-}
-
 module.exports = {
     inferResult,
     getAllResult,
-    viewHistory
 }

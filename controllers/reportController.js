@@ -1,5 +1,6 @@
 const Joi = require("joi");
 const webModel = require("../models/webapp");
+const PACS = require("../db/pacs").PACS
 
 const schema = {
   report_id: Joi.string().required(),
@@ -8,7 +9,8 @@ const schema = {
 const updatedSchema = {
   report_id: Joi.string().required(),
   note: Joi.string(),
-  label: Joi.object()
+  label: Joi.object(),
+  user_id: Joi.object().required()
 }
 
 const validator = Joi.object(schema);
@@ -98,7 +100,7 @@ const update = async (req, res) => {
       note: req.body.note,
       label: req.body.label,
       status: req.body.label? "finalized": undefined,
-      finalized_by: req.body.label? req.user._id: undefined
+      finalized_by: req.body.label? req.body.user_id: undefined // should get user_id from requestBody
     })
     return res.status(200).json({success: true, message: `Update report ${req.body.report_id} successfully`, data})
   } catch (e) {
@@ -106,7 +108,66 @@ const update = async (req, res) => {
   }
 }
 
+// view predicted reults log by project id
+const viewHistory = async (req, res) => {
+  if (!req.params.project_id) {
+      return res.status(400).json({ success: false, message: `Invalid query: "project_id" is required` })
+  }
+  try {
+      // get predicted result
+      const results = await webModel.PredResult.find({ project_id: req.params.project_id })
+          .populate("record_id")
+          .populate("created_by")
+          .populate("image_id")
+
+      let data = []
+
+      if (results) {
+          await Promise.all(results.map(async (item) => {
+              let finding = ""
+
+              // get finding with the most confidence
+              if (item.status === "annotated" || item.status === "finalized") {
+                  const predClass = await webModel.PredClass.findOne({ result_id: item._id })
+                  let mx = -1
+                  let mk = -1
+                  predClass.prediction.forEach((v, k) => {
+                      if (v.confidence > mx) {
+                          mx = v.confidence
+                          mk = k
+                      }
+                  })
+                  finding = predClass.prediction[mk].finding
+              }
+
+              // if (item.status==="finalized") {
+              //     finding = item.label.finding
+              // }
+
+              const hn = item.record_id.record.hn
+              const patientName = await PACS.findOne({ 'Patient ID': String(hn) }, ['Patient Name'])
+
+              data.push({
+                  pred_result_id: item.id,
+                  status: item.status,
+                  hn: hn,
+                  patient_name: patientName['Patient Name'],
+                  clinician_name: item.created_by.first_name,
+                  finding: finding,
+                  accession_no: item.image_id.accession_no,
+                  createdAt: item.createdAt,
+                  updatedAt: item.updatedAt,
+              })
+          }))
+      }
+      return res.status(200).json({ success: true, message: `Get all results by project ${req.params.project_id} successfully`, data });
+  } catch (e) {
+      return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+}
+
 module.exports = {
   getById,
-  update
+  update,
+  viewHistory
 };

@@ -33,9 +33,9 @@ router.patch('/records/deleterow', tokenValidation, vitalsController.deleteRecRo
 router.patch('/records/deletefile/:id', tokenValidation, vitalsController.deleteRecFile);
 
 // get all records by patient HN
-router.get('/records/HN/:HN', tokenValidation, vitalsController.getRecordByHN)
+router.get('/records/', tokenValidation, vitalsController.getRecordByHN)
 
 // generate template by project name
-router.get('/template/:project_name', tokenValidation, vitalsController.generateTemplate)
+router.get('/template/:project_id', tokenValidation, vitalsController.generateTemplate)
 
 module.exports = router;
