@@ -33,16 +33,16 @@ Vitals
 - POST /api/vitals/records ( Create vitals project and upload medical records, reqBody = {project_name, record_name, user_id, records} )
 - GET /api/vitals/ ( Get projects by field, reqQuery = (user_id, project_id) )
 - GET /api/vitals/projects/:id/medrec ( Get all records by project id )
-- GET /api/vitals/records/HN/:HN ( Get all records by patient's HN )
-- GET /api/vitals/template/:project_name (Get .xlsx template from project's requirements)
+- GET /api/vitals/records/ ( Get all records by patient's HN, reqQuery = (HN, project_id) )
+- GET /api/vitals/template/:project_id (Get .xlsx template from project's requirements)
 - PATCH /api/vitals/records/updaterow (Update selected row in record file, reqBody = {record_id, update_data})
 - PATCH /api/vitals/records/deleterow/ (Delete selected row in record file req.boy = {record_id, record_index}) 
 - DELETE /api/vitals/records/deletefile/:id (Delete entire record file by record_id) 
 
 Infer & Report
 - POST /api/infer (Start inference, reqBody = (accession_no, project_id, record, clinician_id) )
-- GET /api/infer/list/project/:project_id (View history by project id)
-- PATCH /api/report/ (Update or finalize report, reqBody = ( note, label(optional) ) )
+- GET /api/report/list/project/:project_id (View history by project id)
+- PATCH /api/report/ (Update or finalize report, reqBody = ( report_id, note, user_id, label(optional) ) )
 
 Image
 - GET /api/image (get image, reqQuery = (result_id, finding, accession_no)) <br />

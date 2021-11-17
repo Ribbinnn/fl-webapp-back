@@ -568,6 +568,7 @@ const webappSeed = async () => {
       gradcam.push({
         "result_id": predResult.insertedIds[i],
         "finding": finding,
+        // "gradcam_path": `results/0041018/classification_pylon_1024/${finding}.png`,
         "gradcam_path": `results/0041018/${finding}.png`,
         "createdAt": new Date(`10/${date.toString()}/2021`),
         "updatedAt": new Date(`10/${date.toString()}/2021`)

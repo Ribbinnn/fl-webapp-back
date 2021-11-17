@@ -186,13 +186,14 @@ const getRecordByHN = async (req, res) => {
             {
                 $addFields: {
                     'records.project_id': { "$arrayElemAt": ['$project._id', 0] },
+                    'records.project_name': { "$arrayElemAt": ['$project.name', 0] },
                     'records.record_id': '$_id',
                     'records.clinician_first_name': { "$arrayElemAt": ['$project.clinician_first_name', 0] },
                     'records.updatedAt': '$updatedAt'
                 }
             },
             { $replaceRoot: { newRoot: '$records' } },
-            { $match: { hn: Number(req.params.HN) } }
+            { $match: { hn: Number(req.query.HN), project_name: req.query.project_name } }
         ])
         return res.status(200).json({ success: true, message: 'Get project successfully', data: records });
     } catch (e) {
@@ -305,7 +306,7 @@ const deleteRecFile = async (req, res) => {
 const generateTemplate = async (req, res) => {
     try {
         // should find by web project id
-        const project = await webModel.Project.findOne({ name: req.params.project_name })
+        const project = await webModel.Project.findById(req.params.project_id)
 
         const requirements = project.requirements.map(item => `${item.name}${item.unit=='none'? "": "(" + item.unit + ")"}`)
         const headerField = ["entry_id", "hn", "measured_time(yyyy-MM-ddTHH:mm:ssZ)", "gender(male/female)", "age(year)", ...requirements]
