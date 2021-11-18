@@ -155,8 +155,8 @@ const inferResult = async (req, res) => {
                 await extract(taskDir + '/result.zip', { dir: taskDir })
                 const modelResult = JSON.parse(fs.readFileSync(taskDir + '/prediction.txt'));
                 let prediction = []
-
                 switch (project.task) {
+                    case "classification_pylon_256":
                     case "classification_pylon_1024":
                         for (let i = 0; i < modelResult["Finding"].length; i++) {
                             prediction.push({
@@ -165,47 +165,51 @@ const inferResult = async (req, res) => {
                                 selected: false
                             })
                         }
+                        // delete zip file
+                        fs.unlink(taskDir + '/result.zip', (err) => {
+                            if (err) throw err
+                        })
+
+                        // delete probability prediction file
+                        fs.unlink(taskDir + '/prediction.txt', (err) => {
+                            if (err) throw err
+                        })
+
+                        // delete PACS file in local
+                        if (!['0041018.dcm', '0041054.dcm', '0041099.dcm'].includes(filename)) {
+                            fs.unlink(path.join(root, "/resources/uploads/", filename), (err) => {
+                                if (err) throw err
+                            })
+                        }
+
+                        // create gradcam and change predicted result's status to annotated in database
+                        fs.readdir(resultDir, async (err, files) => {
+                            if (err) throw err
+                            await Promise.all(files.map(async (item, i) => {
+                                await webModel.Gradcam.create({
+                                    result_id: result._id,
+                                    finding: item.split('.')[0],
+                                    gradcam_path: `results/${filename.split('.')[0]}/${project.task}/${item}`
+                                })
+                            }))
+                            await webModel.PredResult.findByIdAndUpdate(result._id, { status: "annotated" })
+                            await webModel.PredClass.findByIdAndUpdate(predClass._id, { prediction: prediction })
+                            console.log('Finish')
+                        })
                         break;
-                    case "covid19-admission":
+                    case "covid19_admission":
                         prediction = modelResult
+                        fs.rm(taskDir, { recursive: true, force: true }, (err) => {
+                            if (err) throw err
+                        });
+                        await webModel.PredResult.findByIdAndUpdate(result._id, { status: "annotated" })
+                        await webModel.PredClass.findByIdAndUpdate(predClass._id, { prediction: prediction })
+                        console.log('Finish')
                         break;
                     default:
                         break;
                 }
-
-                // delete zip file
-                fs.unlink(taskDir + '/result.zip', (err) => {
-                    if (err) throw err
-                })
-
-                // delete probability prediction file
-                fs.unlink(taskDir + '/prediction.txt', (err) => {
-                    if (err) throw err
-                })
-
-                // delete PACS file in local
-                if (!['0041018.dcm', '0041054.dcm', '0041099.dcm'].includes(filename)) {
-                    fs.unlink(path.join(root, "/resources/uploads/", filename), (err) => {
-                        if (err) throw err
-                    })
-                }
-
-                // create gradcam and change predicted result's status to annotated in database
-                fs.readdir(resultDir, async (err, files) => {
-                    if (err) throw err
-                    await Promise.all(files.map(async (item, i) => {
-                        await webModel.Gradcam.create({
-                            result_id: result._id,
-                            finding: item.split('.')[0],
-                            gradcam_path: `results/${filename.split('.')[0]}/${project.task}/${item}`
-                        })
-                    }))
-                    await webModel.PredResult.findByIdAndUpdate(result._id, { status: "annotated" })
-                    await webModel.PredClass.findByIdAndUpdate(predClass._id, { prediction: prediction })
-                    console.log('Finish')
-                })
             }).catch(async e => {
-                // console.log((e.response.data).toString())
                 await webModel.PredResult.findByIdAndUpdate(result._id, { status: "canceled" })
                 console.log(e)
             })

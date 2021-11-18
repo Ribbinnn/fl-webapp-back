@@ -370,12 +370,12 @@ const webappSeed = async () => {
       updatedAt: new Date('10/14/2021')
     },
     {
-      name: 'Pneumonia',
+      name: 'Abnormal Detection',
       task: 'classification_pylon_1024',
-      description: '2D-classification for Pneumonia',
+      description: '2D_image_classification for abnormal detection',
       requirements: [{ name: 'fever', type: 'string', unit: 'none' }],
       predClasses: pylon_classes,
-      users: [user.insertedIds[0], user.insertedIds[1], user.insertedIds[3]],
+      users: [user.insertedIds[0], user.insertedIds[1], user.insertedIds[2], user.insertedIds[3], user.insertedIds[4], user.insertedIds[5], user.insertedIds[6]],
       createdAt: new Date('10/16/2021'),
       updatedAt: new Date('10/16/2021')
     },
@@ -389,14 +389,24 @@ const webappSeed = async () => {
       createdAt: new Date('10/16/2021'),
       updatedAt: new Date('10/16/2021')
     },
+    {
+      name: 'Abnormal Detection (256)',
+      task: 'classification_pylon_256',
+      description: '2D_image_classification(256) for abnormal detection',
+      requirements: [{ name: 'fever', type: 'string', unit: 'none' }],
+      predClasses: pylon_classes,
+      users: [user.insertedIds[0]],
+      createdAt: new Date('10/16/2021'),
+      updatedAt: new Date('10/16/2021')
+    },
   ])
 
-  await User.collection.updateOne({ _id: user.insertedIds[0] }, { $set: { projects: [project.insertedIds[0], project.insertedIds[1]] } })
+  await User.collection.updateOne({ _id: user.insertedIds[0] }, { $set: { projects: [project.insertedIds[0], project.insertedIds[1], project.insertedIds[3]] } })
   await User.collection.updateOne({ _id: user.insertedIds[1] }, { $set: { projects: [project.insertedIds[1]] } })
-  await User.collection.updateOne({ _id: user.insertedIds[2] }, { $set: { projects: [project.insertedIds[2]] } })
+  await User.collection.updateOne({ _id: user.insertedIds[2] }, { $set: { projects: [project.insertedIds[2], project.insertedIds[1]] } })
   await User.collection.updateOne({ _id: user.insertedIds[3] }, { $set: { projects: [project.insertedIds[1], project.insertedIds[2]] } })
-  await User.collection.updateOne({ _id: user.insertedIds[4] }, { $set: { projects: [project.insertedIds[0], project.insertedIds[2]] } })
-  await User.collection.updateOne({ _id: user.insertedIds[5] }, { $set: { projects: [project.insertedIds[0]] } })
+  await User.collection.updateOne({ _id: user.insertedIds[4] }, { $set: { projects: [project.insertedIds[0], project.insertedIds[1], project.insertedIds[2]] } })
+  await User.collection.updateOne({ _id: user.insertedIds[5] }, { $set: { projects: [project.insertedIds[0], project.insertedIds[1]] } })
 
   const record = await MedRecord.collection.insertMany([
     {
@@ -568,8 +578,8 @@ const webappSeed = async () => {
       gradcam.push({
         "result_id": predResult.insertedIds[i],
         "finding": finding,
-        // "gradcam_path": `results/0041018/classification_pylon_1024/${finding}.png`,
-        "gradcam_path": `results/0041018/${finding}.png`,
+        "gradcam_path": `results/0041018/classification_pylon_1024/${finding}.png`,
+        // "gradcam_path": `results/0041018/${finding}.png`,
         "createdAt": new Date(`10/${date.toString()}/2021`),
         "updatedAt": new Date(`10/${date.toString()}/2021`)
       })
