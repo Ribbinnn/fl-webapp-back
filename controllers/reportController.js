@@ -9,7 +9,9 @@ const schema = {
 const updatedSchema = {
   report_id: Joi.string().required(),
   note: Joi.string(),
-  label: Joi.object(),
+  label: Joi.object({
+    finding: Joi.array().items(Joi.string())
+  }),
   user_id: Joi.string().required()
 }
 
@@ -96,6 +98,20 @@ const update = async (req, res) => {
     return res.status(400).json({ success: false, message: `Invalid report input: ${(validatedResult.error.message)}` })
   }
   try {
+    if (req.body.label){
+      // update fields that are finalized in pred class
+      const predClass = await webModel.PredClass.findOne({result_id: req.body.report_id})
+      let selectedClass = predClass.prediction.map(item => {
+        item["selected"] = false
+        return item
+      })
+      selectedClass = selectedClass.map(item => {
+        if (req.body.label["finding"].includes(item["finding"])) 
+          item["selected"] = true
+        return item
+      })
+      await webModel.PredClass.findOneAndUpdate({result_id: req.body.report_id},{prediction: selectedClass})
+    }
     const data = await webModel.PredResult.findByIdAndUpdate(req.body.report_id, {
       note: req.body.note,
       label: req.body.label,
