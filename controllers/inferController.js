@@ -156,6 +156,7 @@ const inferResult = async (req, res) => {
                 const modelResult = JSON.parse(fs.readFileSync(taskDir + '/prediction.txt'));
                 let prediction = []
                 switch (project.task) {
+                    case "classification_pylon_256":
                     case "classification_pylon_1024":
                         for (let i = 0; i < modelResult["Finding"].length; i++) {
                             prediction.push({
