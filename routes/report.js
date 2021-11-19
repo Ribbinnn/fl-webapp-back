@@ -10,6 +10,9 @@ router.get('/:rid', tokenValidation, reportController.getById)
 // update report
 router.patch('/', tokenValidation, reportController.update)
 
+// delete report
+router.patch('/delete/:rid', tokenValidation, reportController.deleteById)
+
 // view history by project id
 router.get(
     '/list/project/:project_id',
