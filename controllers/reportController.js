@@ -1,6 +1,6 @@
 const Joi = require("joi");
 const webModel = require("../models/webapp");
-const PACS = require("../db/pacs").PACS
+const PACS = require("../db/pacs").PACS;
 
 const schema = {
   report_id: Joi.string().required(),
@@ -10,21 +10,26 @@ const updatedSchema = {
   report_id: Joi.string().required(),
   note: Joi.string(),
   label: Joi.object({
-    finding: Joi.array().items(Joi.string())
+    finding: Joi.array().items(Joi.string()),
   }),
-  user_id: Joi.string().required()
-}
+  user_id: Joi.string().required(),
+};
 
 const validator = Joi.object(schema);
 const updatedValidator = Joi.object(updatedSchema);
 
 const getById = async (req, res) => {
-    const validatedResult = validator.validate({
-        report_id: req.params.rid,
-    })
-    if (validatedResult.error) {
-        return res.status(400).json({ success: false, message: `Invalid Report ID: ${(validatedResult.error.message)}` })
-    }
+  const validatedResult = validator.validate({
+    report_id: req.params.rid,
+  });
+  if (validatedResult.error) {
+    return res
+      .status(400)
+      .json({
+        success: false,
+        message: `Invalid Report ID: ${validatedResult.error.message}`,
+      });
+  }
   try {
     const result = await webModel.PredResult.findById(req.params.rid);
     const classes = await webModel.PredClass.findOne({ result_id: result._id });
@@ -91,99 +96,173 @@ const getById = async (req, res) => {
   }
 };
 
-// update report when label is defined (finalized only when label is defined)
-const update = async (req, res) => {
-  const validatedResult = updatedValidator.validate(req.body)
+// delete report by id
+const deleteById = async (req, res) => {
+  const validatedResult = validator.validate({
+    report_id: req.params.rid,
+  });
   if (validatedResult.error) {
-    return res.status(400).json({ success: false, message: `Invalid report input: ${(validatedResult.error.message)}` })
+    return res
+      .status(400)
+      .json({
+        success: false,
+        message: `Invalid Report ID: ${validatedResult.error.message}`,
+      });
   }
   try {
-    if (req.body.label){
-      // update fields that are finalized in pred class
-      const predClass = await webModel.PredClass.findOne({result_id: req.body.report_id})
-      let selectedClass = predClass.prediction.map(item => {
-        item["selected"] = false
-        return item
-      })
-      selectedClass = selectedClass.map(item => {
-        if (req.body.label["finding"].includes(item["finding"])) 
-          item["selected"] = true
-        return item
-      })
-      await webModel.PredClass.findOneAndUpdate({result_id: req.body.report_id},{prediction: selectedClass})
-    }
-    const data = await webModel.PredResult.findByIdAndUpdate(req.body.report_id, {
-      note: req.body.note,
-      label: req.body.label,
-      status: req.body.label? "finalized": undefined,
-      finalized_by: req.body.label? req.body.user_id: undefined // should get user_id from requestBody
+    console.log(req.params.id)
+    const result = await webModel.PredResult.findByIdAndRemove(req.params.rid);
+    // const classes = await webModel.PredClass.findByIdAndRemove({ result_id: result._id });
+    // const gradCam = await webModel.Gradcam.findByIdAndRemove({ result_id: result._id });
+    // const record = await webModel.MedRecord.findByIdAndRemove(result.record_id);
+    // const image = await webModel.Image.findByIdAndRemove(result.image_id);
+    return res.status(200).json({
+      success: true,
+      message: `Delete report ${result._id} successfully`
     })
-    return res.status(200).json({success: true, message: `Update report ${req.body.report_id} successfully`, data})
   } catch (e) {
-    return res.status(500).json({ success: false, message: "Internal server error" });
+    console.log(e)
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
-}
+};
+// update report when label is defined (finalized only when label is defined)
+const update = async (req, res) => {
+  const validatedResult = updatedValidator.validate(req.body);
+  if (validatedResult.error) {
+    return res
+      .status(400)
+      .json({
+        success: false,
+        message: `Invalid report input: ${validatedResult.error.message}`,
+      });
+  }
+  try {
+    if (req.body.label) {
+      // update fields that are finalized in pred class
+      const predClass = await webModel.PredClass.findOne({
+        result_id: req.body.report_id,
+      });
+      let selectedClass = predClass.prediction.map((item) => {
+        item["selected"] = false;
+        return item;
+      });
+      selectedClass = selectedClass.map((item) => {
+        if (req.body.label["finding"].includes(item["finding"]))
+          item["selected"] = true;
+        return item;
+      });
+      await webModel.PredClass.findOneAndUpdate(
+        { result_id: req.body.report_id },
+        { prediction: selectedClass }
+      );
+    }
+    const data = await webModel.PredResult.findByIdAndUpdate(
+      req.body.report_id,
+      {
+        note: req.body.note,
+        label: req.body.label,
+        status: req.body.label ? "finalized" : undefined,
+        finalized_by: req.body.label ? req.body.user_id : undefined, // should get user_id from requestBody
+      }
+    );
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: `Update report ${req.body.report_id} successfully`,
+        data,
+      });
+  } catch (e) {
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+};
 
 // view predicted reults log by project id
 const viewHistory = async (req, res) => {
   if (!req.params.project_id) {
-      return res.status(400).json({ success: false, message: `Invalid query: "project_id" is required` })
+    return res
+      .status(400)
+      .json({
+        success: false,
+        message: `Invalid query: "project_id" is required`,
+      });
   }
   try {
-      // get predicted result
-      const results = await webModel.PredResult.find({ project_id: req.params.project_id })
-          .populate("record_id")
-          .populate("created_by")
-          .populate("image_id")
+    // get predicted result
+    const results = await webModel.PredResult.find({
+      project_id: req.params.project_id,
+    })
+      .populate("record_id")
+      .populate("created_by")
+      .populate("image_id");
 
-      let data = []
+    let data = [];
 
-      if (results) {
-          await Promise.all(results.map(async (item) => {
-              let finding = ""
+    if (results) {
+      await Promise.all(
+        results.map(async (item) => {
+          let finding = "";
 
-              // get finding with the most confidence
-              if (item.status === "annotated" || item.status === "finalized") {
-                  const predClass = await webModel.PredClass.findOne({ result_id: item._id })
-                  let mx = -1
-                  let mk = -1
-                  predClass.prediction.forEach((v, k) => {
-                      if (v.confidence > mx) {
-                          mx = v.confidence
-                          mk = k
-                      }
-                  })
-                  finding = predClass.prediction[mk].finding
+          // get finding with the most confidence
+          if (item.status === "annotated" || item.status === "finalized") {
+            const predClass = await webModel.PredClass.findOne({
+              result_id: item._id,
+            });
+            let mx = -1;
+            let mk = -1;
+            predClass.prediction.forEach((v, k) => {
+              if (v.confidence > mx) {
+                mx = v.confidence;
+                mk = k;
               }
+            });
+            finding = predClass.prediction[mk].finding;
+          }
 
-              // if (item.status==="finalized") {
-              //     finding = item.label.finding
-              // }
+          // if (item.status==="finalized") {
+          //     finding = item.label.finding
+          // }
 
-              const hn = item.record_id.record.hn
-              const patientName = await PACS.findOne({ 'Patient ID': String(hn) }, ['Patient Name'])
+          const hn = item.record_id.record.hn;
+          const patientName = await PACS.findOne({ "Patient ID": String(hn) }, [
+            "Patient Name",
+          ]);
 
-              data.push({
-                  pred_result_id: item.id,
-                  status: item.status,
-                  hn: hn,
-                  patient_name: patientName['Patient Name'],
-                  clinician_name: item.created_by.first_name,
-                  finding: finding,
-                  accession_no: item.image_id.accession_no,
-                  createdAt: item.createdAt,
-                  updatedAt: item.updatedAt,
-              })
-          }))
-      }
-      return res.status(200).json({ success: true, message: `Get all results by project ${req.params.project_id} successfully`, data });
+          data.push({
+            pred_result_id: item.id,
+            status: item.status,
+            hn: hn,
+            patient_name: patientName["Patient Name"],
+            clinician_name: item.created_by.first_name,
+            finding: finding,
+            accession_no: item.image_id.accession_no,
+            createdAt: item.createdAt,
+            updatedAt: item.updatedAt,
+          });
+        })
+      );
+    }
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: `Get all results by project ${req.params.project_id} successfully`,
+        data,
+      });
   } catch (e) {
-      return res.status(500).json({ success: false, message: 'Internal server error' });
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
-}
+};
 
 module.exports = {
   getById,
   update,
-  viewHistory
+  viewHistory,
+  deleteById
 };
