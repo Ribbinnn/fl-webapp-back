@@ -277,7 +277,7 @@ const deleteRecRow = async (req, res) => {
 }
 
 const deleteRecFile = async (req, res) => {
-    const validatedResult = delete_validator.validate({ record_id: req.params.id })
+    const validatedResult = delete_validator.validate({ record_id: req.params.id, entry_id: req.body.entry_id })
     console.log(req.params)
     if (validatedResult.error) {
         return res.status(400).json({ success: false, message: `Invalid input: ${(validatedResult.error.message)}` })
