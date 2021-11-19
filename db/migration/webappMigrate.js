@@ -375,7 +375,7 @@ const webappSeed = async () => {
       description: '2D_image_classification for abnormal detection',
       requirements: [{ name: 'fever', type: 'string', unit: 'none' }],
       predClasses: pylon_classes,
-      users: [user.insertedIds[0], user.insertedIds[1], user.insertedIds[2], user.insertedIds[3], user.insertedIds[4], user.insertedIds[5], user.insertedIds[6]],
+      users: [user.insertedIds[0], user.insertedIds[1], user.insertedIds[2], user.insertedIds[3], user.insertedIds[4], user.insertedIds[5]],
       createdAt: new Date('10/16/2021'),
       updatedAt: new Date('10/16/2021')
     },
@@ -537,7 +537,7 @@ const webappSeed = async () => {
       project_id: project.insertedIds[1],
       hn: 4149,
       status: "finalized",
-      label: {"finding": "Pneumothorax"},
+      label: {"finding": ["Pneumothorax"]},
       note: "Pneumothorax -Gigi",
       created_by: user.insertedIds[1],
       finalized_by: user.insertedIds[3],
