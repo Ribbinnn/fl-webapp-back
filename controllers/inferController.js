@@ -183,7 +183,7 @@ const inferResult = async (req, res) => {
                         }
 
                         // create gradcam and change predicted result's status to annotated in database
-                        fs.readdir(resultDir, async (err, files) => {
+                        fs.readdir(taskDir, async (err, files) => {
                             if (err) throw err
                             await Promise.all(files.map(async (item, i) => {
                                 await webModel.Gradcam.create({
