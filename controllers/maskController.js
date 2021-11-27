@@ -3,8 +3,12 @@ const webModel = require('../models/webapp')
 
 const schema = {
     report_id: Joi.string().required(),
-    data: Joi.array().items(Joi.object()),
-    user_id: Joi.string()
+    data: Joi.array().items(Joi.object({
+        label: Joi.string().required(),
+        tool: Joi.string().required(),
+        updated_by: Joi.string().required(),
+        data: Joi.object().required(),
+    })),
 };
 
 const validator = Joi.object(schema);
@@ -18,14 +22,15 @@ const insertBBox = async (req, res) => {
         await Promise.all(req.body.data.map(async (item) => {
             await webModel.Mask.create({
                 result_id: req.body.report_id,
-                finding: item.finding,
-                position: item,
-                user_id: req.body.user_id
+                label: item.label,
+                tool: item.tool,
+                data: item.data,
+                updated_by: item.updated_by
             })
         }))
         return res.status(200).json({
             success: true, 
-            message: 'Insert all bounding boxes successfully', 
+            message: `Insert all bounding boxes to report id ${req.body.report_id} successfully`, 
         })
     } catch (e) {
         return res.status(500).json({ success: false, message: 'Internal server error' });
@@ -37,7 +42,7 @@ const getBBox = async (req, res) => {
         const data = await webModel.Mask.find({result_id: req.params.report_id})
         return res.status(200).json({
             success: true, 
-            message: 'Get all bounding boxes successfully', 
+            message: `Get all bounding boxes by report id ${req.body.report_id} successfully`, 
             data
         })
     } catch (e) {

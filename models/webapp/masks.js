@@ -6,9 +6,10 @@ const db = require('../../db/webapp')
 const schema = new Schema(
     {
         result_id: { type: ObjectId, ref: "pred_results" },
-        finding: { type: String },
-        position: { type: Object },
-        clinician_id: {type: ObjectId, ref: "users"}
+        label: { type: String },
+        tool: { type: String },
+        data: { type: Object },
+        updated_by: {type: ObjectId, ref: "users"}
     },
     {
         timestamps: true
