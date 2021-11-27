@@ -54,7 +54,7 @@ PACS
 - GET /api/pacs/HN/:HN/info ( Get patient info by HN )
 
 Mask
-- POST /api/masks/ ( Crete bounding box position, reqBody=(report_id, data, user_id) )
+- POST /api/masks/ ( Crete bounding box position, reqBody=(report_id, data: [{label, tool, updated_by, data}, ...]) )
 - GET /api/report/:report_id ( Get bounding box position by report id )
 
 **Path ที่ไม่ได้ใช้ แต่อาจมีประโยชน์** <br />
