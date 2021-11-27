@@ -6,12 +6,15 @@ const db = require('../../db/webapp')
 const schema = new Schema(
     {
         username: { type: String, required: true, unique: true, index: true },
-        password: { type: String, required: true },
+        password: { type: String },
         email: { type: String },
         first_name: { type: String },
         last_name: {type: String},
         role: {type: String},
         token: {type: String},
+        uid: {type: String},
+        ouid: {type: String},
+        isChulaSSO: {type: Boolean, required: true},
         projects: [{type: ObjectId, ref: "projects"}]
     },
     {

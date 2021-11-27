@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const dotenv = require('dotenv');
 const tokenGenerator = require('../middlewares/tokenGenerator');
 const webModel = require('../models/webapp')
+const axios = require('axios')
 
 dotenv.config();
 
@@ -57,7 +58,57 @@ const logout = async (req, res) => {
     }
 }
 
+const chulaSSO = async (req, res) => {
+    try {
+        const response = (await axios.get('https://account.it.chula.ac.th/serviceValidation', {
+            headers: {
+                'DeeAppId': process.env.DeeAppId,
+                'DeeAppSecret': process.env.DeeAppSecret,
+                'DeeTicket': req.query.ticket
+            }
+        })).data
+
+        console.log(response.username, response.email, response.roles)
+        let user = await webModel.User.findOne({uid: response.uid})
+        if (!user) {
+            user = await webModel.User.create({
+                username: response.username,
+                email: response.email,
+                first_name: response.firstname,
+                last_name: response.lastname,
+                role: response.roles[0],
+                token: "",
+                uid: response.uid,
+                ouid: response.ouid,
+                isChulaSSO: true,
+                projects: []
+            })
+        }
+
+        const data = tokenGenerator({
+            _id: user._id, 
+            username: user.username, 
+            role: user.role
+        }, req.body.remember? true: false);
+        await webModel.User.findByIdAndUpdate(user._id, { token : data })
+        return res.status(200).json({
+            success: true, 
+            message: 'Login successfully', 
+            data: {
+                user_id: user._id,
+                username: user.username,
+                role: user.role,
+                token: data
+            }
+        })
+    } catch (e) {
+        console.log(e.message)
+        return res.status(500).json({success: false, message: 'Internal server error'})
+    }
+}
+
 module.exports = {
     login,
-    logout
+    logout,
+    chulaSSO
 }
