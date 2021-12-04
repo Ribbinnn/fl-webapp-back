@@ -289,6 +289,7 @@ const webappSeed = async () => {
       role: 'radiologist',
       token: '',
       projects: [],
+      isChulaSSO: false,
       createdAt: new Date('10/13/2021'),
       updatedAt: new Date('10/14/2021')
     },
@@ -301,6 +302,7 @@ const webappSeed = async () => {
       role: 'clinician',
       token: '',
       projects: [],
+      isChulaSSO: false,
       createdAt: new Date('10/13/2021'),
       updatedAt: new Date('10/16/2021')
     },
@@ -313,6 +315,7 @@ const webappSeed = async () => {
       role: 'radiologist',
       token: '',
       projects: [],
+      isChulaSSO: false,
       createdAt: new Date('10/13/2021'),
       updatedAt: new Date('10/13/2021')
     },
@@ -325,6 +328,7 @@ const webappSeed = async () => {
       role: 'clinician',
       token: '',
       projects: [],
+      isChulaSSO: false,
       createdAt: new Date('10/13/2021'),
       updatedAt: new Date('10/13/2021')
     },
@@ -337,6 +341,7 @@ const webappSeed = async () => {
       role: 'clinician',
       token: '',
       projects: [],
+      isChulaSSO: false,
       createdAt: new Date('10/13/2021'),
       updatedAt: new Date('10/13/2021')
     },
@@ -349,6 +354,7 @@ const webappSeed = async () => {
       role: 'radiologist',
       token: '',
       projects: [],
+      isChulaSSO: false,
       createdAt: new Date('10/13/2021'),
       updatedAt: new Date('10/13/2021')
     }
@@ -559,6 +565,7 @@ const webappSeed = async () => {
     }
   ])
 
+  let mask = []
   let predClass = []
   for (let i=0; i<4; i++){
     const date = 16+i
@@ -568,8 +575,17 @@ const webappSeed = async () => {
       "createdAt": new Date(`10/${date.toString()}/2021`),
       "updatedAt": new Date(`10/${date.toString()}/2021`)
     })
+
+    mask.push({
+      "result_id": predResult.insertedIds[i],
+      "data": [],
+      "createdAt": new Date(`10/${date.toString()}/2021`),
+      "updatedAt": new Date(`10/${date.toString()}/2021`)
+    })
   }
+
   await PredClass.collection.insertMany(predClass)
+  await Mask.collection.insertMany(mask)
 
   let gradcam = []
   for (let i=0; i<4; i++){

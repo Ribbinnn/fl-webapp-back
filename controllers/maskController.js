@@ -19,15 +19,9 @@ const insertBBox = async (req, res) => {
         return res.status(400).json({success: false, message: `Invalid input: ${(validatedResult.error.message)}`})
     }
     try {
-        await Promise.all(req.body.data.map(async (item) => {
-            await webModel.Mask.create({
-                result_id: req.body.report_id,
-                label: item.label,
-                tool: item.tool,
-                data: item.data,
-                updated_by: item.updated_by
-            })
-        }))
+        const mask = await webModel.Mask.findOneAndUpdate({result_id: req.body.report_id},{
+            data: req.body.data
+        })
         return res.status(200).json({
             success: true, 
             message: `Insert all bounding boxes to report id ${req.body.report_id} successfully`, 
@@ -39,7 +33,7 @@ const insertBBox = async (req, res) => {
 
 const getBBox = async (req, res) => {
     try {
-        const data = await webModel.Mask.find({result_id: req.params.report_id})
+        const data = await webModel.Mask.findOne({result_id: req.params.report_id})
         return res.status(200).json({
             success: true, 
             message: `Get all bounding boxes by report id ${req.body.report_id} successfully`, 
