@@ -32,6 +32,7 @@ const create = async (req, res) => {
             ...req.body,
             password: passwordHash,
             token: "",
+            isChulaSSO: false,
             projects: []
         })
 
@@ -45,7 +46,7 @@ const create = async (req, res) => {
                 first_name: user.first_name,
                 last_name: user.last_name,
                 role: user.role,
-                isChulaSSO: false
+                isChulaSSO: user.isChulaSSO
             }
         })
     } catch (e) {

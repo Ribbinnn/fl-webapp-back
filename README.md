@@ -20,7 +20,7 @@ Authentication <br />
 
 
 User 
-- POST /api/users ( Create new user, reqBody = {username, password, first_name, last_name, role, email} )
+- POST /api/users ( Create new user, reqBody = {username, password, first_name, last_name, role, email, isChulaSSO} )
 
 Webapp Project
 - POST /api/projects ( Create new project, reqBody = {name, task, description, users, requirements, predClasses} )
@@ -54,7 +54,7 @@ PACS
 - GET /api/pacs/HN/:HN/info ( Get patient info by HN )
 
 Mask
-- POST /api/masks/ ( Crete bounding box position, reqBody=(report_id, data: [{label, tool, updated_by, data}, ...]) )
+- PATCH /api/masks/ ( Crete bounding box position, reqBody=(report_id, data: [{label, tool, updated_by, data}, ...]) )
 - GET /api/report/:report_id ( Get bounding box position by report id )
 
 **Path ที่ไม่ได้ใช้ แต่อาจมีประโยชน์** <br />

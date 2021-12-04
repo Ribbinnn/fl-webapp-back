@@ -117,8 +117,9 @@ const inferResult = async (req, res) => {
             hn: req.body.record.hn
         })
 
-        // create predicted classes
+        // create predicted class and mask
         const predClass = await webModel.PredClass.create({ result_id: result._id, prediction: {} })
+        const mask = await webModel.Mask.create({ result_id: result._id, data: [] })
 
         // create FormData to send to python server
         const data = new FormData()
