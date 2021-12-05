@@ -5,11 +5,29 @@ const medRecController = require('../controllers/medRecController');
 const tokenValidation = require('../middlewares/tokenVerification');
 const verification = require('../middlewares/verification')
 
-// create new project
-router.post('/', tokenValidation, projectController.create);
+// create new project (admin)
+router.post(
+    '/',
+    tokenValidation,
+    verification.adminVerification,
+    projectController.create
+);
 
-// get all projects
-router.get('/', tokenValidation, projectController.getAll);
+// update project by id (admin)
+router.patch(
+    '/',
+    tokenValidation,
+    verification.adminVerification,
+    projectController.update
+);
+
+// get all projects (admin)
+router.get(
+    '/',
+    tokenValidation,
+    verification.adminVerification,
+    projectController.getAll
+);
 
 // get all projects by user id
 router.get(
@@ -19,6 +37,13 @@ router.get(
     projectController.getByUserId
 );
 
+// get task 
+router.get(
+    '/tasks',
+    tokenValidation,
+    projectController.getTask
+)
+
 // get project by id
 router.get(
     '/:project_id',
@@ -27,7 +52,6 @@ router.get(
     projectController.getById
 );
 
-// insert new record by project id
-router.post('/:id/insert', tokenValidation, medRecController.insertMedRec);
+// router.post('/:id/insert', tokenValidation, medRecController.insertMedRec);
 
 module.exports = router;

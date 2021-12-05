@@ -18,16 +18,9 @@ Authentication <br />
 - POST /api/auth/login ( reqBody = {username, password, remember} )
 - POST /api/auth/logout 
 
-
-User 
-- POST /api/users ( Create new user, reqBody = {username, password, first_name, last_name, role, email, isChulaSSO} )
-
 Webapp Project
-- POST /api/projects ( Create new project, reqBody = {name, task, description, users, requirements, predClasses} )
 - GET /api/projects/user/:id ( Get all projects by user id )
 - GET /api/projects/:project_id ( Get project by id )
-- POST /api/projects/:id/insert ( Insert medical record to project, reqBody = Object ) 
-
 
 Vitals
 - POST /api/vitals/records ( Create vitals project and upload medical records, reqBody = {project_name, record_name, user_id, records} )
@@ -57,10 +50,15 @@ Mask
 - PATCH /api/masks/ ( Crete bounding box position, reqBody=(report_id, data: [{label, tool, updated_by, data}, ...]) )
 - GET /api/report/:report_id ( Get bounding box position by report id )
 
-**Path ที่ไม่ได้ใช้ แต่อาจมีประโยชน์** <br />
-User <br />
+**Admin API PATH** <br />
+Webapp Project
+- POST /api/projects ( Create new project, reqBody = {name, task, description, predClasses} )
+- PATCH /api/projects ( Create new project, reqBody = {id, name, task, description, predClasses} )
+- GET /api/projects ( Get all projects )
+- GET /api/projects/tasks ( Get all AI tasks )
+ 
+User
+- POST /api/users ( Create new user, reqBody = {username, password, password2, first_name, last_name, role, email} )
+- PATCH /api/users ( Create new user, reqBody = {id, username, password, password2, first_name, last_name, role, email} )
 - GET /api/users ( Get all users )
 - GET /api/users/:id ( Get user by id )
-
-Webapp Project
-- GET /api/projects ( Get all projects )

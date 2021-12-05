@@ -8,6 +8,6 @@ const verification = require('../middlewares/verification')
 router.patch('/', tokenValidation, verification.reportVerification, maskController.insertBBox)
 
 // get bounding box postion by report id
-router.get('/report/:report_id', tokenValidation, maskController.getBBox)
+router.get('/report/:report_id', tokenValidation, verification.reportVerification, maskController.getBBox)
 
 module.exports = router;
