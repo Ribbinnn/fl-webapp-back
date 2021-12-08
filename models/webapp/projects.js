@@ -5,18 +5,21 @@ const db = require('../../db/webapp')
 
 const schema = new Schema(
     {
-        name: { type: String, required: true, unique: false },
+        name: { type: String, required: true },
         task: { type: String, required: true },
         description: { type: String },
         requirements: { type: Object },
         predClasses: [{type: String}],
-        users: [{type: ObjectId, ref: "users"}]
+        users: [{type: ObjectId, ref: "users"}],
+        head: [{type: ObjectId, ref: "users", required: true}]
     },
     {
         timestamps: true
     }
     
 );
+
+// schema.index({name: 1, head: 1}, {unique: true})
 
 // import webapp database
 // schema for projects collection

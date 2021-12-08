@@ -372,6 +372,7 @@ const webappSeed = async () => {
       ],
       predClasses: pylon_classes,
       users: [user.insertedIds[0], user.insertedIds[4], user.insertedIds[5]],
+      head: [user.insertedIds[0]],
       createdAt: new Date('10/14/2021'),
       updatedAt: new Date('10/14/2021')
     },
@@ -382,6 +383,7 @@ const webappSeed = async () => {
       requirements: [{ name: 'fever', type: 'string', unit: 'none' }],
       predClasses: pylon_classes,
       users: [user.insertedIds[0], user.insertedIds[1], user.insertedIds[2], user.insertedIds[3], user.insertedIds[4], user.insertedIds[5]],
+      head: [user.insertedIds[2]],
       createdAt: new Date('10/16/2021'),
       updatedAt: new Date('10/16/2021')
     },
@@ -392,6 +394,7 @@ const webappSeed = async () => {
       requirements: [{ name: 'cough', type: 'string', unit: 'none' }],
       predClasses: pylon_classes,
       users: [user.insertedIds[2], user.insertedIds[3], user.insertedIds[4]],
+      head: [user.insertedIds[4]],
       createdAt: new Date('10/16/2021'),
       updatedAt: new Date('10/16/2021')
     },
@@ -402,6 +405,7 @@ const webappSeed = async () => {
       requirements: [{ name: 'fever', type: 'string', unit: 'none' }],
       predClasses: pylon_classes,
       users: [user.insertedIds[0]],
+      head: [user.insertedIds[0]],
       createdAt: new Date('10/16/2021'),
       updatedAt: new Date('10/16/2021')
     },
