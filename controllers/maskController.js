@@ -36,7 +36,7 @@ const getBBox = async (req, res) => {
         const data = await webModel.Mask.findOne({result_id: req.params.report_id})
         return res.status(200).json({
             success: true, 
-            message: `Get all bounding boxes by report id ${req.body.report_id} successfully`, 
+            message: `Get all bounding boxes by report id ${req.params.report_id} successfully`, 
             data
         })
     } catch (e) {
