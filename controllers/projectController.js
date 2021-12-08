@@ -33,6 +33,7 @@ const schema = {
     ),
     description: Joi.string().max(160),
     predClasses: Joi.array().items(Joi.string()),
+    head: Joi.array().items(Joi.string()).required().min(1).max(2)
     // requirements: Joi.array().items(Joi.object({
     //     name: Joi.string(),
     //     type: Joi.string(),
@@ -52,14 +53,12 @@ const create = async (req, res) => {
     }
     try {
         // create project
-        const project = await webModel.Project.create({ ...req.body, users: [], requirements: task[req.body.task] })
+        const project = await webModel.Project.create({ ...req.body, users: req.body.head, requirements: task[req.body.task] })
 
         // update project list of associated user
-        // if (req.body.users) {
-        //     await Promise.all(req.body.users.map(async (id) => {
-        //         await webModel.User.findByIdAndUpdate(id, { $push: { projects: project.id } })
-        //     }))
-        // }
+        await Promise.all(req.body.head.map(async (id) => {
+            await webModel.User.findByIdAndUpdate(id, { $push: { projects: project.id } })
+        }))
 
         return res.status(200).json({
             success: true,
@@ -104,7 +103,7 @@ const getByUserId = async (req, res) => {
 // get all projects
 const getAll = async (req, res) => {
     try {
-        const data = await webModel.Project.find();
+        const data = await webModel.Project.find().populate('head', 'username');
         return res.status(200).json({ success: true, message: 'Get project successfully', data: data });
     } catch (e) {
         return res.status(500).json({ success: false, message: 'Internal server error' });
@@ -123,7 +122,16 @@ const update = async (req, res) => {
         return res.status(400).json({ success: false, message: `Invalid input: ${(validatedResult.error.message)}` })
     }
     try {
-        const project = await webModel.Project.findByIdAndUpdate(req.body.id, { ...req.body })
+        const project = await webModel.Project.findById(req.body.id)
+        let newUsers = project.users
+        await Promise.all(req.body.head.map(async id => {
+            if (!newUsers.includes(id)){
+                newUsers.push(id)
+                await webModel.User.findByIdAndUpdate(id, { $addToSet: { projects: project.id } })
+            }
+        }))
+        
+        await webModel.Project.findByIdAndUpdate(req.body.id, {...req.body, users: newUsers})
 
         return res.status(200).json({
             success: true,
