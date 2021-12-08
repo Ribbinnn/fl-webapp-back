@@ -52,8 +52,8 @@ Mask
 
 **Admin API PATH** <br />
 Webapp Project
-- POST /api/projects ( Create new project, reqBody = {name, task, description, predClasses} )
-- PATCH /api/projects ( Create new project, reqBody = {id, name, task, description, predClasses} )
+- POST /api/projects ( Create new project, reqBody = {name, task, description, predClasses, head} )
+- PATCH /api/projects ( Create new project, reqBody = {id, name, task, description, predClasses, head} )
 - GET /api/projects ( Get all projects )
 - GET /api/projects/tasks ( Get all AI tasks )
  
