@@ -12,8 +12,6 @@ const schema = new Schema(
         last_name: {type: String},
         role: {type: String},
         token: {type: String},
-        uid: {type: String},
-        ouid: {type: String},
         isChulaSSO: {type: Boolean, required: true},
         projects: [{type: ObjectId, ref: "projects"}]
     },
