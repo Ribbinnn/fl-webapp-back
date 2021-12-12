@@ -48,7 +48,7 @@ PACS
 
 Mask
 - PATCH /api/masks/ ( Crete bounding box position, reqBody=(report_id, data: [{label, tool, updated_by, data}, ...]) )
-- GET /api/report/:report_id ( Get bounding box position by report id )
+- GET /api/masks/report/:report_id ( Get bounding box position by report id )
 
 **Admin API PATH** <br />
 Webapp Project
