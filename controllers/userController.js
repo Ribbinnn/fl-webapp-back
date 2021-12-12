@@ -7,7 +7,7 @@ const webModel = require('../models/webapp')
 const schema = {
     username: Joi.string().max(32).required(),
     password: Joi.string().required().min(8).max(32),
-    password2: Joi.string().required().min(8).max(32),
+    // password2: Joi.string().required().min(8).max(32),
     first_name: Joi.string().max(32),
     last_name: Joi.string().max(32),
     role: Joi.string().valid('admin','radiologist','clinician').required(),
@@ -15,7 +15,12 @@ const schema = {
 };
   
 const validator = Joi.object(schema);
-const updatedValidator = Joi.object({id: Joi.string().required(), ...schema})
+const updatedValidator = Joi.object({
+    ...schema, 
+    id: Joi.string().required(), 
+    password: Joi.string().min(8).max(32), 
+    isChulaSSO: Joi.boolean().required()
+})
 
 const salt = 10;
 
@@ -26,15 +31,15 @@ const create = async (req, res) => {
     if (validatedResult.error) {
         return res.status(400).json({success: false, message: `Invalid input: ${(validatedResult.error.message)}`})
     }
-    if (req.body.password!==req.body.password2) {
-        return res.status(400).json({success: false, message: `Invalid input: password do not match`})
-    }
+    // if (req.body.password!==req.body.password2) {
+    //     return res.status(400).json({success: false, message: `Invalid input: password do not match`})
+    // }
     try {
         // hash password
         const passwordHash = await bcrypt.hash(req.body.password, salt);
       
         delete req.body.password
-        delete req.body.password2
+        // delete req.body.password2
         // insert data to users collection
         const user = await webModel.User.create({
             ...req.body,
@@ -74,7 +79,7 @@ const getAll = async (req, res) => {
         // Find all user from users collection
         const user = await webModel.User
                             .find()
-                            .select(['_id', 'username', 'first_name', 'last_name', 'role', 'email'])
+                            .select(['_id', 'username', 'first_name', 'last_name', 'role', 'email', 'isChulaSSO'])
 
         // send status and message
         return res.status(200).json({success: true, message: 'Get all users successfully', data: user});
@@ -87,7 +92,7 @@ const getAll = async (req, res) => {
 // get user by id
 const getById = async (req, res) => {
     try {
-        const user = await webModel.User.findById(req.params.id, ['_id', 'username', 'first_name', 'last_name', 'role', 'email']);
+        const user = await webModel.User.findById(req.params.id, ['_id', 'username', 'first_name', 'last_name', 'role', 'email', 'isChulaSSO']);
         return res.status(200).json({success: true, message: 'Get all users successfully', data: user});
     } catch (e) {
         return res.status(500).json({success: false, message: 'Internal server error'});
@@ -100,19 +105,26 @@ const update = async (req, res) => {
     if (validatedResult.error) {
         return res.status(400).json({success: false, message: `Invalid input: ${(validatedResult.error.message)}`})
     }
-    if (req.body.password!==req.body.password2) {
-        return res.status(400).json({success: false, message: `Invalid input: password do not match`})
-    }
+    // if (req.body.password!==req.body.password2) {
+    //     return res.status(400).json({success: false, message: `Invalid input: password do not match`})
+    // }
     try {
         // hash password
-        const passwordHash = await bcrypt.hash(req.body.password, salt);
+        let passwordHash = ""
+
+        if (req.body.password)
+            passwordHash = await bcrypt.hash(req.body.password, salt);
       
-        delete req.body.password
-        delete req.body.password2
-        const user = await webModel.User.findByIdAndUpdate({_id: req.body.id}, {
-            ...req.body,
-            password: passwordHash,
-        })
+        const user = await webModel.User.findOneAndUpdate({_id: req.body.id, isChulaSSO: req.body.isChulaSSO}, 
+            req.body.isChulaSSO? {
+                role: req.body.role
+            }: passwordHash? {
+                ...req.body,
+                password: passwordHash,
+            }: req.body
+        )
+        if (!user)
+            return res.status(400).json({success: false, message: `User ${(req.body.id)} not found`}) 
 
         // send status and message
         return res.status(200).json({
@@ -129,6 +141,9 @@ const update = async (req, res) => {
         })
 
     } catch (e) {
+        if (e.message.includes('duplicate key')) {
+            return res.status(400).json({success: false, message: 'Duplicate username'})
+        }
         return res.status(500).json({success: false, message: 'Internal server error'});
     }
 }

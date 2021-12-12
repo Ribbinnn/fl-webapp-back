@@ -33,7 +33,7 @@ const schema = {
     ),
     description: Joi.string().max(160),
     predClasses: Joi.array().items(Joi.string()),
-    head: Joi.array().items(Joi.string()).required().min(1).max(2)
+    head: Joi.array().items(Joi.string()).required().min(1)
     // requirements: Joi.array().items(Joi.object({
     //     name: Joi.string(),
     //     type: Joi.string(),
@@ -103,7 +103,7 @@ const getByUserId = async (req, res) => {
 // get all projects
 const getAll = async (req, res) => {
     try {
-        const data = await webModel.Project.find().populate('head', 'username');
+        const data = await webModel.Project.find({}, ['_id', 'name', 'head']).populate('head', 'username');
         return res.status(200).json({ success: true, message: 'Get project successfully', data: data });
     } catch (e) {
         return res.status(500).json({ success: false, message: 'Internal server error' });

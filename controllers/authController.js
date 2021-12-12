@@ -10,7 +10,7 @@ const login = async (req, res) => {
     try {
         // check if username is in the database
         const user = await webModel.User.findOne({username: req.body.username});
-        if (!user) {
+        if (!user || user.isChulaSSO) {
             return res.status(401).json({success: false, message: 'Invalid username or password'});
         }
 
@@ -78,8 +78,6 @@ const chulaSSO = async (req, res) => {
                 last_name: response.lastname,
                 role: response.roles[0],
                 token: "",
-                uid: response.uid,
-                ouid: response.ouid,
                 isChulaSSO: true,
                 projects: []
             })
