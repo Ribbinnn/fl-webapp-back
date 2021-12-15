@@ -1,6 +1,13 @@
 const bcrypt = require('bcryptjs');
-const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+const { modelStatus, userStatus } = require('../../utils/status');
+const vitalsSeed = require('./vitalsMigrate');
+const mongoose = require('../webapp')
+const mg = require("mongoose");
+const schema = new mg.Schema();
+
+let projectIds = {}
+let userIds = {}
 
 const pylon_classes = [
   'No Finding',
@@ -255,9 +262,6 @@ const focusingFinding = ['Pneumothorax', 'Mass', 'Nodule', 'Mediastinal Mass', '
 dotenv.config();
 
 const webappSeed = async () => {
-  mongoose.connect(process.env.webappDB);
-
-  const schema = new mongoose.Schema()
 
   const Project = mongoose.model('projects', schema)
   const User = mongoose.model('users', schema)
@@ -290,6 +294,7 @@ const webappSeed = async () => {
       token: '',
       projects: [],
       isChulaSSO: false,
+      status: userStatus.ACTIVE,
       createdAt: new Date('10/13/2021'),
       updatedAt: new Date('10/14/2021')
     },
@@ -303,6 +308,7 @@ const webappSeed = async () => {
       token: '',
       projects: [],
       isChulaSSO: false,
+      status: userStatus.ACTIVE,
       createdAt: new Date('10/13/2021'),
       updatedAt: new Date('10/16/2021')
     },
@@ -316,6 +322,7 @@ const webappSeed = async () => {
       token: '',
       projects: [],
       isChulaSSO: false,
+      status: userStatus.ACTIVE,
       createdAt: new Date('10/13/2021'),
       updatedAt: new Date('10/13/2021')
     },
@@ -329,6 +336,7 @@ const webappSeed = async () => {
       token: '',
       projects: [],
       isChulaSSO: false,
+      status: userStatus.ACTIVE,
       createdAt: new Date('10/13/2021'),
       updatedAt: new Date('10/13/2021')
     },
@@ -342,6 +350,7 @@ const webappSeed = async () => {
       token: '',
       projects: [],
       isChulaSSO: false,
+      status: userStatus.ACTIVE,
       createdAt: new Date('10/13/2021'),
       updatedAt: new Date('10/13/2021')
     },
@@ -355,10 +364,62 @@ const webappSeed = async () => {
       token: '',
       projects: [],
       isChulaSSO: false,
+      status: userStatus.ACTIVE,
       createdAt: new Date('10/13/2021'),
       updatedAt: new Date('10/13/2021')
+    },
+    {
+      username: 'admin1',
+      password: passwordHash,
+      email: 'admin1@gmail.com',
+      first_name: 'admin1',
+      last_name: 'admin1',
+      role: 'admin',
+      token: '',
+      projects: [],
+      isChulaSSO: false,
+      status: userStatus.ACTIVE,
+      createdAt: new Date('10/1/2021'),
+      updatedAt: new Date('10/1/2021')
+    },
+    {
+      username: 'admin2',
+      password: passwordHash,
+      email: 'admin2@gmail.com',
+      first_name: 'admin2',
+      last_name: 'admin2',
+      role: 'admin',
+      token: '',
+      projects: [],
+      isChulaSSO: false,
+      status: userStatus.ACTIVE,
+      createdAt: new Date('10/1/2021'),
+      updatedAt: new Date('10/1/2021')
+    },
+    {
+      username: 'admin3',
+      password: passwordHash,
+      email: 'admin3@gmail.com',
+      first_name: 'admin3',
+      last_name: 'admin3',
+      role: 'admin',
+      token: '',
+      projects: [],
+      isChulaSSO: false,
+      status: userStatus.ACTIVE,
+      createdAt: new Date('10/1/2021'),
+      updatedAt: new Date('10/1/2021')
     }
   ])
+
+  userIds = {
+    'John': user.insertedIds[0],
+    'Jane': user.insertedIds[1],
+    'Lavy': user.insertedIds[2],
+    'Gigi': user.insertedIds[3],
+    'Ian': user.insertedIds[4],
+    'Edward': user.insertedIds[5]
+  }
 
   const project = await Project.collection.insertMany([
     {
@@ -410,6 +471,8 @@ const webappSeed = async () => {
       updatedAt: new Date('10/16/2021')
     },
   ])
+
+  projectIds = { 'COVID-19': project.insertedIds[0], 'Abnormal Detection': project.insertedIds[1], 'Tuberculosis': project.insertedIds[2] }
 
   await User.collection.updateOne({ _id: user.insertedIds[0] }, { $set: { projects: [project.insertedIds[0], project.insertedIds[1], project.insertedIds[3]] } })
   await User.collection.updateOne({ _id: user.insertedIds[1] }, { $set: { projects: [project.insertedIds[1]] } })
@@ -522,7 +585,7 @@ const webappSeed = async () => {
       image_id: image.insertedIds[0],
       project_id: project.insertedIds[0],
       hn: 4149,
-      status: "annotated",
+      status: modelStatus.AI_ANNOTATED,
       label: "",
       note: "",
       created_by: user.insertedIds[5],
@@ -534,7 +597,7 @@ const webappSeed = async () => {
       image_id: image.insertedIds[1],
       project_id: project.insertedIds[1],
       hn: 5566,
-      status: "annotated",
+      status: modelStatus.AI_ANNOTATED,
       label: "",
       note: "",
       created_by: user.insertedIds[3],
@@ -546,8 +609,8 @@ const webappSeed = async () => {
       image_id: image.insertedIds[2],
       project_id: project.insertedIds[1],
       hn: 4149,
-      status: "finalized",
-      label: {"finding": ["Pneumothorax"]},
+      status: modelStatus.HUMAN_ANNOTATED,
+      label: { "finding": ["Pneumothorax"] },
       note: "Pneumothorax -Gigi",
       created_by: user.insertedIds[1],
       finalized_by: user.insertedIds[3],
@@ -559,8 +622,8 @@ const webappSeed = async () => {
       image_id: image.insertedIds[3],
       project_id: project.insertedIds[2],
       hn: 5566,
-      status: "finalized",
-      label: {"finding": "Mass"},
+      status: modelStatus.HUMAN_ANNOTATED,
+      label: { "finding": "Mass" },
       note: "Mass -Edward",
       created_by: user.insertedIds[2],
       finalized_by: user.insertedIds[4],
@@ -571,8 +634,8 @@ const webappSeed = async () => {
 
   let mask = []
   let predClass = []
-  for (let i=0; i<4; i++){
-    const date = 16+i
+  for (let i = 0; i < 4; i++) {
+    const date = 16 + i
     predClass.push({
       "result_id": predResult.insertedIds[i],
       "prediction": prediction,
@@ -592,8 +655,8 @@ const webappSeed = async () => {
   await Mask.collection.insertMany(mask)
 
   let gradcam = []
-  for (let i=0; i<4; i++){
-    const date = 16+i
+  for (let i = 0; i < 4; i++) {
+    const date = 16 + i
     focusingFinding.map(finding => {
       gradcam.push({
         "result_id": predResult.insertedIds[i],
@@ -608,7 +671,12 @@ const webappSeed = async () => {
 
   await Gradcam.collection.insertMany(gradcam)
 
-  mongoose.disconnect();
+  mongoose.close()
 }
 
-webappSeed()
+const main = async () => {
+  await webappSeed()
+  await vitalsSeed(projectIds, userIds)
+}
+
+main()

@@ -1,4 +1,4 @@
-const Joi = require("joi"); 
+const Joi = require("joi");
 const webModel = require('../models/webapp')
 
 const schema = {
@@ -8,6 +8,7 @@ const schema = {
         tool: Joi.string().required(),
         updated_by: Joi.string().required(),
         data: Joi.object().required(),
+        updated_time: Joi.date()
     })),
 };
 
@@ -16,15 +17,16 @@ const validator = Joi.object(schema);
 const insertBBox = async (req, res) => {
     const validatedResult = validator.validate(req.body)
     if (validatedResult.error) {
-        return res.status(400).json({success: false, message: `Invalid input: ${(validatedResult.error.message)}`})
+        return res.status(400).json({ success: false, message: `Invalid input: ${(validatedResult.error.message)}` })
     }
     try {
-        const mask = await webModel.Mask.findOneAndUpdate({result_id: req.body.report_id},{
+        const mask = await webModel.Mask.findOneAndUpdate({ result_id: req.body.report_id }, {
             data: req.body.data
-        })
+        }, {new: true})
         return res.status(200).json({
-            success: true, 
-            message: `Insert all bounding boxes to report id ${req.body.report_id} successfully`, 
+            success: true,
+            message: `Insert all bounding boxes to report id ${req.body.report_id} successfully`,
+            data: { updatedAt: mask.updatedAt }
         })
     } catch (e) {
         return res.status(500).json({ success: false, message: 'Internal server error' });
@@ -33,10 +35,10 @@ const insertBBox = async (req, res) => {
 
 const getBBox = async (req, res) => {
     try {
-        const data = await webModel.Mask.findOne({result_id: req.params.report_id})
+        const data = await webModel.Mask.findOne({ result_id: req.params.report_id }).populate('data.updated_by', 'username')
         return res.status(200).json({
-            success: true, 
-            message: `Get all bounding boxes by report id ${req.params.report_id} successfully`, 
+            success: true,
+            message: `Get all bounding boxes by report id ${req.params.report_id} successfully`,
             data
         })
     } catch (e) {

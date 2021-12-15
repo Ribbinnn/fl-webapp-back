@@ -7,8 +7,8 @@ const verification = require('../middlewares/verification')
 // Create new user
 router.post('/', userController.create);
 
-// Update user (admin)
-router.patch('/', tokenValidation, verification.adminVerification, userController.update);
+// Update user
+router.patch('/', tokenValidation, verification.userVerification, userController.update);
 
 // Get users (admin)
 router.get('/', tokenValidation, verification.adminVerification, userController.getAll);

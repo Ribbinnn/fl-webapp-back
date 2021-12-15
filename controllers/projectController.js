@@ -66,6 +66,9 @@ const create = async (req, res) => {
             data: project
         })
     } catch (e) {
+        if (e.message.includes('duplicate key')) {
+            return res.status(400).json({ success: false, message: 'Duplicate project name' })
+        }
         return res.status(500).json({ success: false, message: 'Internal server error' })
     }
 }
@@ -139,6 +142,9 @@ const update = async (req, res) => {
             data: project
         })
     } catch (e) {
+        if (e.message.includes('duplicate key')) {
+            return res.status(400).json({ success: false, message: 'Duplicate project name' })
+        }
         return res.status(500).json({ success: false, message: 'Internal server error' })
     }
 }

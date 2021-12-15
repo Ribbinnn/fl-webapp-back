@@ -2,10 +2,12 @@ const webModel = require('../models/webapp')
 
 // verify if user id in token match
 const userVerification = (req, res, next) => {
-    const user_id = req.body.user_id ?? req.body.clinician_id ?? req.query.user_id ?? req.params.id ?? undefined
-    if (user_id) {
-        if (user_id !== req.user._id)
-            return res.status(403).json({ success: false, message: `User have no permission to access user ${user_id}'s resource'` })
+    if (req.user.role !== "admin") {
+        const user_id = req.body.user_id ?? req.body.clinician_id ?? req.query.user_id ?? req.params.id ?? undefined
+        if (user_id) {
+            if (user_id !== req.user._id)
+                return res.status(403).json({ success: false, message: `User have no permission to access user ${user_id}'s resource'` })
+        }
     }
     next()
 }

@@ -96,9 +96,11 @@ const create = async (req, res) => {
         // create project (vitals database)
         const project = await vitalsModel.Project.create({
             name: webProject.name,
+            webproject_id: req.body.project_id,
+            user_id: req.body.user_id,
             clinician_first_name: user.first_name,
             clinician_last_name: user.last_name,
-            record_name: req.body.record_name
+            record_name: req.body.record_name,
         })
 
         // create record (vitals database)
@@ -139,9 +141,8 @@ const getProject = async (req, res) => {
             },
             { 
                 $match: { 
-                    "project.clinician_first_name": user.first_name,
-                    "project.clinician_last_name": user.last_name,
-                    "project.name": project.name
+                    "project.user_id": user._id,
+                    "project.webproject_id": project._id
                 } 
             },
             {
