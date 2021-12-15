@@ -1,6 +1,7 @@
 const Joi = require("joi");
 const webModel = require("../models/webapp");
 const PACS = require("../db/pacs").PACS;
+const { modelStatus } = require('../utils/status')
 
 const schema = {
   report_id: Joi.string().required(),
@@ -36,7 +37,7 @@ const getById = async (req, res) => {
     const gradCam = await webModel.Gradcam.find({ result_id: result._id });
     const createdBy = await webModel.User.findById(result.created_by);
     const finalizedBy =
-      result.status === "finalized"
+      (result.status === modelStatus.FINALIZED || result.status === modelStatus.HUMAN_ANNOTATED)
         ? await webModel.User.findById(result.finalized_by)
         : undefined;
     const project = await webModel.Project.findById(result.project_id);
@@ -139,32 +140,32 @@ const update = async (req, res) => {
       });
   }
   try {
-    if (req.body.label) {
-      // update fields that are finalized in pred class
-      const predClass = await webModel.PredClass.findOne({
-        result_id: req.body.report_id,
-      });
-      let selectedClass = predClass.prediction.map((item) => {
-        item["selected"] = false;
-        return item;
-      });
-      selectedClass = selectedClass.map((item) => {
-        if (req.body.label["finding"].includes(item["finding"]))
-          item["selected"] = true;
-        return item;
-      });
-      await webModel.PredClass.findOneAndUpdate(
-        { result_id: req.body.report_id },
-        { prediction: selectedClass }
-      );
-    }
+    // update fields that are finalized in pred class
+    const predClass = await webModel.PredClass.findOne({
+      result_id: req.body.report_id,
+    });
+
+    let selectedClass = predClass.prediction.map((item) => {
+      item["selected"] = false;
+      return item;
+    });
+    selectedClass = selectedClass.map((item) => {
+      if (req.body.label["finding"].includes(item["finding"]))
+        item["selected"] = true;
+      return item;
+    });
+    await webModel.PredClass.findOneAndUpdate(
+      { result_id: req.body.report_id },
+      { prediction: selectedClass }
+    );
+
     const data = await webModel.PredResult.findByIdAndUpdate(
       req.body.report_id,
       {
         note: req.body.note,
         label: req.body.label,
-        status: req.body.label ? "finalized" : undefined,
-        finalized_by: req.body.label ? req.body.user_id : undefined, // should get user_id from requestBody
+        status: modelStatus.HUMAN_ANNOTATED,
+        finalized_by: req.body.user_id,
       }
     );
     return res
@@ -208,7 +209,7 @@ const viewHistory = async (req, res) => {
           let finding = "";
 
           // get finding with the most confidence
-          if (item.status === "annotated" || item.status === "finalized") {
+          if (item.status === modelStatus.AI_ANNOTATED || item.status === modelStatus.HUMAN_ANNOTATED || item.status === modelStatus.FINALIZED) {
             const predClass = await webModel.PredClass.findOne({
               result_id: item._id,
             });

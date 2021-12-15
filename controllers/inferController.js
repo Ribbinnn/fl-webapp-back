@@ -7,8 +7,8 @@ const axios = require('axios')
 const FormData = require('form-data');
 const extract = require('extract-zip')
 const dotenv = require('dotenv')
+const { modelStatus } = require('../utils/status')
 // let con1 = require('../db/webapp')
-
 dotenv.config()
 
 const imageSchema = {
@@ -54,8 +54,11 @@ const inferResult = async (req, res) => {
 
     filename = pacs.filepath.split('/')[1]
 
+    // const resultDir = path.join(root, "/resources/results/", project.id + "-" + project.name)
+    // const fileLocation = path.join(resultDir, filename.split('.')[0])
+
     const resultDir = path.join(root, "/resources/results/", filename.split('.')[0])
-    const taskDir = path.join(resultDir, project.task)
+    const fileLocation = path.join(resultDir, project.task)
 
     // let session = await con1.startSession()
     // session.startTransaction();
@@ -72,7 +75,7 @@ const inferResult = async (req, res) => {
         ]
 
         // record can be null (might be changed in the future)
-        if (!req.body.record) 
+        if (!req.body.record)
             throw new Error(`Invalid record input: "record" is required`)
         // check required fields
         requirements.forEach((requirement) => {
@@ -80,9 +83,9 @@ const inferResult = async (req, res) => {
             if (!req.body.record[fieldName])
                 throw new Error(`Invalid record input: "${fieldName}" is required`)
             // check fields' type
-            if (typeof(req.body.record[fieldName])!==requirement.type && fieldName !== "measured_time") 
+            if (typeof (req.body.record[fieldName]) !== requirement.type && fieldName !== "measured_time")
                 throw new Error(`Invalid record input: "${fieldName}" must be a ${requirement.type}`)
-            if(fieldName == "measured_time" && new Date(req.body.record[fieldName]) == "Invalid Date")
+            if (fieldName == "measured_time" && new Date(req.body.record[fieldName]) == "Invalid Date")
                 throw new Error(`Invalid record input: Incorrect "${fieldName}" date format`)
         })
         // create record
@@ -109,7 +112,7 @@ const inferResult = async (req, res) => {
             record_id: record ? record._id : undefined,
             image_id: image._id,
             project_id: project._id,
-            status: "in progress",
+            status: modelStatus.IN_PROGRESS,
             label: "",
             note: "",
             created_by: req.body.clinician_id,
@@ -140,21 +143,21 @@ const inferResult = async (req, res) => {
                 // make new directory if does not exist
                 if (!fs.existsSync(resultDir)) {
                     fs.mkdirSync(resultDir);
-                    fs.mkdirSync(taskDir)
+                    fs.mkdirSync(fileLocation)
                 }
 
-                if (!fs.existsSync(taskDir)) {
-                    fs.mkdirSync(taskDir)
+                if (!fs.existsSync(fileLocation)) {
+                    fs.mkdirSync(fileLocation)
                 }
 
                 // save zip file
-                fs.writeFile(taskDir + '/result.zip', res.data, (err) => {
+                fs.writeFile(fileLocation + '/result.zip', res.data, (err) => {
                     if (err) throw err
                 });
 
                 // extract zip file and get probability prediction + overlay files
-                await extract(taskDir + '/result.zip', { dir: taskDir })
-                const modelResult = JSON.parse(fs.readFileSync(taskDir + '/prediction.txt'));
+                await extract(fileLocation + '/result.zip', { dir: fileLocation })
+                const modelResult = JSON.parse(fs.readFileSync(fileLocation + '/prediction.txt'));
                 let prediction = []
                 switch (project.task) {
                     case "classification_pylon_256":
@@ -167,12 +170,12 @@ const inferResult = async (req, res) => {
                             })
                         }
                         // delete zip file
-                        fs.unlink(taskDir + '/result.zip', (err) => {
+                        fs.unlink(fileLocation + '/result.zip', (err) => {
                             if (err) throw err
                         })
 
                         // delete probability prediction file
-                        fs.unlink(taskDir + '/prediction.txt', (err) => {
+                        fs.unlink(fileLocation + '/prediction.txt', (err) => {
                             if (err) throw err
                         })
 
@@ -184,7 +187,7 @@ const inferResult = async (req, res) => {
                         }
 
                         // create gradcam and change predicted result's status to annotated in database
-                        fs.readdir(taskDir, async (err, files) => {
+                        fs.readdir(fileLocation, async (err, files) => {
                             if (err) throw err
                             await Promise.all(files.map(async (item, i) => {
                                 await webModel.Gradcam.create({
@@ -193,17 +196,17 @@ const inferResult = async (req, res) => {
                                     gradcam_path: `results/${filename.split('.')[0]}/${project.task}/${item}`
                                 })
                             }))
-                            await webModel.PredResult.findByIdAndUpdate(result._id, { status: "annotated" })
+                            await webModel.PredResult.findByIdAndUpdate(result._id, { status: modelStatus.AI_ANNOTATED })
                             await webModel.PredClass.findByIdAndUpdate(predClass._id, { prediction: prediction })
                             console.log('Finish')
                         })
                         break;
                     case "covid19_admission":
                         prediction = modelResult
-                        fs.rm(taskDir, { recursive: true, force: true }, (err) => {
+                        fs.rm(fileLocation, { recursive: true, force: true }, (err) => {
                             if (err) throw err
                         });
-                        await webModel.PredResult.findByIdAndUpdate(result._id, { status: "annotated" })
+                        await webModel.PredResult.findByIdAndUpdate(result._id, { status: modelStatus.AI_ANNOTATED })
                         await webModel.PredClass.findByIdAndUpdate(predClass._id, { prediction: prediction })
                         console.log('Finish')
                         break;
@@ -211,7 +214,7 @@ const inferResult = async (req, res) => {
                         break;
                 }
             }).catch(async e => {
-                await webModel.PredResult.findByIdAndUpdate(result._id, { status: "canceled" })
+                await webModel.PredResult.findByIdAndUpdate(result._id, { status: modelStatus.CANCELED })
                 console.log(e)
             })
 
@@ -219,13 +222,12 @@ const inferResult = async (req, res) => {
     } catch (e) {
         // await session.abortTransaction()
         // session.endSession();
-        console.log(e.message)
         if (e.message.includes('Invalid record input'))
             return res.status(400).json({ success: false, message: e.message });
 
         // delete result folder if error occurs
-        if (!['0041018.dcm', '0041054.dcm', '0041099.dcm'].includes(filename) && fs.existsSync(taskDir)) {
-            fs.rm(taskDir, { recursive: true, force: true }, (err) => {
+        if (!['0041018.dcm', '0041054.dcm', '0041099.dcm'].includes(filename) && fs.existsSync(fileLocation)) {
+            fs.rm(fileLocation, { recursive: true, force: true }, (err) => {
                 console.log(err)
             });
         }

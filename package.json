@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "nodemon ./bin/www",
-    "initDB": "node ./db/migration/vitalsMigrate.js && node ./db/migration/webappMigrate.js && node ./db/migration/pacsMigrate.js"
+    "initDB": "node ./db/migration/webappMigrate.js && node ./db/migration/pacsMigrate.js"
   },
   "dependencies": {
     "axios": "^0.24.0",

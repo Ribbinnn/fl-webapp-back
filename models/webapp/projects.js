@@ -19,7 +19,7 @@ const schema = new Schema(
     
 );
 
-// schema.index({name: 1, head: 1}, {unique: true})
+schema.index({name: 1, head: 1}, {unique: true})
 
 // import webapp database
 // schema for projects collection

@@ -1,25 +1,27 @@
-const mongoose = require('mongoose')
+const mongoose = require('../vitals')
 const dotenv = require('dotenv');
+const mg = require("mongoose");
+const schema = new mg.Schema();
 
 dotenv.config()
 
-const vitalsSeed = async () => {
-  mongoose.connect(process.env.vitalsDB);
-  
-  const schema = new mongoose.Schema()
+const vitalsSeed = async (projectIds, userIds) => {
 
   const Project = mongoose.model('projects', schema)
   const Record = mongoose.model('records', schema)
 
   await Project.collection.drop()
   await Record.collection.drop()
-  
+
+
   const project = await Project.collection.insertMany([
     {
       name: 'COVID-19',
       clinician_first_name: 'John',
       clinician_last_name: 'Doe',
       record_name: 'covid_record',
+      webproject_id: projectIds['COVID-19'],
+      user_id: userIds['John'],
       createdAt: new Date('10/15/2021'),
       updatedAt: new Date('10/15/2021')
     },
@@ -28,6 +30,8 @@ const vitalsSeed = async () => {
       clinician_first_name: 'Ian',
       clinician_last_name: 'Boston',
       record_name: 'tuberculosis_record',
+      webproject_id: projectIds['Tuberculosis'],
+      user_id: userIds['Ian'],
       createdAt: new Date('10/17/2021'),
       updatedAt: new Date('10/17/2021')
     },
@@ -36,6 +40,8 @@ const vitalsSeed = async () => {
       clinician_first_name: 'Lavy',
       clinician_last_name: 'Smith',
       record_name: 'abnormal_record',
+      webproject_id: projectIds['Abnormal Detection'],
+      user_id: userIds['Lavy'],
       createdAt: new Date('10/17/2021'),
       updatedAt: new Date('10/17/2021')
     },
@@ -44,6 +50,8 @@ const vitalsSeed = async () => {
       clinician_first_name: 'Jane',
       clinician_last_name: 'Smith',
       record_name: 'covid_record2',
+      webproject_id: projectIds['COVID-19'],
+      user_id: userIds['Jane'],
       createdAt: new Date('10/16/2021'),
       updatedAt: new Date('10/16/2021')
     },
@@ -52,6 +60,8 @@ const vitalsSeed = async () => {
       clinician_first_name: 'Gigi',
       clinician_last_name: 'Hadid',
       record_name: 'tuberculosis_record2',
+      webproject_id: projectIds['Tuberculosis'],
+      user_id: userIds['Gigi'],
       createdAt: new Date('10/18/2021'),
       updatedAt: new Date('10/18/2021')
     },
@@ -60,6 +70,8 @@ const vitalsSeed = async () => {
       clinician_first_name: 'Edward',
       clinician_last_name: 'Cullen',
       record_name: 'abnormal_record2',
+      webproject_id: projectIds['Abnormal Detection'],
+      user_id: userIds['Edward'],
       createdAt: new Date('10/18/2021'),
       updatedAt: new Date('10/18/2021')
     },
@@ -68,36 +80,26 @@ const vitalsSeed = async () => {
       clinician_first_name: 'Lavy',
       clinician_last_name: 'Smith',
       record_name: 'abnormal_record3',
+      webproject_id: projectIds['Abnormal Detection'],
+      user_id: userIds['Lavy'],
       createdAt: new Date('10/18/2021'),
       updatedAt: new Date('10/18/2021')
     },
   ])
 
-  let abnormalRecords = [];
-  for (let i=0;i<10;i++) {
-    abnormalRecords.push({
-      entry_id: 20 + i,
-      hn: 4146 + i,
-      gender: i%2==0? 'male': 'female',
-      age: 39 + i,
-      fever: i%4==0? 'none': i%4==1? 'stay': i%4==2? 'up': 'down',
-      measured_time: new Date('10/14/2021'),
-      updated_time: new Date('10/14/2021'),
-    })
-  }
-
   let records = [];
-  for (let i=0;i<10;i++) {
-    abnormalRecords.push({
+
+  for (let i = 0; i < 10; i++) {
+    records.push({
       entry_id: 100 + i,
       hn: 5566 + i,
-      gender: i%2==0? 'male': 'female',
+      gender: i % 2 == 0 ? 'male' : 'female',
       age: 37 + i,
-      pulse: 75+i,
-      weight: i%2==0? 48+i: 58+i,
-      height: i%2==0? 156+i: 165+i,
-      fever: i%4==0? 'none': i%4==1? 'stay': i%4==2? 'up': 'down',
-      cough: i%4==1? 'none': i%4==2? 'stay': i%4==3? 'up': 'down',
+      pulse: 75 + i,
+      weight: i % 2 == 0 ? 48 + i : 58 + i,
+      height: i % 2 == 0 ? 156 + i : 165 + i,
+      fever: i % 4 == 0 ? 'none' : i % 4 == 1 ? 'stay' : i % 4 == 2 ? 'up' : 'down',
+      cough: i % 4 == 1 ? 'none' : i % 4 == 2 ? 'stay' : i % 4 == 3 ? 'up' : 'down',
       measured_time: new Date('10/14/2021'),
       updated_time: new Date('10/14/2021'),
     })
@@ -163,7 +165,7 @@ const vitalsSeed = async () => {
     },
     {
       project_id: project.insertedIds[2],
-      records: abnormalRecords,
+      records: records,
       createdAt: new Date('10/19/2021'),
       updatedAt: new Date('10/19/2021')
     },
@@ -181,7 +183,7 @@ const vitalsSeed = async () => {
     },
     {
       project_id: project.insertedIds[5],
-      records: abnormalRecords,
+      records: records,
       createdAt: new Date('10/22/2021'),
       updatedAt: new Date('10/22/2021')
     },
@@ -202,9 +204,7 @@ const vitalsSeed = async () => {
       updatedAt: new Date('10/23/2021')
     },
   ])
-
-  mongoose.disconnect();
+  mongoose.close()
 }
 
-
-vitalsSeed()
+module.exports = vitalsSeed

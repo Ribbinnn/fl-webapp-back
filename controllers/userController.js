@@ -2,6 +2,7 @@
 const bcrypt = require('bcryptjs');
 const Joi = require("joi"); 
 const webModel = require('../models/webapp')
+const { userStatus } = require('../utils/status')
 
 // create data validator for input
 const schema = {
@@ -13,14 +14,17 @@ const schema = {
     role: Joi.string().valid('admin','radiologist','clinician').required(),
     email: Joi.string().email()
 };
-  
-const validator = Joi.object(schema);
-const updatedValidator = Joi.object({
+
+const updatedSchema = {
     ...schema, 
     id: Joi.string().required(), 
     password: Joi.string().min(8).max(32), 
     isChulaSSO: Joi.boolean().required()
-})
+}
+delete updatedSchema.username
+
+const validator = Joi.object(schema);
+const updatedValidator = Joi.object(updatedSchema)
 
 const salt = 10;
 
@@ -31,15 +35,11 @@ const create = async (req, res) => {
     if (validatedResult.error) {
         return res.status(400).json({success: false, message: `Invalid input: ${(validatedResult.error.message)}`})
     }
-    // if (req.body.password!==req.body.password2) {
-    //     return res.status(400).json({success: false, message: `Invalid input: password do not match`})
-    // }
     try {
         // hash password
         const passwordHash = await bcrypt.hash(req.body.password, salt);
       
         delete req.body.password
-        // delete req.body.password2
         // insert data to users collection
         const user = await webModel.User.create({
             ...req.body,
@@ -59,7 +59,8 @@ const create = async (req, res) => {
                 first_name: user.first_name,
                 last_name: user.last_name,
                 role: user.role,
-                isChulaSSO: user.isChulaSSO
+                isChulaSSO: user.isChulaSSO,
+                status: userStatus.ACTIVE
             }
         })
     } catch (e) {
@@ -105,9 +106,6 @@ const update = async (req, res) => {
     if (validatedResult.error) {
         return res.status(400).json({success: false, message: `Invalid input: ${(validatedResult.error.message)}`})
     }
-    // if (req.body.password!==req.body.password2) {
-    //     return res.status(400).json({success: false, message: `Invalid input: password do not match`})
-    // }
     try {
         // hash password
         let passwordHash = ""
@@ -136,14 +134,12 @@ const update = async (req, res) => {
                 first_name: user.first_name,
                 last_name: user.last_name,
                 role: user.role,
-                isChulaSSO: user.isChulaSSO
+                isChulaSSO: user.isChulaSSO,
+                status: user.status
             }
         })
 
     } catch (e) {
-        if (e.message.includes('duplicate key')) {
-            return res.status(400).json({success: false, message: 'Duplicate username'})
-        }
         return res.status(500).json({success: false, message: 'Internal server error'});
     }
 }

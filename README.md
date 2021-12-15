@@ -59,6 +59,6 @@ Webapp Project
  
 User
 - POST /api/users ( Create new user, reqBody = {username, password, first_name, last_name, role, email} )
-- PATCH /api/users ( Create new user, reqBody = {id, username, password, first_name, last_name, role, email, isChulaSSO} )
+- PATCH /api/users ( Create new user, reqBody = {id, password, first_name, last_name, role, email, isChulaSSO} )
 - GET /api/users ( Get all users )
 - GET /api/users/:id ( Get user by id )

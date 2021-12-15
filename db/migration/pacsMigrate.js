@@ -110,7 +110,7 @@ const pacsSeed = async () => {
           }
     ])
 
-    mongoose.disconnect();
+  mongoose.disconnect();
 }
 
 
