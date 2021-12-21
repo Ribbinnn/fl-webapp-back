@@ -111,8 +111,7 @@ const deleteById = async (req, res) => {
       });
   }
   try {
-    console.log(req.params.id)
-    const result = await webModel.PredResult.findByIdAndRemove(req.params.rid);
+    const result = await webModel.PredResult.findOneAndDelete({_id: req.params.rid});
     // const classes = await webModel.PredClass.findByIdAndRemove({ result_id: result._id });
     // const gradCam = await webModel.Gradcam.findByIdAndRemove({ result_id: result._id });
     // const record = await webModel.MedRecord.findByIdAndRemove(result.record_id);
@@ -122,7 +121,6 @@ const deleteById = async (req, res) => {
       message: `Delete report ${result._id} successfully`
     })
   } catch (e) {
-    console.log(e)
     return res
       .status(500)
       .json({ success: false, message: "Internal server error" });

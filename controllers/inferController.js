@@ -54,14 +54,11 @@ const inferResult = async (req, res) => {
 
     filename = pacs.filepath.split('/')[1]
 
-    // const resultDir = path.join(root, "/resources/results/", project.id + "-" + project.name)
-    // const fileLocation = path.join(resultDir, filename.split('.')[0])
+    const resultDir = path.join(root, "/resources/results/", project.id)
+    const fileLocation = path.join(resultDir, filename.split('.')[0])
 
-    const resultDir = path.join(root, "/resources/results/", filename.split('.')[0])
-    const fileLocation = path.join(resultDir, project.task)
-
-    // let session = await con1.startSession()
-    // session.startTransaction();
+    // const resultDir = path.join(root, "/resources/results/", filename.split('.')[0])
+    // const fileLocation = path.join(resultDir, project.task)
 
     try {
         // project's requirements
@@ -93,12 +90,6 @@ const inferResult = async (req, res) => {
             project_id: req.body.project_id,
             record: req.body.record
         })
-        // record = await webModel.MedRecord.create([{
-        //     project_id: req.body.project_id,
-        //     record: req.body.record
-        // }], { session: session })
-        // await session.commitTransaction()
-        // session.endSession();
 
         // create image
         const image = await webModel.Image.create({
@@ -193,7 +184,7 @@ const inferResult = async (req, res) => {
                                 await webModel.Gradcam.create({
                                     result_id: result._id,
                                     finding: item.split('.')[0],
-                                    gradcam_path: `results/${filename.split('.')[0]}/${project.task}/${item}`
+                                    gradcam_path: `results/${project.id}/${filename.split('.')[0]}/${item}`
                                 })
                             }))
                             await webModel.PredResult.findByIdAndUpdate(result._id, { status: modelStatus.AI_ANNOTATED })
@@ -215,13 +206,11 @@ const inferResult = async (req, res) => {
                 }
             }).catch(async e => {
                 await webModel.PredResult.findByIdAndUpdate(result._id, { status: modelStatus.CANCELED })
-                console.log(e)
+                console.log(e.message)
             })
 
         return res.status(200).json({ success: true, message: `Start inference` })
     } catch (e) {
-        // await session.abortTransaction()
-        // session.endSession();
         if (e.message.includes('Invalid record input'))
             return res.status(400).json({ success: false, message: e.message });
 

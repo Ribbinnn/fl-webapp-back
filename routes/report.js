@@ -11,7 +11,8 @@ router.get('/:rid', tokenValidation, verification.reportVerification, reportCont
 router.patch('/', tokenValidation, verification.radiologistVerification, verification.reportVerification, reportController.update)
 
 // delete report
-router.patch('/delete/:rid', tokenValidation, verification.reportVerification, reportController.deleteById)
+// validate
+router.delete('/delete/:rid', tokenValidation, reportController.deleteById)
 
 // view history by project id
 router.get(

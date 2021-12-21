@@ -149,11 +149,25 @@ const update = async (req, res) => {
     }
 }
 
+const deleteById = async (req, res) => {
+    try {
+        const report = await webModel.PredResult.find({project_id: req.params.project_id}, ['_id'])
+        console.log(report)
+        return res.status(200).json({
+            success: true,
+            message: `Delete project ${report.id} successfully`,
+        })
+    } catch (e) {
+        return res.status(500).json({ success: false, message: 'Internal server error' })
+    }
+}
+
 module.exports = {
     create,
     getById,
     getByUserId,
     getAll,
     getTask,
-    update
+    update,
+    deleteById
 }
