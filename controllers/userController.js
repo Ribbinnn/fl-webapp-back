@@ -46,7 +46,8 @@ const create = async (req, res) => {
             password: passwordHash,
             token: "",
             isChulaSSO: false,
-            projects: []
+            projects: [],
+            status: userStatus.ACTIVE
         })
 
         // send status and message
