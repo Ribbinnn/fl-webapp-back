@@ -1,6 +1,7 @@
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 const webModel = require('../models/webapp')
+const { userStatus } = require('../utils/status')
 
 dotenv.config();
 
@@ -20,9 +21,11 @@ const verifyToken = async (req, res, next) => {
     jwt.verify(token, secret, async (err, user) => {
         // check if user still login
         const result = await webModel.User.findOne({token: token});
-        if (err || !result) {
+        if (err || !result) 
             return res.status(401).json({success: false, message: 'Token is invalid, please login again'});
-        }
+
+        if (result.status !== userStatus.ACTIVE)
+            return res.status(403).json({ success: false, message: `User have no permission to access the resource` })
         req.user = user;
         next();
     })
