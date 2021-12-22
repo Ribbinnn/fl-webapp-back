@@ -122,6 +122,7 @@ const deleteById = async (req, res) => {
       .json({ success: false, message: "Internal server error" });
   }
 };
+
 // update report when label is defined (finalized only when label is defined)
 const update = async (req, res) => {
   const validatedResult = updatedValidator.validate(req.body);

@@ -29,6 +29,7 @@ schema.index({name: 1, head: 1}, {unique: true})
 schema.pre('findOneAndDelete', { document: false, query: true }, async function () {
     const pid = this.getQuery()['_id']
     
+    // delete project from associated user's list
     const project = await Project.findById(pid)
     await Promise.all(project.users.map(async (id) => {
         const user = await User.findByIdAndUpdate(id, {
@@ -37,11 +38,14 @@ schema.pre('findOneAndDelete', { document: false, query: true }, async function 
             }
         })
     }))
+
+    // delete all project's reports
     const result = await PredResult.find({project_id: pid}, ['_id'])
     await Promise.all(result.map(async (id) => {
         await PredResult.findOneAndDelete({_id: id})
     }))
 
+    // delete project directory if exist
     const projectDir = path.join(__dirname, "../../resources/results", pid)
     if (fs.existsSync(projectDir)) {
         await fs.promises.rm(projectDir, { recursive: true, force: true });

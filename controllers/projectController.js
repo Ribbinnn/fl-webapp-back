@@ -127,6 +127,7 @@ const update = async (req, res) => {
     }
 }
 
+// delete project by id
 const deleteById = async (req, res) => {
     try {
         const project = await webModel.Project.findOneAndDelete({_id: req.params.project_id})
