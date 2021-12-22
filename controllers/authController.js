@@ -3,6 +3,7 @@ const dotenv = require('dotenv');
 const tokenGenerator = require('../middlewares/tokenGenerator');
 const webModel = require('../models/webapp')
 const axios = require('axios')
+const { userStatus } = require('../utils/status')
 
 dotenv.config();
 
@@ -10,7 +11,7 @@ const login = async (req, res) => {
     try {
         // check if username is in the database
         const user = await webModel.User.findOne({username: req.body.username});
-        if (!user || user.isChulaSSO) {
+        if (!user || user.isChulaSSO || user.status !== userStatus.ACTIVE) {
             return res.status(401).json({success: false, message: 'Invalid username or password'});
         }
 

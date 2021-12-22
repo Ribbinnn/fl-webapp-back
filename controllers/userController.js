@@ -80,7 +80,7 @@ const getAll = async (req, res) => {
     try {
         // Find all user from users collection
         const user = await webModel.User
-                            .find()
+                            .find({status: userStatus.ACTIVE})
                             .select(['_id', 'username', 'first_name', 'last_name', 'role', 'email', 'isChulaSSO'])
 
         // send status and message
@@ -117,7 +117,7 @@ const update = async (req, res) => {
         if (req.user.role !== "admin")
             delete req.body.role
       
-        const user = await webModel.User.findOneAndUpdate({_id: req.body.id, isChulaSSO: req.body.isChulaSSO}, 
+        const user = await webModel.User.findOneAndUpdate({_id: req.body.id, isChulaSSO: req.body.isChulaSSO, status: userStatus.ACTIVE}, 
             (req.body.isChulaSSO && req.user.role === "admin")? {
                 role: req.body.role
             }: req.body.isChulaSSO? {}: req.body
