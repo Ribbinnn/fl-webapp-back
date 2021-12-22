@@ -13,7 +13,8 @@ const schema = new Schema(
         role: {type: String},
         token: {type: String},
         isChulaSSO: {type: Boolean, required: true},
-        projects: [{type: ObjectId, ref: "projects"}]
+        projects: [{type: ObjectId, ref: "projects"}],
+        status: { type: String }
     },
     {
         timestamps: true

@@ -36,6 +36,7 @@ Infer & Report
 - POST /api/infer (Start inference, reqBody = (accession_no, project_id, record, clinician_id) )
 - GET /api/report/list/project/:project_id (View history by project id)
 - PATCH /api/report/ (Update or finalize report, reqBody = ( report_id, note, user_id, label(optional) ) )
+- DELETE /api/delete/:rid (Delete report by id)
 
 Image
 - GET /api/image (get image, reqQuery = (result_id, finding, accession_no)) <br />
@@ -56,6 +57,7 @@ Webapp Project
 - PATCH /api/projects ( Create new project, reqBody = {id, name, task, description, predClasses, head} )
 - GET /api/projects ( Get all projects )
 - GET /api/projects/tasks ( Get all AI tasks )
+- DELETE /api/projects/delete/:project_id ( Delete project by id )
  
 User
 - POST /api/users ( Create new user, reqBody = {username, password, first_name, last_name, role, email} )

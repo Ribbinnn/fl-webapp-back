@@ -623,7 +623,7 @@ const webappSeed = async () => {
       project_id: project.insertedIds[2],
       hn: 5566,
       status: modelStatus.HUMAN_ANNOTATED,
-      label: { "finding": "Mass" },
+      label: { "finding": ["Mass"] },
       note: "Mass -Edward",
       created_by: user.insertedIds[2],
       finalized_by: user.insertedIds[4],
@@ -651,6 +651,9 @@ const webappSeed = async () => {
     })
   }
 
+  predClass[2]['prediction']['Pneumothorax'] = true
+  predClass[3]['prediction']['Mass'] = true
+  
   await PredClass.collection.insertMany(predClass)
   await Mask.collection.insertMany(mask)
 

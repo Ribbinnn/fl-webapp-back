@@ -69,7 +69,7 @@ const chulaSSO = async (req, res) => {
         })).data
 
         // console.log(response.username, response.email, response.roles)
-        let user = await webModel.User.findOne({uid: response.uid})
+        let user = await webModel.User.findOne({username: response.username})
         if (!user) {
             user = await webModel.User.create({
                 username: response.username,

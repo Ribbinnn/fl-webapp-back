@@ -4,7 +4,7 @@ const MedRecord = require('./medRecords')
 const Image = require('./images')
 const PredResult = require('./predResults')
 const Mask = require('./masks')
-const PredClass = require('./predClassed')
+const PredClass = require('./predClasses')
 const Gradcam = require('./gradcams')
 
 module.exports = {
