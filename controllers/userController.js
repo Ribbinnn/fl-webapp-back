@@ -22,9 +22,11 @@ const updatedSchema = {
     isChulaSSO: Joi.boolean().required()
 }
 delete updatedSchema.username
+const deleteSchema = {id: Joi.string().required()}
 
 const validator = Joi.object(schema);
 const updatedValidator = Joi.object(updatedSchema)
+const deleteValidator = Joi.object(deleteSchema)
 
 const salt = 10;
 
@@ -144,9 +146,34 @@ const update = async (req, res) => {
     }
 }
 
+const deleteUserById = async (req, res) => {
+    console.log(req.params.id)
+    const validatedResult = deleteValidator.validate({id: req.params.id})
+    if (validatedResult.error) {
+          return res.status(400).json({success: false, message: `Invalid input: ${(validatedResult.error.message)}`})
+      }
+    try {
+        const user = await webModel.User.findOneAndUpdate({_id: req.params.id}, 
+            {status: userStatus.INACTIVE }, {new: true}
+        )
+        if (!user)
+            return res.status(400).json({success: false, message: `User ${(req.params.id)} not found`}) 
+
+        // send status and message
+        return res.status(200).json({
+            success: true, 
+            message: `Delete user ${user.username} successfully.`
+        })
+
+    } catch (e) {
+        return res.status(500).json({success: false, message: 'Internal server error'});
+    }
+}
+
 module.exports = {
     create,
     getAll,
     getById,
-    update
+    update,
+    deleteUserById
 }
