@@ -161,20 +161,14 @@ const inferResult = async (req, res) => {
                             })
                         }
                         // delete zip file
-                        fs.unlink(fileLocation + '/result.zip', (err) => {
-                            if (err) throw err
-                        })
+                        await fs.promises.unlink(fileLocation + '/result.zip')
 
                         // delete probability prediction file
-                        fs.unlink(fileLocation + '/prediction.txt', (err) => {
-                            if (err) throw err
-                        })
+                        await fs.promises.unlink(fileLocation + '/prediction.txt')
 
                         // delete PACS file in local
                         if (!['0041018.dcm', '0041054.dcm', '0041099.dcm'].includes(filename)) {
-                            fs.unlink(path.join(root, "/resources/uploads/", filename), (err) => {
-                                if (err) throw err
-                            })
+                            await fs.promises.unlink(path.join(root, "/resources/uploads/", filename))
                         }
 
                         // create gradcam and change predicted result's status to annotated in database

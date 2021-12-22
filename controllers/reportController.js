@@ -111,11 +111,7 @@ const deleteById = async (req, res) => {
       });
   }
   try {
-    const result = await webModel.PredResult.findOneAndDelete({_id: req.params.rid});
-    // const classes = await webModel.PredClass.findByIdAndRemove({ result_id: result._id });
-    // const gradCam = await webModel.Gradcam.findByIdAndRemove({ result_id: result._id });
-    // const record = await webModel.MedRecord.findByIdAndRemove(result.record_id);
-    // const image = await webModel.Image.findByIdAndRemove(result.image_id);
+    const result = await webModel.PredResult.findOneAndDelete({ _id: req.params.rid });
     return res.status(200).json({
       success: true,
       message: `Delete report ${result._id} successfully`

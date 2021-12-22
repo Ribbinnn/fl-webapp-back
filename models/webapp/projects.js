@@ -2,6 +2,11 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const ObjectId = mongoose.Schema.Types.ObjectId;
 const db = require('../../db/webapp')
+const path = require('path');
+const fs = require('fs')
+
+const PredResult = require('./predResults')
+const User = require('./users')
 
 const schema = new Schema(
     {
@@ -20,6 +25,29 @@ const schema = new Schema(
 );
 
 schema.index({name: 1, head: 1}, {unique: true})
+
+schema.pre('findOneAndDelete', { document: false, query: true }, async function () {
+    const pid = this.getQuery()['_id']
+    
+    const project = await Project.findById(pid)
+    await Promise.all(project.users.map(async (id) => {
+        const user = await User.findByIdAndUpdate(id, {
+            $pullAll: {
+                projects: [pid]
+            }
+        })
+    }))
+    const result = await PredResult.find({project_id: pid}, ['_id'])
+    await Promise.all(result.map(async (id) => {
+        await PredResult.findOneAndDelete({_id: id})
+    }))
+
+    const projectDir = path.join(__dirname, "../../resources/results", pid)
+    if (fs.existsSync(projectDir)) {
+        await fs.promises.rm(projectDir, { recursive: true, force: true });
+    }
+
+})
 
 // import webapp database
 // schema for projects collection

@@ -119,7 +119,7 @@ const update = async (req, res) => {
         const user = await webModel.User.findOneAndUpdate({_id: req.body.id, isChulaSSO: req.body.isChulaSSO}, 
             (req.body.isChulaSSO && req.user.role === "admin")? {
                 role: req.body.role
-            }: req.body
+            }: req.body.isChulaSSO? {}: req.body
         )
         if (!user)
             return res.status(400).json({success: false, message: `User ${(req.body.id)} not found`}) 

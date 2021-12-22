@@ -20,13 +20,17 @@ const schema = new Schema(
 schema.pre('deleteMany', { document: false, query: true }, async function () {
     const rid = this._conditions['result_id']
     const gradcam = await Gradcam.findOne({result_id: rid})
-    let dir = gradcam['gradcam_path'].split('/')
-    dir.pop()
-    dir = dir.join('/')
-    const resultDir = path.join(__dirname, "../../resources", dir)
-    
-    if (fs.existsSync(resultDir)) {
-        await fs.promises.rm(resultDir, { recursive: true, force: true });
+
+    // delete report's gradcam directory if exist
+    if (gradcam) {
+        let dir = gradcam['gradcam_path'].split('/')
+        dir.pop()
+        dir = dir.join('/')
+        const resultDir = path.join(__dirname, "../../resources", dir)
+        
+        if (fs.existsSync(resultDir)) {
+            await fs.promises.rm(resultDir, { recursive: true, force: true });
+        }
     }
 })
 

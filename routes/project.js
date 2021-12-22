@@ -44,6 +44,14 @@ router.get(
     projectController.getTask
 )
 
+// delete project by id
+router.delete(
+    '/delete/:project_id',
+    tokenValidation,
+    verification.projectVerification,
+    projectController.deleteById
+);
+
 // get project by id
 router.get(
     '/:project_id',

@@ -32,10 +32,12 @@ schema.pre('findOneAndDelete', { document: false, query: true }, async function 
     const rid = this.getQuery()['_id']
     const result = await PredResult.findById(rid)
     
+    // delete associated result from model
     await Gradcam.deleteMany({result_id: rid})
     await Mask.findOneAndDelete({result_id: rid})
     await PredClasses.findOneAndDelete({result_id: rid})
     
+    // delete associated image and medical record
     await Image.findByIdAndDelete(result.image_id)
     await MedRecord.findByIdAndDelete(result.record_id)
     // })
