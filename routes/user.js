@@ -16,4 +16,7 @@ router.get('/', tokenValidation, verification.adminVerification, userController.
 // Get user by id (admin)
 router.get('/:id', tokenValidation, verification.adminVerification, userController.getById);
 
+// Delete user by id (admin)
+router.patch('/:id', tokenValidation, verification.adminVerification, userController.deleteUserById);
+
 module.exports = router;
