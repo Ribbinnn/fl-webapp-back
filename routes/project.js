@@ -21,6 +21,14 @@ router.patch(
     projectController.update
 );
 
+// manage project's user list (admin)
+router.patch(
+    '/manage',
+    tokenValidation,
+    verification.adminVerification,
+    projectController.manageUser
+);
+
 // get all projects (admin)
 router.get(
     '/',

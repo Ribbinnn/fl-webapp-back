@@ -26,7 +26,7 @@ const insertBBox = async (req, res) => {
         return res.status(200).json({
             success: true,
             message: `Insert all bounding boxes to report id ${req.body.report_id} successfully`,
-            data: { updatedAt: mask.updatedAt }
+            data: mask
         })
     } catch (e) {
         return res.status(500).json({ success: false, message: 'Internal server error' });

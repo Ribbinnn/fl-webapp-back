@@ -7,7 +7,7 @@ const schema = {
   report_id: Joi.string().required(),
 };
 
-const updatedSchema = {
+const updateSchema = {
   report_id: Joi.string().required(),
   note: Joi.string(),
   label: Joi.object({
@@ -17,7 +17,7 @@ const updatedSchema = {
 };
 
 const validator = Joi.object(schema);
-const updatedValidator = Joi.object(updatedSchema);
+const updateValidator = Joi.object(updateSchema);
 
 const getById = async (req, res) => {
   const validatedResult = validator.validate({
@@ -125,7 +125,7 @@ const deleteById = async (req, res) => {
 
 // update report when label is defined (finalized only when label is defined)
 const update = async (req, res) => {
-  const validatedResult = updatedValidator.validate(req.body);
+  const validatedResult = updateValidator.validate(req.body);
   if (validatedResult.error) {
     return res
       .status(400)
