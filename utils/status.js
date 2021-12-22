@@ -7,7 +7,7 @@ const modelStatus = {
 }
 
 const userStatus = {
-    ACTIVE: "acrive",
+    ACTIVE: "active",
     INACTIVE: "inactive"
 }
 
