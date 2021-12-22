@@ -111,15 +111,15 @@ const update = async (req, res) => {
         let passwordHash = ""
 
         if (req.body.password)
-            passwordHash = await bcrypt.hash(req.body.password, salt);
+            req.body.password = await bcrypt.hash(req.body.password, salt);
+        
+        if (req.user.role !== "admin")
+            delete req.body.role
       
         const user = await webModel.User.findOneAndUpdate({_id: req.body.id, isChulaSSO: req.body.isChulaSSO}, 
-            req.body.isChulaSSO? {
+            (req.body.isChulaSSO && req.user.role === "admin")? {
                 role: req.body.role
-            }: passwordHash? {
-                ...req.body,
-                password: passwordHash,
-            }: req.body
+            }: req.body.isChulaSSO? {}: req.body
         )
         if (!user)
             return res.status(400).json({success: false, message: `User ${(req.body.id)} not found`}) 
