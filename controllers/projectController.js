@@ -19,8 +19,14 @@ const schema = {
     // }))
 };
 
+const manageSchema = {
+    id: Joi.string().required(),
+    users: Joi.array().items(Joi.string())
+}
+
 const validator = Joi.object(schema);
-const updatedValidator = Joi.object({ ...schema, id: Joi.string().required() });
+const updateValidator = Joi.object({ ...schema, id: Joi.string().required() });
+const manageValidator = Joi.object(manageSchema)
 
 // create new project
 const create = async (req, res) => {
@@ -98,21 +104,24 @@ const getTask = async (req, res) => {
 
 // update project by id
 const update = async (req, res) => {
-    const validatedResult = updatedValidator.validate(req.body)
+    const validatedResult = updateValidator.validate(req.body)
     if (validatedResult.error) {
         return res.status(400).json({ success: false, message: `Invalid input: ${(validatedResult.error.message)}` })
     }
     try {
         const project = await webModel.Project.findById(req.body.id)
+        if (!project)
+            return res.status(400).json({ success: false, message: 'Project not found' });
+
         let newUsers = project.users
         await Promise.all(req.body.head.map(async id => {
-            if (!newUsers.includes(id)){
+            if (!newUsers.includes(id)) {
                 newUsers.push(id)
                 await webModel.User.findByIdAndUpdate(id, { $addToSet: { projects: project.id } })
             }
         }))
-        
-        await webModel.Project.findByIdAndUpdate(req.body.id, {...req.body, users: newUsers})
+
+        await webModel.Project.findByIdAndUpdate(req.body.id, { ...req.body, users: newUsers })
 
         return res.status(200).json({
             success: true,
@@ -130,12 +139,60 @@ const update = async (req, res) => {
 // delete project by id
 const deleteById = async (req, res) => {
     try {
-        const project = await webModel.Project.findOneAndDelete({_id: req.params.project_id})
+        const project = await webModel.Project.findOneAndDelete({ _id: req.params.project_id })
         return res.status(200).json({
             success: true,
             message: `Delete project ${project.id} successfully`,
         })
     } catch (e) {
+        return res.status(500).json({ success: false, message: 'Internal server error' })
+    }
+}
+
+// manage project's user list
+const manageUser = async (req, res) => {
+    const validatedResult = manageValidator.validate(req.body)
+    if (validatedResult.error) {
+        return res.status(400).json({ success: false, message: `Invalid input: ${(validatedResult.error.message)}` })
+    }
+    try {
+        const project = await webModel.Project.findById(req.body.id);
+        project.head.forEach((id) => {
+            if (!req.body.users.includes(String(id)))
+                throw new Error(`Invalid input: Cannot delete head user ${id}`)
+        })
+
+        // delete project from associated user's list
+        await Promise.all(project.users.map(async (id) => {
+            await webModel.User.findByIdAndUpdate(id, {
+                $pullAll: {
+                    projects: [project.id]
+                }
+            })
+        }))
+
+        // add project to associated user's list
+        let users = []
+        await Promise.all(req.body.users.map(async (id) => {
+            const user = await webModel.User.findByIdAndUpdate(id, {
+                $addToSet:
+                {
+                    projects: project.id
+                }
+            })
+            users.push(user.id)
+        }))
+
+        await webModel.Project.findByIdAndUpdate(req.body.id, {users})
+
+        return res.status(200).json({
+            success: true,
+            message: `Manage user list of project ${project.id} successfully`,
+            data: req.body.users
+        })
+    } catch (e) {
+        if (e.message.includes('head user'))
+            return res.status(400).json({ success: false, message: e.message })
         return res.status(500).json({ success: false, message: 'Internal server error' })
     }
 }
@@ -147,5 +204,6 @@ module.exports = {
     getAll,
     getTask,
     update,
-    deleteById
+    deleteById,
+    manageUser
 }

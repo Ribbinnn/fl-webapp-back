@@ -55,6 +55,7 @@ Mask
 Webapp Project
 - POST /api/projects ( Create new project, reqBody = {name, task, description, predClasses, head} )
 - PATCH /api/projects ( Create new project, reqBody = {id, name, task, description, predClasses, head} )
+- PATCH /api/projects/managee ( Manage project's user list, reqBody = {id, users} )
 - GET /api/projects ( Get all projects )
 - GET /api/projects/tasks ( Get all AI tasks )
 - DELETE /api/projects/delete/:project_id ( Delete project by id )

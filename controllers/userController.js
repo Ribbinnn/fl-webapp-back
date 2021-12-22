@@ -15,17 +15,17 @@ const schema = {
     email: Joi.string().email()
 };
 
-const updatedSchema = {
+const updateSchema = {
     ...schema, 
     id: Joi.string().required(), 
     password: Joi.string().min(8).max(32), 
     isChulaSSO: Joi.boolean().required()
 }
-delete updatedSchema.username
+delete updateSchema.username
 const deleteSchema = {id: Joi.string().required()}
 
 const validator = Joi.object(schema);
-const updatedValidator = Joi.object(updatedSchema)
+const updateValidator = Joi.object(updateSchema)
 const deleteValidator = Joi.object(deleteSchema)
 
 const salt = 10;
@@ -105,7 +105,7 @@ const getById = async (req, res) => {
 
 // update user by id
 const update = async (req, res) => {
-    const validatedResult = updatedValidator.validate(req.body)
+    const validatedResult = updateValidator.validate(req.body)
     if (validatedResult.error) {
         return res.status(400).json({success: false, message: `Invalid input: ${(validatedResult.error.message)}`})
     }
