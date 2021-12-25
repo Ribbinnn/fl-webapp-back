@@ -256,9 +256,36 @@ const viewHistory = async (req, res) => {
   }
 };
 
+// save report back to PACS
+const saveToPACS = async (req, res) => {
+  // request: params = report_id
+  try {
+    const report = await webModel.PredResult.findById(req.params.report_id).populate('project_id');
+
+    // check if report's status is human-annoated and user is project's head
+    if (!report || report.status !== modelStatus.HUMAN_ANNOTATED || !report.project_id.head.includes(req.user._id))
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: !report.project_id.head.includes(req.user._id) ?
+            `User must be project's head to save report ${req.params.report_id} back to PACS` :
+            `Report's status must be 'Human-Annotated' to be saved to PACS`
+        });
+
+    /* SAVE TO PACS */
+
+  } catch (e) {
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+}
+
 module.exports = {
   getById,
   update,
   viewHistory,
-  deleteById
+  deleteById,
+  saveToPACS
 };

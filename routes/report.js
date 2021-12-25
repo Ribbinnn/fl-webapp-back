@@ -8,7 +8,14 @@ const verification = require('../middlewares/verification')
 router.get('/:rid', tokenValidation, verification.reportVerification, reportController.getById)
 
 // update report
-router.patch('/', tokenValidation, verification.radiologistVerification, verification.reportVerification, reportController.update)
+router.patch(
+    '/',
+    tokenValidation,
+    verification.radiologistVerification,
+    verification.reportVerification,
+    verification.checkEditReportStatus,
+    reportController.update
+)
 
 // delete report
 router.delete('/delete/:rid', tokenValidation, verification.reportVerification, reportController.deleteById)
@@ -19,6 +26,14 @@ router.get(
     tokenValidation,
     verification.projectVerification,
     reportController.viewHistory
+)
+
+// save back to PACS
+router.post(
+    '/pacs/',
+    tokenValidation,
+    verification.reportVerification,
+    reportController.saveToPACS
 )
 
 module.exports = router;

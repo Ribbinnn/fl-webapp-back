@@ -1,6 +1,8 @@
 const Joi = require("joi");
 const webModel = require('../models/webapp')
 const { task } = require('../utils/taskList')
+const { checkExistedUser } = require('../utils/checkExistedUser')
+const { userStatus } = require('../utils/status')
 
 const schema = {
     name: Joi.string().required().max(32),
@@ -37,10 +39,17 @@ const create = async (req, res) => {
     }
     try {
         // create project
-        const project = await webModel.Project.create({ ...req.body, users: req.body.head, requirements: task[req.body.task] })
+        const existedUsers = await checkExistedUser(req.body.head)
+        if (existedUsers.length < 1)
+            return res.status(400).json({
+                success: false,
+                message: 'Cannot update project when head list is empty, please check if user assigned to be head is valid'
+            });
+
+        const project = await webModel.Project.create({ ...req.body, users: existedUsers, requirements: task[req.body.task] })
 
         // update project list of associated user
-        await Promise.all(req.body.head.map(async (id) => {
+        await Promise.all(existedUsers.map(async (id) => {
             await webModel.User.findByIdAndUpdate(id, { $push: { projects: project.id } })
         }))
 
@@ -113,15 +122,25 @@ const update = async (req, res) => {
         if (!project)
             return res.status(400).json({ success: false, message: 'Project not found' });
 
+        // update head list with only active users
+        const existedUsers = await checkExistedUser(req.body.head)
+        if (existedUsers.length < 1)
+            return res.status(400).json({
+                success: false,
+                message: 'Cannot update project when head list is empty, please check if user assigned to be head is valid'
+            });
+
+        // if new user is added to head, then add project id to the user's project list
         let newUsers = project.users
-        await Promise.all(req.body.head.map(async id => {
+        await Promise.all(existedUsers.map(async id => {
             if (!newUsers.includes(id)) {
                 newUsers.push(id)
-                await webModel.User.findByIdAndUpdate(id, { $addToSet: { projects: project.id } })
+                await webModel.User.findOneAndUpdate({ _id: id, status: userStatus.ACTIVE }, { $addToSet: { projects: project.id } })
             }
         }))
 
-        await webModel.Project.findByIdAndUpdate(req.body.id, { ...req.body, users: newUsers })
+        // change project's head list and user list
+        await webModel.Project.findByIdAndUpdate(req.body.id, { ...req.body, users: newUsers, head: existedUsers })
 
         return res.status(200).json({
             success: true,
@@ -162,6 +181,9 @@ const manageUser = async (req, res) => {
                 throw new Error(`Invalid input: Cannot delete head user ${id}`)
         })
 
+        // if user is inactive, then do not add that user to the project
+        const existedUsers = await checkExistedUser(req.body.users)
+
         // delete project from associated user's list
         await Promise.all(project.users.map(async (id) => {
             await webModel.User.findByIdAndUpdate(id, {
@@ -173,8 +195,8 @@ const manageUser = async (req, res) => {
 
         // add project to associated user's list
         let users = []
-        await Promise.all(req.body.users.map(async (id) => {
-            const user = await webModel.User.findByIdAndUpdate(id, {
+        await Promise.all(existedUsers.map(async (userId) => {
+            const user = await webModel.User.findByIdAndUpdate(userId['_id'], {
                 $addToSet:
                 {
                     projects: project.id
@@ -183,12 +205,12 @@ const manageUser = async (req, res) => {
             users.push(user.id)
         }))
 
-        await webModel.Project.findByIdAndUpdate(req.body.id, {users})
+        await webModel.Project.findByIdAndUpdate(req.body.id, { users })
 
         return res.status(200).json({
             success: true,
             message: `Manage user list of project ${project.id} successfully`,
-            data: req.body.users
+            data: existedUsers
         })
     } catch (e) {
         if (e.message.includes('head user'))
