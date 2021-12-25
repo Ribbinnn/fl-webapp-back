@@ -1,4 +1,5 @@
 const webModel = require('../models/webapp')
+const { modelStatus } = require('../utils/status')
 
 // verify if user id in token match
 const userVerification = async (req, res, next) => {
@@ -59,10 +60,26 @@ const reportVerification = async (req, res, next) => {
     next()
 }
 
+// check if report is able to be updated
+const checkEditReportStatus = async (req, res, next) => {
+    try {
+        const report = await webModel.PredResult.findById(req.body.report_id);
+        if (!(report.status === modelStatus.AI_ANNOTATED || report.status === modelStatus.HUMAN_ANNOTATED))
+            return res.status(400).json({
+                success: false,
+                message: `Report's status must be 'Human-Annotated' or 'AI-Annotated' to be able to updated`
+            });
+    } catch (e) {
+        return res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+    next()
+}
+
 module.exports = {
     userVerification,
     projectVerification,
     radiologistVerification,
     reportVerification,
-    adminVerification
+    adminVerification,
+    checkEditReportStatus
 }
