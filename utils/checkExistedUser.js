@@ -1,9 +1,14 @@
 const webModel = require('../models/webapp');
 const { userStatus } = require('./status');
 
-const checkExistedUser = async (userList) => {
+// filter inactive users
+const checkExistedUser = async (userList, role = [userRole.ADMIN, userRole.RADIOLOGIST, userRole.CLINICIAN]) => {
     try {
-        const existedUsers = await webModel.User.find({ _id: { $in: userList }, status: userStatus.ACTIVE }, ['_id']);
+        const existedUsers = await webModel.User.find({
+            _id: { $in: userList },
+            role: { $in: role },
+            status: userStatus.ACTIVE
+        }, ['_id']);
         return existedUsers.map(user => user["_id"]);
     } catch (e) {
         throw e;

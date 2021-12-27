@@ -24,7 +24,7 @@ const insertMedRec = async (req, res) => {
             data: medRec 
         })
     } catch (e) {
-        return res.status(500).json({success: false, message: 'Internal server error'})
+        return res.status(500).json({success: false, message: 'Internal server error', error: e.message})
     }
 }
 

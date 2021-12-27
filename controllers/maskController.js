@@ -22,27 +22,33 @@ const insertBBox = async (req, res) => {
     try {
         const mask = await webModel.Mask.findOneAndUpdate({ result_id: req.body.report_id }, {
             data: req.body.data
-        }, {new: true})
+        }, { new: true })
         return res.status(200).json({
             success: true,
-            message: `Insert all bounding boxes to report id ${req.body.report_id} successfully`,
+            message: `Insert all bounding boxes to report ${req.body.report_id} successfully`,
             data: mask
         })
     } catch (e) {
-        return res.status(500).json({ success: false, message: 'Internal server error' });
+        return res.status(500).json({ success: false, message: 'Internal server error', error: e.message });
     }
 }
 
 const getBBox = async (req, res) => {
     try {
-        const data = await webModel.Mask.findOne({ result_id: req.params.report_id }).populate('data.updated_by', 'username')
+        let mask = await webModel.Mask
+            .findOne({ result_id: req.params.report_id })
+            .populate({
+                path: 'data.updated_by',
+                select: 'username first_name last_name'
+            });
+
         return res.status(200).json({
             success: true,
-            message: `Get all bounding boxes by report id ${req.params.report_id} successfully`,
-            data
+            message: `Get all bounding boxes by report ${req.params.report_id} successfully`,
+            data: mask
         })
     } catch (e) {
-        return res.status(500).json({ success: false, message: 'Internal server error' });
+        return res.status(500).json({ success: false, message: 'Internal server error', error: e.message });
     }
 }
 

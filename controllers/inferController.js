@@ -49,7 +49,7 @@ const inferResult = async (req, res) => {
         if (!project)
             return res.status(400).json({ success: false, message: 'Project not found' });
     } catch {
-        return res.status(500).json({ success: false, message: 'Internal server error' });
+        return res.status(500).json({ success: false, message: 'Internal server error', error: e.message });
     }
 
     filename = pacs.filepath.split('/')[1]
@@ -214,7 +214,7 @@ const inferResult = async (req, res) => {
                 console.log(err)
             });
         }
-        return res.status(500).json({ success: false, message: 'Internal server error' });
+        return res.status(500).json({ success: false, message: 'Internal server error', error: e.message });
     }
 }
 
@@ -225,11 +225,10 @@ const getAllResult = async (req, res) => {
 
         return res.status(200).json({ success: true, message: 'Get all predicted classes successfully', data: data });
     } catch (e) {
-        return res.status(500).json({ success: false, message: 'Internal server error' });
+        return res.status(500).json({ success: false, message: 'Internal server error', error: e.message });
     }
 }
 
 module.exports = {
     inferResult,
-    getAllResult,
 }

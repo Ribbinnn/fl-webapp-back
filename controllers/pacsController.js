@@ -4,28 +4,28 @@ const PACS = require('../db/pacs').PACS
 // get patient information from PACS by HN
 const getInfoByHN = async (req, res) => {
     try {
-        const data = await PACS.findOne({'Patient ID': req.params.HN}, ['Patient Name'])
+        const data = await PACS.findOne({ 'Patient ID': req.params.HN }, ['Patient Name'])
         return res.status(200).json({
-            success: true, 
-            message: 'Get pacs data successfully', 
+            success: true,
+            message: 'Get PACS data successfully',
             data
         })
     } catch (e) {
-        return res.status(500).json({success: false, message: 'Internal server error'})
+        return res.status(500).json({ success: false, message: 'Internal server error', error: e.message })
     }
 }
 
 // get all data from PACS by HN
 const getAllByHN = async (req, res) => {
     try {
-        const data = await PACS.find({'Patient ID': req.params.HN})
+        const data = await PACS.find({ 'Patient ID': req.params.HN })
         return res.status(200).json({
-            success: true, 
-            message: 'Get pacs data successfully', 
+            success: true,
+            message: 'Get PACS data successfully',
             data
         })
-    } catch(e) {
-        return res.status(500).json({success: false, message: 'Internal server error'})
+    } catch (e) {
+        return res.status(500).json({ success: false, message: 'Internal server error', error: e.message })
     }
 }
 

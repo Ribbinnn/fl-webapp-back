@@ -5,7 +5,7 @@ const tokenValidation = require('../middlewares/tokenVerification')
 const verification = require('../middlewares/verification')
 
 // Create new user
-router.post('/', userController.create);
+router.post('/', tokenValidation, verification.adminVerification, userController.create);
 
 // Update user
 router.patch('/', tokenValidation, verification.userVerification, userController.update);

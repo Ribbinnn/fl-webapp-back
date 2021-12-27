@@ -1,9 +1,9 @@
 const webModel = require('../models/webapp')
-const { modelStatus } = require('../utils/status')
+const { modelStatus, userRole } = require('../utils/status')
 
 // verify if user id in token match
 const userVerification = async (req, res, next) => {
-    if (req.user.role !== "admin") {
+    if (req.user.role !== userRole.ADMIN) {
         const user_id = req.body.user_id ?? req.body.clinician_id ?? req.query.user_id ?? req.params.id ?? req.body.id ?? undefined
         const user = await webModel.User.findById(user_id)
         if (!user || user.id !== req.user._id)
@@ -14,7 +14,7 @@ const userVerification = async (req, res, next) => {
 
 // verify if user is able to access project
 const projectVerification = async (req, res, next) => {
-    if (req.user.role !== "admin") {
+    if (req.user.role !== userRole.ADMIN) {
         try {
             const project_id = req.body.project_id ?? req.params.project_id ?? undefined
             const project = await webModel.Project.findById(project_id)
@@ -22,7 +22,7 @@ const projectVerification = async (req, res, next) => {
                 return res.status(403).json({ success: false, message: `User have no permission to access project ${project_id}` })
             }
         } catch (e) {
-            return res.status(500).json({ success: false, message: 'Internal server error' });
+            return res.status(500).json({ success: false, message: 'Internal server error', error: e.message });
         }
     }
     next()
@@ -30,7 +30,7 @@ const projectVerification = async (req, res, next) => {
 
 // verify if user is radiologist
 const radiologistVerification = (req, res, next) => {
-    if (req.user.role !== "radiologist") {
+    if (req.user.role !== userRole.RADIOLOGIST) {
         return res.status(403).json({ success: false, message: `User must be radiologist to access the resource` })
     }
     next()
@@ -38,7 +38,7 @@ const radiologistVerification = (req, res, next) => {
 
 // verify if user is admin
 const adminVerification = (req, res, next) => {
-    if (req.user.role !== "admin") {
+    if (req.user.role !== userRole.ADMIN) {
         return res.status(403).json({ success: false, message: `User must be admin to access the resource` })
     }
     next()
@@ -46,7 +46,7 @@ const adminVerification = (req, res, next) => {
 
 // verify if user is able to access report
 const reportVerification = async (req, res, next) => {
-    if (req.user.role !== "admin") {
+    if (req.user.role !== userRole.ADMIN) {
         try {
             const report_id = req.params.rid ?? req.body.report_id ?? req.params.report_id ?? undefined
             const report = await webModel.PredResult.findById(report_id).populate('project_id')
@@ -54,7 +54,7 @@ const reportVerification = async (req, res, next) => {
                 return res.status(403).json({ success: false, message: `User have no permission to access report ${report_id}` })
             }
         } catch (e) {
-            return res.status(500).json({ success: false, message: 'Internal server error' });
+            return res.status(500).json({ success: false, message: 'Internal server error', error: e.message });
         }
     }
     next()
@@ -70,7 +70,7 @@ const checkEditReportStatus = async (req, res, next) => {
                 message: `Report's status must be 'Human-Annotated' or 'AI-Annotated' to be able to updated`
             });
     } catch (e) {
-        return res.status(500).json({ success: false, message: 'Internal server error' });
+        return res.status(500).json({ success: false, message: 'Internal server error', error: e.message });
     }
     next()
 }
