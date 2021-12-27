@@ -46,7 +46,7 @@ const getById = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Get report successfully",
+      message: `Get report ${req.params.rid} successfully`,
       data: {
         status: result.status,
         created_by: `${createdBy.first_name} ${createdBy.last_name}`,
@@ -93,7 +93,7 @@ const getById = async (req, res) => {
   } catch (e) {
     return res
       .status(500)
-      .json({ success: false, message: "Internal server error" });
+      .json({ success: false, message: 'Internal server error', error: e.message });
   }
 };
 
@@ -119,7 +119,7 @@ const deleteById = async (req, res) => {
   } catch (e) {
     return res
       .status(500)
-      .json({ success: false, message: "Internal server error" });
+      .json({ success: false, message: 'Internal server error', error: e.message });
   }
 };
 
@@ -131,7 +131,7 @@ const update = async (req, res) => {
       .status(400)
       .json({
         success: false,
-        message: `Invalid report input: ${validatedResult.error.message}`,
+        message: `Invalid input: ${validatedResult.error.message}`,
       });
   }
   try {
@@ -173,7 +173,7 @@ const update = async (req, res) => {
   } catch (e) {
     return res
       .status(500)
-      .json({ success: false, message: "Internal server error" });
+      .json({ success: false, message: 'Internal server error', error: e.message });
   }
 };
 
@@ -184,7 +184,7 @@ const viewHistory = async (req, res) => {
       .status(400)
       .json({
         success: false,
-        message: `Invalid query: "project_id" is required`,
+        message: `Invalid input: "project_id" is required`,
       });
   }
   try {
@@ -204,7 +204,11 @@ const viewHistory = async (req, res) => {
           let finding = "";
 
           // get finding with the most confidence
-          if (item.status === modelStatus.AI_ANNOTATED || item.status === modelStatus.HUMAN_ANNOTATED || item.status === modelStatus.FINALIZED) {
+          if (
+            item.status === modelStatus.AI_ANNOTATED ||
+            item.status === modelStatus.HUMAN_ANNOTATED ||
+            item.status === modelStatus.FINALIZED
+          ) {
             const predClass = await webModel.PredClass.findOne({
               result_id: item._id,
             });
@@ -252,7 +256,7 @@ const viewHistory = async (req, res) => {
   } catch (e) {
     return res
       .status(500)
-      .json({ success: false, message: "Internal server error" });
+      .json({ success: false, message: 'Internal server error', error: e.message });
   }
 };
 
@@ -278,7 +282,7 @@ const saveToPACS = async (req, res) => {
   } catch (e) {
     return res
       .status(500)
-      .json({ success: false, message: "Internal server error" });
+      .json({ success: false, message: 'Internal server error', error: e.message });
   }
 }
 

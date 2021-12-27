@@ -15,6 +15,6 @@ router.post(
 );
 
 // get all results
-router.get('/', tokenValidation, inferController.getAllResult);
+// router.get('/', tokenValidation, inferController.getAllResult);
 
 module.exports = router;

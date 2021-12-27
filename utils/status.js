@@ -11,7 +11,14 @@ const userStatus = {
     INACTIVE: "inactive"
 }
 
+const userRole = {
+    CLINICIAN: "clinician",
+    RADIOLOGIST: "radiologist",
+    ADMIN: "admin"
+}
+
 module.exports = {
     modelStatus,
-    userStatus
+    userStatus,
+    userRole
 }

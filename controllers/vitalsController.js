@@ -8,24 +8,24 @@ const schema = {
     user_id: Joi.string().required(),
     record_name: Joi.string().required(),
     records: Joi.array().items(
-        Joi.object({ 
+        Joi.object({
             'entry_id': Joi.required(),
             'hn': Joi.required(),
-            'gender(male/female)': Joi.required(),
+            'gender(male/female)': Joi.required().valid('male', 'female'),
             'age(year)': Joi.required(),
-            'measured_time(yyyy-MM-ddTHH:mm:ssZ)': Joi.required() 
+            'measured_time(yyyy-MM-ddTHH:mm:ssZ)': Joi.required()
         }).unknown(true)).unique('entry_id')
 };
 
 const update_schema = {
     record_id: Joi.string().required(),
     update_data: Joi.array().items(
-        Joi.object({ 
+        Joi.object({
             'entry_id': Joi.required(),
             'hn': Joi.required(),
             'gender': Joi.required(),
             'age': Joi.required(),
-            'measured_time': Joi.required(), 
+            'measured_time': Joi.required(),
             // 'updated_time': Joi.required()
         }).unknown(true)).unique('entry_id'),
 }
@@ -75,9 +75,9 @@ const create = async (req, res) => {
                 if (!item[fieldName])
                     throw new Error(`Invalid record input: "${fieldName}" is required`)
                 // check fields' type
-                if (typeof(item[fieldName])!==requirement.type && requirement.name !== "measured_time") 
+                if (typeof (item[fieldName]) !== requirement.type && requirement.name !== "measured_time")
                     throw new Error(`Invalid record input: "${fieldName}" must be a ${requirement.type}`)
-                if(requirement.name == "measured_time" && new Date(item[fieldName]) == "Invalid Date")
+                if (requirement.name == "measured_time" && new Date(item[fieldName]) == "Invalid Date")
                     throw new Error(`Invalid record input: Incorrect "${fieldName}" date format`)
             })
             for (const k in item) {
@@ -112,14 +112,14 @@ const create = async (req, res) => {
         // send status and message
         return res.status(200).json({
             success: true,
-            message: 'Create project successfully',
+            message: 'Create vitals project successfully',
             data: project
         })
     } catch (e) {
         // error
         if (e.message.includes('Invalid record input'))
             return res.status(400).json({ success: false, message: e.message });
-        return res.status(500).json({ success: false, message: 'Internal server error' })
+        return res.status(500).json({ success: false, message: 'Internal server error', error: e.message })
     }
 }
 
@@ -139,11 +139,11 @@ const getProject = async (req, res) => {
                     as: "project"
                 },
             },
-            { 
-                $match: { 
+            {
+                $match: {
                     "project.user_id": user._id,
                     "project.webproject_id": project._id
-                } 
+                }
             },
             {
                 $addFields: {
@@ -154,9 +154,9 @@ const getProject = async (req, res) => {
             { $unset: ["project", "_id"] },
         ])
 
-        return res.status(200).json({ success: true, message: 'Get projects successfully', data: data });
+        return res.status(200).json({ success: true, message: `Get vitals project by user ${req.query.user_id} successfully`, data: data });
     } catch (e) {
-        return res.status(500).json({ success: false, message: 'Internal server error' });
+        return res.status(500).json({ success: false, message: 'Internal server error', error: e.message });
     }
 }
 
@@ -165,9 +165,9 @@ const getRecordByProjectId = async (req, res) => {
     try {
         // get all records from this project
         const records = await vitalsModel.Record.find({ project_id: req.params.id });
-        return res.status(200).json({ success: true, message: 'Get project successfully', data: records });
+        return res.status(200).json({ success: true, message: `Get record by project ${req.params.id} successfully`, data: records });
     } catch (e) {
-        return res.status(500).json({ success: false, message: 'Internal server error' });
+        return res.status(500).json({ success: false, message: 'Internal server error', error: e.message });
     }
 }
 
@@ -196,9 +196,9 @@ const getRecordByHN = async (req, res) => {
             { $replaceRoot: { newRoot: '$records' } },
             { $match: { hn: Number(req.query.HN), project_name: req.query.project_name } }
         ])
-        return res.status(200).json({ success: true, message: 'Get project successfully', data: records });
+        return res.status(200).json({ success: true, message: 'Get record successfully', data: records });
     } catch (e) {
-        return res.status(500).json({ success: false, message: 'Internal server error' });
+        return res.status(500).json({ success: false, message: 'Internal server error', error: e.message });
     }
 }
 
@@ -223,22 +223,22 @@ const updateRecRow = async (req, res) => {
             (err) => {
                 if (err) {
                     console.log(err)
-                    return res.status(500).json({ success: false, message: 'Internal server error' })
+                    return res.status(500).json({ success: false, message: 'Internal server error', error: e.message })
                 }
                 vitalsModel.Record.findOneAndUpdate(
-                    { _id: req.body.record_id }, 
+                    { _id: req.body.record_id },
                     { updatedAt: updated_time },
                     (err) => {
                         if (err) {
                             console.log(err)
-                            return res.status(500).json({ success: false, message: 'Internal server error' })
+                            return res.status(500).json({ success: false, message: 'Internal server error', error: e.message })
                         }
                         return res.status(200).json({ success: true, message: `Update record ${req.body.record_id} successfully` });
                     });
             });
     } catch (e) {
         console.log(e)
-        return res.status(500).json({ success: false, message: 'Internal server error' })
+        return res.status(500).json({ success: false, message: 'Internal server error', error: e.message })
     }
 }
 
@@ -256,13 +256,13 @@ const deleteRecRow = async (req, res) => {
             record.save((err) => {
                 if (err) {
                     console.log(err)
-                    return res.status(500).json({ success: false, message: 'Internal server error' })
+                    return res.status(500).json({ success: false, message: 'Internal server error', error: e.message })
                 }
                 let updated_time = new Date();
                 vitalsModel.Project.findByIdAndUpdate(record.project_id, { "updatedAt": updated_time }, (err, result) => {
                     if (err) {
                         console.log(err)
-                        return res.status(500).json({ success: false, message: 'Internal server error' })
+                        return res.status(500).json({ success: false, message: 'Internal server error', error: e.message })
                     }
                     return res.status(200).json({
                         success: true,
@@ -273,7 +273,7 @@ const deleteRecRow = async (req, res) => {
         })
     } catch (e) {
         console.log(e)
-        return res.status(500).json({ success: false, message: 'Internal server error' })
+        return res.status(500).json({ success: false, message: 'Internal server error', error: e.message })
     }
 }
 
@@ -287,19 +287,19 @@ const deleteRecFile = async (req, res) => {
         vitalsModel.Record.findByIdAndRemove(req.params.id, (err, record) => {
             if (err) {
                 console.log(err)
-                return res.status(500).json({ success: false, message: 'Internal server error' })
+                return res.status(500).json({ success: false, message: 'Internal server error', error: e.message })
             }
             vitalsModel.Project.findByIdAndRemove(record.project_id, (err, result) => {
                 if (err) {
                     console.log(err)
-                    return res.status(500).json({ success: false, message: 'Internal server error' })
+                    return res.status(500).json({ success: false, message: 'Internal server error', error: e.message })
                 }
                 return res.status(200).json({ success: true, message: `remove record ${record.id} successfully` })
             })
         });
     } catch (e) {
         console.log(e)
-        return res.status(500).json({ success: false, message: 'Internal server error' })
+        return res.status(500).json({ success: false, message: 'Internal server error', error: e.message })
     }
 }
 
@@ -309,7 +309,7 @@ const generateTemplate = async (req, res) => {
         // should find by web project id
         const project = await webModel.Project.findById(req.params.project_id)
 
-        const requirements = project.requirements.map(item => `${item.name}${item.unit=='none'? "": "(" + item.unit + ")"}`)
+        const requirements = project.requirements.map(item => `${item.name}${item.unit == 'none' ? "" : "(" + item.unit + ")"}`)
         const headerField = ["entry_id", "hn", "measured_time(yyyy-MM-ddTHH:mm:ssZ)", "gender(male/female)", "age(year)", ...requirements]
 
         const ws = XLSX.utils.json_to_sheet([], { header: headerField })

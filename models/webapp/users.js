@@ -9,17 +9,17 @@ const schema = new Schema(
         password: { type: String },
         email: { type: String },
         first_name: { type: String },
-        last_name: {type: String},
-        role: {type: String},
-        token: {type: String},
-        isChulaSSO: {type: Boolean, required: true},
-        projects: [{type: ObjectId, ref: "projects"}],
+        last_name: { type: String },
+        role: { type: String },
+        token: [{ type: String }],
+        isChulaSSO: { type: Boolean, required: true },
+        projects: [{ type: ObjectId, ref: "projects" }],
         status: { type: String }
     },
     {
         timestamps: true
     }
-    
+
 );
 
 // import webapp database
