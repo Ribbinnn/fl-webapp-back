@@ -237,7 +237,6 @@ const deleteUserById = async (req, res) => {
     const project = await webModel.Project.find({}, ["_id", "head"]);
     if (
       project.some((member) => {
-          console.log(member)
         return member.head.includes(req.params.id);
       })
     )
