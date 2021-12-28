@@ -9,11 +9,12 @@ const schema = {
 
 const updateSchema = {
   report_id: Joi.string().required(),
-  note: Joi.string(),
+  note: Joi.string().allow(''),
   label: Joi.object({
     finding: Joi.array().items(Joi.string()),
-  }),
+  }).required(),
   user_id: Joi.string().required(),
+  rating: Joi.number().integer().min(1).max(5)
 };
 
 const validator = Joi.object(schema);
@@ -154,6 +155,22 @@ const update = async (req, res) => {
       { prediction: selectedClass }
     );
 
+    // calculate AI rating
+    const report = await webModel.PredResult.findById(req.body.report_id).populate('project_id')
+
+    const ratingCount = report.project_id.rating_count
+    const projectRating = report.project_id.rating
+    if (report.rating == 0) {
+      await webModel.Project.findByIdAndUpdate(report.project_id._id, {
+        rating: (req.body.rating + (ratingCount * projectRating)) / (ratingCount + 1),
+        rating_count: ratingCount + 1
+      })
+    } else {
+      await webModel.Project.findByIdAndUpdate(report.project_id._id, {
+        rating: (req.body.rating + (ratingCount * projectRating) - report.rating) / ratingCount
+      })
+    }
+
     const data = await webModel.PredResult.findByIdAndUpdate(
       req.body.report_id,
       {
@@ -161,6 +178,7 @@ const update = async (req, res) => {
         label: req.body.label,
         status: modelStatus.HUMAN_ANNOTATED,
         finalized_by: req.body.user_id,
+        rating: req.body.rating
       }
     );
     return res

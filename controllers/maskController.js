@@ -1,5 +1,6 @@
 const Joi = require("joi");
 const webModel = require('../models/webapp')
+const { modelStatus } = require('../utils/status')
 
 const schema = {
     report_id: Joi.string().required(),
@@ -23,6 +24,7 @@ const insertBBox = async (req, res) => {
         const mask = await webModel.Mask.findOneAndUpdate({ result_id: req.body.report_id }, {
             data: req.body.data
         }, { new: true })
+        await webModel.PredResult.findByIdAndUpdate(req.body.report_id, { status: modelStatus.HUMAN_ANNOTATED })
         return res.status(200).json({
             success: true,
             message: `Insert all bounding boxes to report ${req.body.report_id} successfully`,

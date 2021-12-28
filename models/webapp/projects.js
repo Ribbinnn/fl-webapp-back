@@ -14,21 +14,23 @@ const schema = new Schema(
         task: { type: String, required: true },
         description: { type: String },
         requirements: { type: Object },
-        predClasses: [{type: String}],
-        users: [{type: ObjectId, ref: "users"}],
-        head: [{type: ObjectId, ref: "users", required: true}]
+        predClasses: [{ type: String }],
+        users: [{ type: ObjectId, ref: "users" }],
+        head: [{ type: ObjectId, ref: "users", required: true }],
+        rating: { type: Number },
+        rating_count: { type: Number }
     },
     {
         timestamps: true
     }
-    
+
 );
 
-schema.index({name: 1, head: 1}, {unique: true})
+schema.index({ name: 1, head: 1 }, { unique: true })
 
 schema.pre('findOneAndDelete', { document: false, query: true }, async function () {
     const pid = this.getQuery()['_id']
-    
+
     // delete project from associated user's list
     const project = await Project.findById(pid)
     await Promise.all(project.users.map(async (id) => {
@@ -40,9 +42,9 @@ schema.pre('findOneAndDelete', { document: false, query: true }, async function 
     }))
 
     // delete all project's reports
-    const result = await PredResult.find({project_id: pid}, ['_id'])
+    const result = await PredResult.find({ project_id: pid }, ['_id'])
     await Promise.all(result.map(async (id) => {
-        await PredResult.findOneAndDelete({_id: id})
+        await PredResult.findOneAndDelete({ _id: id })
     }))
 
     // delete project directory if exist
