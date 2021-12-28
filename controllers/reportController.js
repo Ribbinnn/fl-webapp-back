@@ -124,7 +124,7 @@ const deleteById = async (req, res) => {
   }
 };
 
-// update report when label is defined (finalized only when label is defined)
+// update report
 const update = async (req, res) => {
   const validatedResult = updateValidator.validate(req.body);
   if (validatedResult.error) {
@@ -156,19 +156,21 @@ const update = async (req, res) => {
     );
 
     // calculate AI rating
-    const report = await webModel.PredResult.findById(req.body.report_id).populate('project_id')
+    if (req.body.rating) {
+      const report = await webModel.PredResult.findById(req.body.report_id).populate('project_id')
 
-    const ratingCount = report.project_id.rating_count
-    const projectRating = report.project_id.rating
-    if (report.rating == 0) {
-      await webModel.Project.findByIdAndUpdate(report.project_id._id, {
-        rating: (req.body.rating + (ratingCount * projectRating)) / (ratingCount + 1),
-        rating_count: ratingCount + 1
-      })
-    } else {
-      await webModel.Project.findByIdAndUpdate(report.project_id._id, {
-        rating: (req.body.rating + (ratingCount * projectRating) - report.rating) / ratingCount
-      })
+      const ratingCount = report.project_id.rating_count
+      const projectRating = report.project_id.rating
+      if (report.rating == 0) {
+        await webModel.Project.findByIdAndUpdate(report.project_id._id, {
+          rating: (req.body.rating + (ratingCount * projectRating)) / (ratingCount + 1),
+          rating_count: ratingCount + 1
+        })
+      } else {
+        await webModel.Project.findByIdAndUpdate(report.project_id._id, {
+          rating: (req.body.rating + (ratingCount * projectRating) - report.rating) / ratingCount
+        })
+      }
     }
 
     const data = await webModel.PredResult.findByIdAndUpdate(
