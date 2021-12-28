@@ -14,11 +14,6 @@ const schema = {
     description: Joi.string().max(160),
     predClasses: Joi.array().items(Joi.string()),
     head: Joi.array().items(Joi.string()).required().min(1)
-    // requirements: Joi.array().items(Joi.object({
-    //     name: Joi.string(),
-    //     type: Joi.string(),
-    //     unit: Joi.string()
-    // }))
 };
 
 const manageSchema = {
@@ -38,7 +33,6 @@ const create = async (req, res) => {
         return res.status(400).json({ success: false, message: `Invalid input: ${(validatedResult.error.message)}` })
     }
     try {
-        // create project
         const existedUsers = await checkExistedUser(req.body.head, [userRole.RADIOLOGIST])
         if (existedUsers.length < 1)
             return res.status(400).json({
@@ -46,7 +40,15 @@ const create = async (req, res) => {
                 message: 'Cannot create project when head list is empty, please check if user assigned to be head is valid'
             });
 
-        const project = await webModel.Project.create({ ...req.body, users: existedUsers, requirements: task[req.body.task] })
+        // create project
+        const project = await webModel.Project.create({
+            ...req.body,
+            head: existedUsers,
+            users: existedUsers,
+            rating: 0,
+            rating_count: 0,
+            requirements: task[req.body.task]
+        })
 
         // update project list of associated user
         await Promise.all(existedUsers.map(async (id) => {

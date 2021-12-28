@@ -434,6 +434,8 @@ const webappSeed = async () => {
       predClasses: pylon_classes,
       users: [user.insertedIds[0], user.insertedIds[4], user.insertedIds[5]],
       head: [user.insertedIds[0]],
+      rating: 0,
+      rating_count: 0,
       createdAt: new Date('10/14/2021'),
       updatedAt: new Date('10/14/2021')
     },
@@ -445,6 +447,8 @@ const webappSeed = async () => {
       predClasses: pylon_classes,
       users: [user.insertedIds[0], user.insertedIds[1], user.insertedIds[2], user.insertedIds[3], user.insertedIds[4], user.insertedIds[5]],
       head: [user.insertedIds[2]],
+      rating: 0,
+      rating_count: 0,
       createdAt: new Date('10/16/2021'),
       updatedAt: new Date('10/16/2021')
     },
@@ -456,6 +460,8 @@ const webappSeed = async () => {
       predClasses: pylon_classes,
       users: [user.insertedIds[2], user.insertedIds[3], user.insertedIds[4]],
       head: [user.insertedIds[4]],
+      rating: 0,
+      rating_count: 0,
       createdAt: new Date('10/16/2021'),
       updatedAt: new Date('10/16/2021')
     },
@@ -467,6 +473,8 @@ const webappSeed = async () => {
       predClasses: pylon_classes,
       users: [user.insertedIds[0]],
       head: [user.insertedIds[0]],
+      rating: 0,
+      rating_count: 0,
       createdAt: new Date('10/16/2021'),
       updatedAt: new Date('10/16/2021')
     },
@@ -588,6 +596,7 @@ const webappSeed = async () => {
       status: modelStatus.AI_ANNOTATED,
       label: "",
       note: "",
+      rating: 0,
       created_by: user.insertedIds[5],
       createdAt: new Date('10/16/2021'),
       updatedAt: new Date('10/16/2021')
@@ -600,6 +609,7 @@ const webappSeed = async () => {
       status: modelStatus.AI_ANNOTATED,
       label: "",
       note: "",
+      rating: 0,
       created_by: user.insertedIds[3],
       createdAt: new Date('10/17/2021'),
       updatedAt: new Date('10/17/2021')
@@ -612,6 +622,7 @@ const webappSeed = async () => {
       status: modelStatus.HUMAN_ANNOTATED,
       label: { "finding": ["Pneumothorax"] },
       note: "Pneumothorax -Gigi",
+      rating: 0,
       created_by: user.insertedIds[1],
       finalized_by: user.insertedIds[3],
       createdAt: new Date('10/18/2021'),
@@ -625,6 +636,7 @@ const webappSeed = async () => {
       status: modelStatus.HUMAN_ANNOTATED,
       label: { "finding": ["Mass"] },
       note: "Mass -Edward",
+      rating: 0,
       created_by: user.insertedIds[2],
       finalized_by: user.insertedIds[4],
       createdAt: new Date('10/18/2021'),

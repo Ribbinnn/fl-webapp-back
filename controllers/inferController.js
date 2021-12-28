@@ -106,6 +106,7 @@ const inferResult = async (req, res) => {
             status: modelStatus.IN_PROGRESS,
             label: "",
             note: "",
+            rating: 0,
             created_by: req.body.clinician_id,
             finalized_by: undefined,
             hn: req.body.record.hn
