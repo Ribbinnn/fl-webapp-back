@@ -14,9 +14,10 @@
   ```
 
 ## API PATH
-Authentication <br />
+Authentication & User <br />
 - POST /api/auth/login ( reqBody = {username, password, remember} )
 - POST /api/auth/logout 
+- GET /api/users/:id ( Get user by id )
 
 Webapp Project
 - GET /api/projects/user/:id ( Get all projects by user id )
@@ -64,4 +65,3 @@ User
 - POST /api/users ( Create new user, reqBody = {username, password, first_name, last_name, role, email} )
 - PATCH /api/users ( Create new user, reqBody = {id, password, first_name, last_name, role, email, isChulaSSO} )
 - GET /api/users ( Get all users )
-- GET /api/users/:id ( Get user by id )
