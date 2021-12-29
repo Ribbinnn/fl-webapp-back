@@ -13,8 +13,8 @@ router.patch('/', tokenValidation, verification.userVerification, userController
 // Get users (admin)
 router.get('/', tokenValidation, verification.adminVerification, userController.getAll);
 
-// Get user by id (admin)
-router.get('/:id', tokenValidation, verification.adminVerification, userController.getById);
+// Get user by id
+router.get('/:id', tokenValidation, verification.userVerification, userController.getById);
 
 // Delete user by id (admin)
 router.patch('/:id', tokenValidation, verification.adminVerification, userController.deleteUserById);
