@@ -37,17 +37,20 @@ const insertBBox = async (req, res) => {
 
 const getBBox = async (req, res) => {
     try {
-        let mask = await webModel.Mask
+        const mask = await webModel.Mask
             .findOne({ result_id: req.params.report_id })
             .populate({
                 path: 'data.updated_by',
                 select: 'username first_name last_name'
             });
+        const user = await webModel.User.findById(req.user._id, ['first_name', 'last_name'])
+        let data = mask.toObject()
+        data.user = user
 
         return res.status(200).json({
             success: true,
             message: `Get all bounding boxes by report ${req.params.report_id} successfully`,
-            data: mask
+            data
         })
     } catch (e) {
         return res.status(500).json({ success: false, message: 'Internal server error', error: e.message });
