@@ -36,7 +36,7 @@ const getById = async (req, res) => {
       { path: "image_id", select: "accession_no"},
       { path: "project_id", select: ["name", "head"]},
       { path: "created_by", select: ["first_name", "last_name"] },
-      { path: "finalized_by", select: ["first_name", "last_name"] },
+      { path: "updated_by", select: ["first_name", "last_name"] },
     ]);
     const classes = await webModel.PredClass.findOne({ result_id: result._id }, ['prediction']);
     const gradCam = await webModel.Gradcam.find({ result_id: result._id }, ['finding']);
@@ -171,7 +171,7 @@ const update = async (req, res) => {
         note: req.body.note,
         label: req.body.label,
         status: modelStatus.HUMAN_ANNOTATED,
-        finalized_by: req.body.user_id,
+        updated_by: req.body.user_id,
         rating: req.body.rating,
       }
     );
@@ -250,6 +250,7 @@ const viewHistory = async (req, res) => {
             hn: hn,
             patient_name: patientName["Patient Name"],
             clinician_name: item.created_by.first_name,
+            clinician_lastname: item.created_by.last_name,
             finding: finding,
             accession_no: item.image_id.accession_no,
             createdAt: item.createdAt,

@@ -34,10 +34,11 @@ Vitals
 - DELETE /api/vitals/records/deletefile/:id (Delete entire record file by record_id) 
 
 Infer & Report
-- POST /api/infer (Start inference, reqBody = (accession_no, project_id, record, clinician_id) )
+- POST /api/infer (Start inference, reqBody = (accession_no, project_id, record, user_id) )
+- GET /api/report/:rid (Get report by id)
 - GET /api/report/list/project/:project_id (View history by project id)
 - PATCH /api/report/ (Update or finalize report, reqBody = ( report_id, note, user_id, label, rating ) )
-- DELETE /api/delete/:rid (Delete report by id)
+- DELETE /api/report/delete/:rid (Delete report by id)
 
 Image
 - GET /api/image (get image, reqQuery = (result_id, finding, accession_no)) <br />

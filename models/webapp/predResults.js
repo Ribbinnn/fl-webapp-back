@@ -19,7 +19,7 @@ const schema = new Schema(
         label: { type: Object },
         note: { type: String },
         created_by: {type: ObjectId, ref: "users"},
-        finalized_by: {type: ObjectId, ref: "users"},
+        updated_by: {type: ObjectId, ref: "users"},
         rating: { type: Number }
     },
     {
