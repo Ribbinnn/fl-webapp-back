@@ -247,7 +247,7 @@ const deleteUserById = async (req, res) => {
           message: `This user is currently in charge of some projects. Please assign head to others and try delete again.`,
         });
     const user = await webModel.User.findOneAndUpdate(
-      { _id: req.params.id },
+      { _id: req.params.id, isChulaSSO: false },
       { status: userStatus.INACTIVE },
       { new: true }
     );

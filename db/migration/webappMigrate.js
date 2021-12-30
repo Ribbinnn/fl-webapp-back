@@ -624,7 +624,7 @@ const webappSeed = async () => {
       note: "Pneumothorax -Gigi",
       rating: 0,
       created_by: user.insertedIds[1],
-      finalized_by: user.insertedIds[3],
+      updated_by: user.insertedIds[3],
       createdAt: new Date('10/18/2021'),
       updatedAt: new Date('10/18/2021')
     },
@@ -638,7 +638,7 @@ const webappSeed = async () => {
       note: "Mass -Edward",
       rating: 0,
       created_by: user.insertedIds[2],
-      finalized_by: user.insertedIds[4],
+      updated_by: user.insertedIds[4],
       createdAt: new Date('10/18/2021'),
       updatedAt: new Date('10/18/2021')
     }

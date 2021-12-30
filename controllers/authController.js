@@ -36,7 +36,7 @@ const login = async (req, res) => {
         })
         return res.status(200).json({
             success: true,
-            message: 'Login successfully',
+            message: `Login successfully`,
             data: {
                 user_id: user._id,
                 username: user.username,
@@ -59,7 +59,7 @@ const logout = async (req, res) => {
         await webModel.User.findByIdAndUpdate(req.user._id, {
             $pullAll: { token: [token] }
         })
-        return res.status(200).json({ success: true, message: 'Logout successfully' })
+        return res.status(200).json({ success: true, message: `User ${req.user._id} logout successfully` })
     } catch (e) {
         return res.status(500).json({ success: false, message: 'Internal server error', error: e.message })
     }
@@ -86,7 +86,8 @@ const chulaSSO = async (req, res) => {
                 role: response.roles[0],
                 token: [],
                 isChulaSSO: true,
-                projects: []
+                projects: [],
+                status: userStatus.ACTIVE
             })
         }
 
@@ -107,7 +108,6 @@ const chulaSSO = async (req, res) => {
             }
         })
     } catch (e) {
-        console.log(e.message)
         return res.status(500).json({ success: false, message: 'Internal server error', error: e.message })
     }
 }

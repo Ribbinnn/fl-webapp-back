@@ -4,7 +4,7 @@ const { modelStatus, userRole } = require('../utils/status')
 // verify if user id in token match
 const userVerification = async (req, res, next) => {
     if (req.user.role !== userRole.ADMIN) {
-        const user_id = req.body.user_id ?? req.body.clinician_id ?? req.query.user_id ?? req.params.id ?? req.body.id ?? undefined
+        const user_id = req.body.user_id ?? req.query.user_id ?? req.params.id ?? req.body.id ?? undefined
         const user = await webModel.User.findById(user_id)
         if (!user || user.id !== req.user._id)
             return res.status(403).json({ success: false, message: `User have no permission to access user ${user_id}'s resource` })
