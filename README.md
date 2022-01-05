@@ -66,3 +66,8 @@ User
 - POST /api/users ( Create new user, reqBody = {username, password, first_name, last_name, role, email} )
 - PATCH /api/users ( Create new user, reqBody = {id, password, first_name, last_name, role, email, isChulaSSO} )
 - GET /api/users ( Get all users )
+
+
+**Docker** <br />
+- docker-compose up -d --build
+- docker exec -it fl-webapp-back_webapp bash

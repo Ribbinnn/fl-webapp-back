@@ -112,7 +112,7 @@ const inferResult = async (req, res) => {
 
         // create FormData to send to python server
         const data = new FormData()
-        data.append('file', fs.createReadStream(root + '\\resources\\uploads\\' + filename))
+        data.append('file', fs.createReadStream(path.join(root, '/resources', '/uploads', filename)))
         data.append('model_name', project.task)
 
         console.log('Start')
@@ -135,15 +135,15 @@ const inferResult = async (req, res) => {
                 }
 
                 // save zip file sent from AI server
-                fs.writeFile(resultDir + '/result.zip', res.data, (err) => {
+                fs.writeFile(path.join(resultDir, '/result.zip'), res.data, (err) => {
                     if (err) throw err
                 });
 
                 // extract zip file to result directory (overlay files + prediction file)
-                await extract(resultDir + '/result.zip', { dir: resultDir })
+                await extract(path.join(resultDir, '/result.zip'), { dir: resultDir })
 
                 // parse prediction.txt to JSON
-                const modelResult = JSON.parse(fs.readFileSync(resultDir + '/prediction.txt'));
+                const modelResult = JSON.parse(fs.readFileSync(path.join(resultDir, '/prediction.txt')));
 
                 let prediction = []
                 switch (project.task) {
@@ -157,10 +157,10 @@ const inferResult = async (req, res) => {
                             })
                         }
                         // delete zip file
-                        await fs.promises.unlink(resultDir + '/result.zip')
+                        await fs.promises.unlink(path.join(resultDir, '/result.zip'))
 
                         // delete probability prediction file
-                        await fs.promises.unlink(resultDir + '/prediction.txt')
+                        await fs.promises.unlink(path.join(resultDir, '/prediction.txt'))
 
                         // delete PACS file in local
                         if (!['0041018.dcm', '0041054.dcm', '0041099.dcm'].includes(filename)) {
