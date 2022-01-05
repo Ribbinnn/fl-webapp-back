@@ -107,7 +107,7 @@ User
      mongodb:
      back:
    ```
-3. For frontend, change serverURL in `config.js` to `http://localhost:5000/api`, for backend remove comments under #docker in `.env`
+3. For frontend, change serverURL in `config.js` to `http://localhost:5000/api`, for backend remove comments under #DOCKER in `.env`
 3. Build docker compose. Frontend, backend, and model will be run at port 3000, 5000, and 7000
    ```
    docker-compose up -d --build
@@ -124,5 +124,5 @@ User
    npm run initDB
    ```
 5. Others
-- ดูรายละเอียดแต่ละ container: `docker ps`
-- เข้าไปดูข้อมูลต่าง ๆ ใน database ของ container ผ่าน MongoDB Compass ได้ทาง url `mongodb://localhost:27018` หรือใช้คำสั่ง `docker exec -it mongo bash` เข้าไปใน container ของ mongo แล้วใช้คำสั่งของ MongoDB Shell ดูข้อมูล database ก็ได้
+- ดูรายละเอียดของแต่ละ container: `docker ps`
+- เข้าไปดูข้อมูลต่าง ๆ ใน database ของ container ผ่าน MongoDB Compass ได้ทาง url `mongodb://localhost:27018` หรือใช้คำสั่ง `docker exec -it mongo bash` เข้าไปใน container ของ mongo แล้วใช้คำสั่งของ MongoDB Shell ดูข้อมูลใน database ก็ได้
