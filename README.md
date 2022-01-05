@@ -69,5 +69,60 @@ User
 
 
 **Docker** <br />
-- docker-compose up -d --build
-- docker exec -it fl-webapp-back_webapp bash
+1. Go to root directory of all three fl servers
+2. Add docker-compose.yml <br />
+![image](https://user-images.githubusercontent.com/47110972/148223267-2b95e1ec-f038-41d2-b8d2-13ee7e23c6b5.png) <br />
+   docker-compose.yml
+   ```
+   version: "3.8"
+   services:
+     webapp-back:
+       container_name: webapp-back
+       restart: always
+       build: ./fl-webapp-back
+       ports:
+         - '5000:5000'
+       volumes:
+         - back:/usr/src/app
+     webapp-front:
+       container_name: webapp-front
+       restart: always
+       build: ./fl-webapp-front
+       ports:
+         - '3000:3000'
+     webapp-model:
+       container_name: webapp-model
+       restart: always
+       build: ./fl-webapp-model
+       ports:
+         - '7000:7000'
+     mongo:
+       container_name: mongo
+       image: mongo
+       ports:
+         - '27018:27017' # host_port:container_port
+       volumes:
+         - mongodb:/data/db
+   volumes:
+     mongodb:
+     back:
+   ```
+3. For frontend, change serverURL in `config.js` to `http://localhost:5000/api`, for backend remove comments under #docker in `.env`
+3. Build docker compose. Frontend, backend, and model will be run at port 3000, 5000, and 7000
+   ```
+   docker-compose up -d --build
+   ```
+   or
+   ```
+   docker-compose up -d
+   ```
+4. Import sample data into the containers
+   ```
+   docker exec -it webapp-back bash
+   ```
+   ```
+   npm run initDB
+   ```
+5. Others
+- ดูรายละเอียดแต่ละ container: `docker ps`
+- เข้าไปดูข้อมูลต่าง ๆ ใน database ของ container ผ่าน MongoDB Compass ได้ทาง url `mongodb://localhost:27018` หรือใช้คำสั่ง `docker exec -it mongo bash` เข้าไปใน container ของ mongo แล้วใช้คำสั่งของ MongoDB Shell ดูข้อมูล database ก็ได้
