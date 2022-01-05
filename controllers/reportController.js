@@ -173,8 +173,8 @@ const update = async (req, res) => {
         status: modelStatus.HUMAN_ANNOTATED,
         updated_by: req.body.user_id,
         rating: req.body.rating,
-      }
-    );
+      }, { new: true }
+    ).populate('updated_by',["first_name", "last_name"]);
     return res.status(200).json({
       success: true,
       message: `Update report ${req.body.report_id} successfully`,
