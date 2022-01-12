@@ -70,43 +70,90 @@ User
 
 **Docker** <br />
 1. Go to root directory of all three fl servers
-2. Add docker-compose.yml <br />
+2. Copy docker-compose.yml, Dockerfile, and mongo-init.js to the root directory <br />
 ![image](https://user-images.githubusercontent.com/47110972/148223267-2b95e1ec-f038-41d2-b8d2-13ee7e23c6b5.png) <br />
-   docker-compose.yml
-   ```
-   version: "3.8"
-   services:
-     webapp-back:
-       container_name: webapp-back
-       restart: always
-       build: ./fl-webapp-back
-       ports:
-         - '5000:5000'
-       volumes:
-         - back:/usr/src/app
-     webapp-front:
-       container_name: webapp-front
-       restart: always
-       build: ./fl-webapp-front
-       ports:
-         - '3000:3000'
-     webapp-model:
-       container_name: webapp-model
-       restart: always
-       build: ./fl-webapp-model
-       ports:
-         - '7000:7000'
-     mongo:
-       container_name: mongo
-       image: mongo
-       ports:
-         - '27018:27017' # host_port:container_port
-       volumes:
-         - mongodb:/data/db
-   volumes:
-     mongodb:
-     back:
-   ```
+  docker-compose.yml
+  ```
+  version: "3.8"
+  services:
+    webapp-back:
+      container_name: webapp-back
+      restart: always
+      build: ./fl-webapp-back
+      ports:
+        - '5000:5000'
+      volumes:
+        - back:/usr/src/app/resources # /fl-webapp-back/resources:/usr/src/app/resources
+    webapp-front:
+      container_name: webapp-front
+      restart: always
+      build: ./fl-webapp-front
+      ports:
+        - '3000:3000'
+    webapp-model:
+      container_name: webapp-model
+      restart: always
+      build: ./fl-webapp-model
+      ports:
+        - '7000:7000'
+    mongo:
+      container_name: mongo
+      build: ./
+      ports:
+        - '27018:27017' # host_port:container_port
+      volumes:
+        - mongodb:/data/db
+  volumes:
+    mongodb:
+    back:
+  ```
+  Dockerfile
+  ```
+  FROM mongo
+  ENV MONGO_INITDB_ROOT_USERNAME root
+  ENV MONGO_INITDB_ROOT_PASSWORD password
+  ENV MONGO_INITDB_DATABASE admin
+  ADD mongo-init.js /docker-entrypoint-initdb.d/
+  ```
+  mongo-init.js
+  ```
+  db.auth('<root>', '<password>')
+  db = db.getSiblingDB('webapp')
+  db.createUser({
+    user: '<admin>',
+    pwd: '<admin>',
+    roles: [
+      {
+        role: 'readWrite',
+        db: 'webapp',
+      },
+    ],
+  });
+
+  db = db.getSiblingDB('vitals')
+  db.createUser({
+    user: '<admin>',
+    pwd: '<admin>',
+    roles: [
+      {
+        role: 'readWrite',
+        db: 'vitals',
+      },
+    ],
+  });
+
+  db = db.getSiblingDB('pacs')
+  db.createUser({
+    user: '<admin>',
+    pwd: '<admin>',
+    roles: [
+      {
+        role: 'readWrite',
+        db: 'pacs',
+      },
+    ],
+  });
+  ```
 3. For frontend, change serverURL in `config.js` to `http://localhost:5000/api`, for backend remove comments under #DOCKER in `.env`
 3. Build docker compose. Frontend, backend, and model will be run at port 3000, 5000, and 7000
    ```

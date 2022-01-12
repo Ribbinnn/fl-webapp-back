@@ -47,38 +47,47 @@ const inferResult = async (req, res) => {
         return res.status(500).json({ success: false, message: 'Internal server error', error: e.message });
     }
 
+    // project's requirements
+    const requirements = [
+        { name: "entry_id", type: "number", unit: "none" },
+        { name: "hn", type: "number", unit: "none" },
+        { name: "gender", type: "string", unit: "male/female" },
+        { name: "age", type: "number", unit: "year" },
+        { name: "measured_time", type: "object", unit: "yyyy-MM-ddTHH:mm:ssZ" },
+        ...project.requirements
+    ]
+
+    // record can be null (might be changed in the future)
+    if (!req.body.record)
+        return res.status(400).json({ success: false, message: `Invalid record input: "record" is required` })
+    // check required fields
+    requirements.forEach((requirement) => {
+        const fieldName = requirement.name
+        if (!req.body.record[fieldName])
+            return res.status(400).json({ success: false, message: `Invalid record input: "${fieldName}" is required` })
+        // check fields' type
+        if (typeof (req.body.record[fieldName]) !== requirement.type && fieldName !== "measured_time")
+            return res.status(400).json({ success: false, message: `Invalid record input: "${fieldName}" must be a ${requirement.type}` })
+        if (fieldName == "measured_time" && new Date(req.body.record[fieldName]) == "Invalid Date")
+            return res.status(400).json({ success: false, message: `Invalid record input: Incorrect "${fieldName}" date format` })
+    })
+
+    let predResult = {}
+    try {
+        // create predicted result
+        predResult = await webModel.PredResult.create({})
+    } catch (e) {
+        return res.status(500).json({ success: false, message: 'Internal server error', error: e.message });
+    }
+
     // define directory path and AI server url
     filename = pacs.filepath.split('/')[1]
     const root = path.join(__dirname, "..");
     const projectDir = path.join(root, "/resources/results/", project.id)
-    const resultDir = path.join(projectDir, filename.split('.')[0])
+    const resultDir = path.join(projectDir, String(predResult._id))
     const url = process.env.PY_SERVER + '/api/infer';
 
     try {
-        // project's requirements
-        const requirements = [
-            { name: "entry_id", type: "number", unit: "none" },
-            { name: "hn", type: "number", unit: "none" },
-            { name: "gender", type: "string", unit: "male/female" },
-            { name: "age", type: "number", unit: "year" },
-            { name: "measured_time", type: "object", unit: "yyyy-MM-ddTHH:mm:ssZ" },
-            ...project.requirements
-        ]
-
-        // record can be null (might be changed in the future)
-        if (!req.body.record)
-            throw new Error(`Invalid record input: "record" is required`)
-        // check required fields
-        requirements.forEach((requirement) => {
-            const fieldName = requirement.name
-            if (!req.body.record[fieldName])
-                throw new Error(`Invalid record input: "${fieldName}" is required`)
-            // check fields' type
-            if (typeof (req.body.record[fieldName]) !== requirement.type && fieldName !== "measured_time")
-                throw new Error(`Invalid record input: "${fieldName}" must be a ${requirement.type}`)
-            if (fieldName == "measured_time" && new Date(req.body.record[fieldName]) == "Invalid Date")
-                throw new Error(`Invalid record input: Incorrect "${fieldName}" date format`)
-        })
         // create record
         record = await webModel.MedRecord.create({
             project_id: req.body.project_id,
@@ -92,8 +101,8 @@ const inferResult = async (req, res) => {
             hn: req.body.record.hn
         })
 
-        // create predicted result referenced to image and record    
-        const predResult = await webModel.PredResult.create({
+        // update predicted result referenced to image and record
+        await webModel.PredResult.findByIdAndUpdate(predResult._id, {
             record_id: record ? record._id : undefined,
             image_id: image._id,
             project_id: project._id,
@@ -135,9 +144,7 @@ const inferResult = async (req, res) => {
                 }
 
                 // save zip file sent from AI server
-                fs.writeFile(path.join(resultDir, '/result.zip'), res.data, (err) => {
-                    if (err) throw err
-                });
+                fs.writeFileSync(path.join(resultDir, '/result.zip'), res.data);
 
                 // extract zip file to result directory (overlay files + prediction file)
                 await extract(path.join(resultDir, '/result.zip'), { dir: resultDir })
@@ -175,7 +182,7 @@ const inferResult = async (req, res) => {
                                 await webModel.Gradcam.create({
                                     result_id: predResult._id,
                                     finding: item.split('.')[0],
-                                    gradcam_path: `results/${project.id}/${filename.split('.')[0]}/${item}`
+                                    gradcam_path: `results/${project.id}/${String(predResult._id)}/${item}`
                                 })
                             }))
                             // update result's status to annotated
