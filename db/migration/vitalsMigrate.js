@@ -92,9 +92,9 @@ const vitalsSeed = async (projectIds, userIds) => {
   for (let i = 0; i < 10; i++) {
     records.push({
       entry_id: 100 + i,
-      hn: 5566 + i,
+      hn: 1234567 + i,
       gender: i % 2 == 0 ? 'male' : 'female',
-      age: 37 + i,
+      age: 28 + i,
       pulse: 75 + i,
       weight: i % 2 == 0 ? 48 + i : 58 + i,
       height: i % 2 == 0 ? 156 + i : 165 + i,
@@ -111,7 +111,7 @@ const vitalsSeed = async (projectIds, userIds) => {
       records: [
         {
           entry_id: 1,
-          hn: 4149,
+          hn: 1234567,
           gender: "female",
           age: 42,
           pulse: 76,

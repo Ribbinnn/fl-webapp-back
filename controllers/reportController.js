@@ -1,7 +1,7 @@
 const Joi = require("joi");
 const webModel = require("../models/webapp");
-const PACS = require("../db/pacs").PACS;
 const { modelStatus } = require("../utils/status");
+const axios = require('axios');
 
 const schema = {
   report_id: Joi.string().required(),
@@ -14,7 +14,7 @@ const updateSchema = {
     finding: Joi.array().items(Joi.string()),
   }).required(),
   user_id: Joi.string().required(),
-  rating: Joi.number().integer().min(1).max(5),
+  rating: Joi.number().integer().min(0).max(5),
 };
 
 const validator = Joi.object(schema);
@@ -32,9 +32,9 @@ const getById = async (req, res) => {
   }
   try {
     const result = await webModel.PredResult.findById(req.params.rid).populate([
-      { path: "record_id", select: "record"},
-      { path: "image_id", select: "accession_no"},
-      { path: "project_id", select: ["name", "head"]},
+      { path: "record_id", select: "record" },
+      { path: "image_id", select: "accession_no" },
+      { path: "project_id", select: ["name", "head"] },
       { path: "created_by", select: ["first_name", "last_name"] },
       { path: "updated_by", select: ["first_name", "last_name"] },
     ]);
@@ -49,7 +49,7 @@ const getById = async (req, res) => {
         patient: Object.keys(result.record_id.record).reduce((json, item) => {
           if (["gender", "age", "height", "weight"].includes(item)) {
             json[item.charAt(0).toUpperCase() + item.slice(1)] =
-            result.record_id.record[item];
+              result.record_id.record[item];
           }
           return json;
         }, {}),
@@ -61,7 +61,7 @@ const getById = async (req, res) => {
             item !== "updated_time"
           ) {
             json[item.charAt(0).toUpperCase() + item.slice(1)] =
-            result.record_id.record[item];
+              result.record_id.record[item];
           }
           return json;
         }, {}),
@@ -143,7 +143,7 @@ const update = async (req, res) => {
     );
 
     // calculate AI rating
-    if (req.body.rating) {
+    if (req.body.rating && req.body.rating > 0) {
       const report = await webModel.PredResult.findById(
         req.body.report_id
       ).populate("project_id");
@@ -174,7 +174,7 @@ const update = async (req, res) => {
         updated_by: req.body.user_id,
         rating: req.body.rating,
       }, { new: true }
-    ).populate('updated_by',["first_name", "last_name"]);
+    ).populate('updated_by', ["first_name", "last_name"]);
     return res.status(200).json({
       success: true,
       message: `Update report ${req.body.report_id} successfully`,
@@ -240,15 +240,15 @@ const viewHistory = async (req, res) => {
           // }
 
           const hn = item.record_id.record.hn;
-          const patientName = await PACS.findOne({ "Patient ID": String(hn) }, [
-            "Patient Name",
-          ]);
+          // const patientName = await PACS.findOne({ "Patient ID": String(hn) }, [
+          //   "Patient Name",
+          // ]);
 
           data.push({
             pred_result_id: item.id,
             status: item.status,
             hn: hn,
-            patient_name: patientName["Patient Name"],
+            patient_name: item.patient_name,
             clinician_name: item.created_by.first_name,
             clinician_lastname: item.created_by.last_name,
             finding: finding,
@@ -279,24 +279,46 @@ const viewHistory = async (req, res) => {
 const saveToPACS = async (req, res) => {
   // request: params = report_id
   try {
-    const report = await webModel.PredResult.findById(
+    let report = await webModel.PredResult.findById(
       req.params.report_id
-    ).populate("project_id");
+    ).populate("project_id", "image_id");
 
     // check if report's status is human-annoated and user is project's head
     if (
       !report ||
       report.status !== modelStatus.HUMAN_ANNOTATED ||
       !report.project_id.head.includes(req.user._id)
-    )
+    ) {
       return res.status(400).json({
         success: false,
         message: !report.project_id.head.includes(req.user._id)
           ? `User must be project's head to save report ${req.params.report_id} back to PACS`
           : `Report's status must be 'Human-Annotated' to be saved to PACS`,
       });
+    }
 
-    /* SAVE TO PACS */
+    /* CALLS PYTHON API */
+
+    await webModel.Image.findByIdAndUpdate(report.image_id._id, {
+      hn: "-"
+    })
+    await webModel.MedRecord.findByIdAndUpdate(report.record_id, {
+      hn: ""
+    })
+    report = await webModel.PredResult.findByIdAndUpdate(req.params.report_id, {
+      hn: "-",
+      patient_name: "-",
+      status: modelStatus.FINALIZED
+    }, { new: true })
+
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: `Save report ${req.params.rid} to PACS successfully`,
+        data: report,
+      });
+
   } catch (e) {
     return res
       .status(500)

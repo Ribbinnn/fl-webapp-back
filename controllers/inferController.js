@@ -1,6 +1,5 @@
 const Joi = require("joi");
 const webModel = require('../models/webapp');
-const PACS = require('../db/pacs').PACS
 const path = require('path');
 const fs = require('fs')
 const axios = require('axios')
@@ -37,10 +36,7 @@ const inferResult = async (req, res) => {
     let pacs = {}
     let project = {}
     try {
-        pacs = await PACS.findOne({ 'Accession No': req.body.accession_no })
         project = await webModel.Project.findById(req.body.project_id)
-        if (!pacs)
-            return res.status(400).json({ success: false, message: 'File not found' });
         if (!project)
             return res.status(400).json({ success: false, message: 'Project not found' });
     } catch {
@@ -81,10 +77,9 @@ const inferResult = async (req, res) => {
     }
 
     // define directory path and AI server url
-    filename = pacs.filepath.split('/')[1]
     const root = path.join(__dirname, "..");
     const projectDir = path.join(root, "/resources/results/", project.id)
-    const resultDir = path.join(projectDir, String(predResult._id))
+    const resultDir = path.join(projectDir, predResult.id)
     const url = process.env.PY_SERVER + '/api/infer';
 
     try {
@@ -120,17 +115,14 @@ const inferResult = async (req, res) => {
         const mask = await webModel.Mask.create({ result_id: predResult._id, data: [] })
 
         // create FormData to send to python server
-        const data = new FormData()
-        data.append('file', fs.createReadStream(path.join(root, '/resources', '/uploads', filename)))
-        data.append('model_name', project.task)
+        // const data = new FormData()
+        // data.append('file', fs.createReadStream(path.join(root, '/resources', '/uploads', filename)))
+        // data.append('model_name', project.task)
 
         console.log('Start')
 
         // get result from python model
-        axios.post(url, data, {
-            headers: {
-                'Content-Type': `multipart/form-data; boundary=${data._boundary}`,
-            },
+        axios.get(url + `/${project.task}/${req.body.accession_no}`, {
             responseType: 'arraybuffer'
         })
             .then(async res => {
@@ -147,11 +139,16 @@ const inferResult = async (req, res) => {
                 fs.writeFileSync(path.join(resultDir, '/result.zip'), res.data);
 
                 // extract zip file to result directory (overlay files + prediction file)
-                await extract(path.join(resultDir, '/result.zip'), { dir: resultDir })
+                await extract(path.join(resultDir, '/result.zip'), { dir: resultDir })            
 
                 // parse prediction.txt to JSON
-                const modelResult = JSON.parse(fs.readFileSync(path.join(resultDir, '/prediction.txt')));
+                let modelResult = JSON.parse(fs.readFileSync(path.join(resultDir, '/prediction.txt')));
 
+                patient_name = "-"
+                if (modelResult.patient_name)
+                    patient_name = modelResult.patient_name
+                    delete modelResult.patient_name
+                
                 let prediction = []
                 switch (project.task) {
                     case "classification_pylon_256":
@@ -169,11 +166,6 @@ const inferResult = async (req, res) => {
                         // delete probability prediction file
                         await fs.promises.unlink(path.join(resultDir, '/prediction.txt'))
 
-                        // delete PACS file in local
-                        if (!['0041018.dcm', '0041054.dcm', '0041099.dcm'].includes(filename)) {
-                            await fs.promises.unlink(path.join(root, "/resources/uploads/", filename))
-                        }
-
                         // iterate over files in result directory to get overlay files
                         fs.readdir(resultDir, async (err, files) => {
                             if (err) throw err
@@ -186,7 +178,10 @@ const inferResult = async (req, res) => {
                                 })
                             }))
                             // update result's status to annotated
-                            await webModel.PredResult.findByIdAndUpdate(predResult._id, { status: modelStatus.AI_ANNOTATED })
+                            await webModel.PredResult.findByIdAndUpdate(predResult._id, { 
+                                status: modelStatus.AI_ANNOTATED,
+                                patient_name 
+                            })
                             // update probability prediction
                             await webModel.PredClass.findByIdAndUpdate(predClass._id, { prediction: prediction })
                             console.log('Finish')
@@ -197,7 +192,10 @@ const inferResult = async (req, res) => {
                         fs.rm(resultDir, { recursive: true, force: true }, (err) => {
                             if (err) throw err
                         });
-                        await webModel.PredResult.findByIdAndUpdate(predResult._id, { status: modelStatus.AI_ANNOTATED })
+                        await webModel.PredResult.findByIdAndUpdate(predResult._id, { 
+                            status: modelStatus.AI_ANNOTATED,
+                            patient_name: "-"
+                        })
                         await webModel.PredClass.findByIdAndUpdate(predClass._id, { prediction: prediction })
                         console.log('Finish')
                         break;
@@ -216,7 +214,7 @@ const inferResult = async (req, res) => {
             return res.status(400).json({ success: false, message: e.message });
 
         // delete result folder if error occurs
-        if (!['0041018.dcm', '0041054.dcm', '0041099.dcm'].includes(filename) && fs.existsSync(resultDir)) {
+        if (fs.existsSync(resultDir)) {
             fs.rm(resultDir, { recursive: true, force: true }, (err) => {
                 console.log(err)
             });
