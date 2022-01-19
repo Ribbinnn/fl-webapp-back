@@ -7,6 +7,4 @@ resources/uploads/*
 !resources/uploads/0041099.dcm
 
 resources/results/*
-!resources/results/0041018
-resources/results/0041018/*
-!resources/results/0041018/classification_pylon_1024
+!resources/results/20211018CR0846
