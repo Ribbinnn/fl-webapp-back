@@ -15,11 +15,12 @@ const schema = new Schema(
         image_id: { type: ObjectId, ref: "images" },
         project_id: { type: ObjectId, ref: "projects" },
         status: { type: String }, // in progress, annotated, reviewed, finalized, canceled
-        hn: { type: Number },
+        hn: { type: String },
+        patient_name: { type: String },
         label: { type: Object },
         note: { type: String },
-        created_by: {type: ObjectId, ref: "users"},
-        updated_by: {type: ObjectId, ref: "users"},
+        created_by: { type: ObjectId, ref: "users" },
+        updated_by: { type: ObjectId, ref: "users" },
         rating: { type: Number }
     },
     {
@@ -32,12 +33,12 @@ schema.pre('findOneAndDelete', { document: false, query: true }, async function 
     // await session.withTransaction( async () => {
     const rid = this.getQuery()['_id']
     const result = await PredResult.findById(rid)
-    
+
     // delete associated result from model
-    await Gradcam.deleteMany({result_id: rid})
-    await Mask.findOneAndDelete({result_id: rid})
-    await PredClasses.findOneAndDelete({result_id: rid})
-    
+    await Gradcam.deleteMany({ result_id: rid })
+    await Mask.findOneAndDelete({ result_id: rid })
+    await PredClasses.findOneAndDelete({ result_id: rid })
+
     // delete associated image and medical record
     await Image.findByIdAndDelete(result.image_id)
     await MedRecord.findByIdAndDelete(result.record_id)

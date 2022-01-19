@@ -257,7 +257,7 @@ const prediction = [
 
 const focusingFinding = ['Pneumothorax', 'Mass', 'Nodule', 'Mediastinal Mass', 'Lung Opacity',
   'Pleural Effusion', 'Atelectasis', 'Tracheal-Mediastinal Shift', 'Volume Loss',
-  'Osteolytic Lesion', 'Fracture', 'Sclerotic Lesion', 'Cardiomegaly', 'Bronchiectasis',]
+  'Osteolytic Lesion', 'Fracture', 'Sclerotic Lesion', 'Cardiomegaly', 'Bronchiectasis', 'original']
 
 dotenv.config();
 
@@ -494,7 +494,7 @@ const webappSeed = async () => {
       project_id: project.insertedIds[0],
       record: {
         entry_id: 1,
-        hn: 4149,
+        hn: 1234567,
         gender: "female",
         age: 42,
         pulse: 76,
@@ -506,93 +506,94 @@ const webappSeed = async () => {
       createdAt: new Date('10/16/2021'),
       updatedAt: new Date('10/16/2021')
     },
-    {
-      project_id: project.insertedIds[1],
-      record: {
-        entry_id: 2,
-        hn: 5566,
-        gender: "female",
-        age: 37,
-        pulse: 83,
-        weight: 47,
-        height: 159,
-        fever: "None",
-        measured_time: new Date("2021-10-11T17:00:00.000Z"),
-        updated_time: new Date("2021-10-11T17:00:00.000Z")
-      },
-      createdAt: new Date('10/17/2021'),
-      updatedAt: new Date('10/17/2021')
-    },
-    {
-      project_id: project.insertedIds[1],
-      record: {
-        entry_id: 3,
-        hn: 4149,
-        gender: "female",
-        age: 42,
-        pulse: 74,
-        weight: 53,
-        height: 162,
-        fever: "down",
-        measured_time: new Date("2021-10-12T17:00:00.000Z"),
-        updated_time: new Date("2021-10-12T17:00:00.000Z")
-      },
-      createdAt: new Date('10/18/2021'),
-      updatedAt: new Date('10/18/2021')
-    },
-    {
-      project_id: project.insertedIds[2],
-      record: {
-        entry_id: 4,
-        hn: 5566,
-        gender: "female",
-        age: 37,
-        cough: "down",
-        measured_time: new Date("2021-10-11T17:00:00.000Z"),
-        updated_time: new Date("2021-10-11T17:00:00.000Z")
-      },
-      createdAt: new Date('10/19/2021'),
-      updatedAt: new Date('10/19/2021')
-    },
+    // {
+    //   project_id: project.insertedIds[1],
+    //   record: {
+    //     entry_id: 2,
+    //     hn: 5566,
+    //     gender: "female",
+    //     age: 37,
+    //     pulse: 83,
+    //     weight: 47,
+    //     height: 159,
+    //     fever: "None",
+    //     measured_time: new Date("2021-10-11T17:00:00.000Z"),
+    //     updated_time: new Date("2021-10-11T17:00:00.000Z")
+    //   },
+    //   createdAt: new Date('10/17/2021'),
+    //   updatedAt: new Date('10/17/2021')
+    // },
+    // {
+    //   project_id: project.insertedIds[1],
+    //   record: {
+    //     entry_id: 3,
+    //     hn: 4149,
+    //     gender: "female",
+    //     age: 42,
+    //     pulse: 74,
+    //     weight: 53,
+    //     height: 162,
+    //     fever: "down",
+    //     measured_time: new Date("2021-10-12T17:00:00.000Z"),
+    //     updated_time: new Date("2021-10-12T17:00:00.000Z")
+    //   },
+    //   createdAt: new Date('10/18/2021'),
+    //   updatedAt: new Date('10/18/2021')
+    // },
+    // {
+    //   project_id: project.insertedIds[2],
+    //   record: {
+    //     entry_id: 4,
+    //     hn: 5566,
+    //     gender: "female",
+    //     age: 37,
+    //     cough: "down",
+    //     measured_time: new Date("2021-10-11T17:00:00.000Z"),
+    //     updated_time: new Date("2021-10-11T17:00:00.000Z")
+    //   },
+    //   createdAt: new Date('10/19/2021'),
+    //   updatedAt: new Date('10/19/2021')
+    // },
   ])
 
   const image = await Image.collection.insertMany([
     {
       project_id: project.insertedIds[0],
-      accession_no: "74",
-      hn: 4149,
+      accession_no: "20211018CR0846",
+      hn: 1234567,
       createdAt: new Date('10/16/2021'),
       updatedAt: new Date('10/16/2021')
     },
-    {
-      project_id: project.insertedIds[1],
-      accession_no: "82",
-      hn: 5566,
-      createdAt: new Date('10/17/2021'),
-      updatedAt: new Date('10/17/2021')
-    },
-    {
-      project_id: project.insertedIds[1],
-      accession_no: "74",
-      hn: 4149,
-      createdAt: new Date('10/18/2021'),
-      updatedAt: new Date('10/18/2021')
-    },
-    {
-      project_id: project.insertedIds[2],
-      accession_no: "82",
-      hn: 5566,
-      createdAt: new Date('10/19/2021'),
-      updatedAt: new Date('10/19/2021')
-    }
+    // {
+    //   project_id: project.insertedIds[1],
+    //   accession_no: "82",
+    //   hn: 5566,
+    //   createdAt: new Date('10/17/2021'),
+    //   updatedAt: new Date('10/17/2021')
+    // },
+    // {
+    //   project_id: project.insertedIds[1],
+    //   accession_no: "74",
+    //   hn: 4149,
+    //   createdAt: new Date('10/18/2021'),
+    //   updatedAt: new Date('10/18/2021')
+    // },
+    // {
+    //   project_id: project.insertedIds[2],
+    //   accession_no: "82",
+    //   hn: 5566,
+    //   createdAt: new Date('10/19/2021'),
+    //   updatedAt: new Date('10/19/2021')
+    // }
   ])
 
   const predResult = await PredResult.collection.insertMany([
     {
       record_id: record.insertedIds[0],
       image_id: image.insertedIds[0],
-      project_id: project.insertedIds[0],
-      hn: 4149,
+      project_id: project.insertedIds[1],
+      hn: 1234567,
+      patient_name: "LINNET CAMPO",
       status: modelStatus.AI_ANNOTATED,
       label: "",
       note: "",
@@ -601,52 +602,52 @@ const webappSeed = async () => {
       createdAt: new Date('10/16/2021'),
       updatedAt: new Date('10/16/2021')
     },
-    {
-      record_id: record.insertedIds[1],
-      image_id: image.insertedIds[1],
-      project_id: project.insertedIds[1],
-      hn: 5566,
-      status: modelStatus.AI_ANNOTATED,
-      label: "",
-      note: "",
-      rating: 0,
-      created_by: user.insertedIds[3],
-      createdAt: new Date('10/17/2021'),
-      updatedAt: new Date('10/17/2021')
-    },
-    {
-      record_id: record.insertedIds[2],
-      image_id: image.insertedIds[2],
-      project_id: project.insertedIds[1],
-      hn: 4149,
-      status: modelStatus.HUMAN_ANNOTATED,
-      label: { "finding": ["Pneumothorax"] },
-      note: "Pneumothorax -Gigi",
-      rating: 0,
-      created_by: user.insertedIds[1],
-      updated_by: user.insertedIds[3],
-      createdAt: new Date('10/18/2021'),
-      updatedAt: new Date('10/18/2021')
-    },
-    {
-      record_id: record.insertedIds[3],
-      image_id: image.insertedIds[3],
-      project_id: project.insertedIds[2],
-      hn: 5566,
-      status: modelStatus.HUMAN_ANNOTATED,
-      label: { "finding": ["Mass"] },
-      note: "Mass -Edward",
-      rating: 0,
-      created_by: user.insertedIds[2],
-      updated_by: user.insertedIds[4],
-      createdAt: new Date('10/18/2021'),
-      updatedAt: new Date('10/18/2021')
-    }
+    // {
+    //   record_id: record.insertedIds[1],
+    //   image_id: image.insertedIds[1],
+    //   project_id: project.insertedIds[1],
+    //   hn: 5566,
+    //   status: modelStatus.AI_ANNOTATED,
+    //   label: "",
+    //   note: "",
+    //   rating: 0,
+    //   created_by: user.insertedIds[3],
+    //   createdAt: new Date('10/17/2021'),
+    //   updatedAt: new Date('10/17/2021')
+    // },
+    // {
+    //   record_id: record.insertedIds[2],
+    //   image_id: image.insertedIds[2],
+    //   project_id: project.insertedIds[1],
+    //   hn: 4149,
+    //   status: modelStatus.HUMAN_ANNOTATED,
+    //   label: { "finding": ["Pneumothorax"] },
+    //   note: "Pneumothorax -Gigi",
+    //   rating: 0,
+    //   created_by: user.insertedIds[1],
+    //   updated_by: user.insertedIds[3],
+    //   createdAt: new Date('10/18/2021'),
+    //   updatedAt: new Date('10/18/2021')
+    // },
+    // {
+    //   record_id: record.insertedIds[3],
+    //   image_id: image.insertedIds[3],
+    //   project_id: project.insertedIds[2],
+    //   hn: 5566,
+    //   status: modelStatus.HUMAN_ANNOTATED,
+    //   label: { "finding": ["Mass"] },
+    //   note: "Mass -Edward",
+    //   rating: 0,
+    //   created_by: user.insertedIds[2],
+    //   updated_by: user.insertedIds[4],
+    //   createdAt: new Date('10/18/2021'),
+    //   updatedAt: new Date('10/18/2021')
+    // }
   ])
 
   let mask = []
   let predClass = []
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 1; i++) {
     const date = 16 + i
     predClass.push({
       "result_id": predResult.insertedIds[i],
@@ -663,20 +664,20 @@ const webappSeed = async () => {
     })
   }
 
-  predClass[2]['prediction']['Pneumothorax'] = true
-  predClass[3]['prediction']['Mass'] = true
+  // predClass[2]['prediction']['Pneumothorax'] = true
+  // predClass[3]['prediction']['Mass'] = true
   
   await PredClass.collection.insertMany(predClass)
   await Mask.collection.insertMany(mask)
 
   let gradcam = []
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 1; i++) {
     const date = 16 + i
     focusingFinding.map(finding => {
       gradcam.push({
         "result_id": predResult.insertedIds[i],
         "finding": finding,
-        "gradcam_path": `results/0041018/classification_pylon_1024/${finding}.png`,
+        "gradcam_path": `results/20211018CR0846/classification_pylon_1024/${finding}.png`,
         // "gradcam_path": `results/0041018/${finding}.png`,
         "createdAt": new Date(`10/${date.toString()}/2021`),
         "updatedAt": new Date(`10/${date.toString()}/2021`)
