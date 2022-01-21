@@ -31,9 +31,7 @@ const inferResult = async (req, res) => {
         return res.status(400).json({ success: false, message: `Invalid input: "user_id" is required` })
     }
 
-    // mock-up
     // get filepath (from PACS) by accession no
-    let pacs = {}
     let project = {}
     try {
         project = await webModel.Project.findById(req.body.project_id)
@@ -79,8 +77,13 @@ const inferResult = async (req, res) => {
     // define directory path and AI server url
     const root = path.join(__dirname, "..");
     const projectDir = path.join(root, "/resources/results/", project.id)
-    const resultDir = path.join(projectDir, predResult.id)
-    const url = process.env.PY_SERVER + '/api/infer';
+    const resultDir = path.join(projectDir, (req.body.dir === 'local'? "local_": "") + predResult.id)
+
+    let url = ""
+    if (req.body.dir === 'local')
+        url = process.env.PY_SERVER + '/api/local/infer';
+    else
+        url = process.env.PY_SERVER + '/api/infer';
 
     try {
         // create record
@@ -139,7 +142,7 @@ const inferResult = async (req, res) => {
                 fs.writeFileSync(path.join(resultDir, '/result.zip'), res.data);
 
                 // extract zip file to result directory (overlay files + prediction file)
-                await extract(path.join(resultDir, '/result.zip'), { dir: resultDir })            
+                await extract(path.join(resultDir, '/result.zip'), { dir: resultDir })
 
                 // parse prediction.txt to JSON
                 let modelResult = JSON.parse(fs.readFileSync(path.join(resultDir, '/prediction.txt')));
@@ -147,8 +150,8 @@ const inferResult = async (req, res) => {
                 patient_name = "-"
                 if (modelResult.patient_name)
                     patient_name = modelResult.patient_name
-                    delete modelResult.patient_name
-                
+                delete modelResult.patient_name
+
                 let prediction = []
                 switch (project.task) {
                     case "classification_pylon_256":
@@ -178,9 +181,9 @@ const inferResult = async (req, res) => {
                                 })
                             }))
                             // update result's status to annotated
-                            await webModel.PredResult.findByIdAndUpdate(predResult._id, { 
+                            await webModel.PredResult.findByIdAndUpdate(predResult._id, {
                                 status: modelStatus.AI_ANNOTATED,
-                                patient_name 
+                                patient_name
                             })
                             // update probability prediction
                             await webModel.PredClass.findByIdAndUpdate(predClass._id, { prediction: prediction })
@@ -192,7 +195,7 @@ const inferResult = async (req, res) => {
                         fs.rm(resultDir, { recursive: true, force: true }, (err) => {
                             if (err) throw err
                         });
-                        await webModel.PredResult.findByIdAndUpdate(predResult._id, { 
+                        await webModel.PredResult.findByIdAndUpdate(predResult._id, {
                             status: modelStatus.AI_ANNOTATED,
                             patient_name: "-"
                         })

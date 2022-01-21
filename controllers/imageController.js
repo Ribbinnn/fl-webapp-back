@@ -2,7 +2,7 @@ const webModel = require('../models/webapp')
 const path = require('path');
 const axios = require('axios')
 
-const url = process.env.PY_SERVER;
+const pythonURL = process.env.PY_SERVER + '/api';
 
 // get image by accession_no (PACS) or by predicted result id + finding's name (overlay image)
 const getImage = async (req, res) => {
@@ -11,7 +11,12 @@ const getImage = async (req, res) => {
 
         // PACS
         if (req.query.accession_no) {
-            data = (await axios.get(url + `/api/pacs/acc_no/${req.query.accession_no}`, {
+            url = ""
+            if (req.query.dir === 'local')
+                url = pythonURL + `/local/acc_no/${req.query.accession_no}`
+            else
+                url = pythonURL + `/pacs/acc_no/${req.query.accession_no}`
+            data = (await axios.get(url, {
                 responseType: 'arraybuffer'
             })).data
             return res.status(200).send(data)

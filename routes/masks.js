@@ -5,7 +5,7 @@ const tokenValidation = require('../middlewares/tokenVerification')
 const verification = require('../middlewares/verification')
 
 // create mask(bounding box postion) by report id (pred_result_id)
-router.patch('/', tokenValidation, verification.reportVerification, verification.checkEditReportStatus, maskController.insertBBox)
+router.patch('/', tokenValidation, verification.radiologistVerification, verification.reportVerification, verification.checkEditReportStatus, maskController.insertBBox)
 
 // get bounding box postion by report id
 router.get('/report/:report_id', tokenValidation, verification.reportVerification, maskController.getBBox)

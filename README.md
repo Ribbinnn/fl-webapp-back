@@ -34,20 +34,21 @@ Vitals
 - DELETE /api/vitals/records/deletefile/:id (Delete entire record file by record_id) 
 
 Infer & Report
-- POST /api/infer (Start inference, reqBody = (accession_no, project_id, record, user_id) )
+- POST /api/infer (Start inference, reqBody = (accession_no, project_id, record, user_id, dir) )
 - GET /api/report/:rid (Get report by id)
 - GET /api/report/list/project/:project_id (View history by project id)
 - PATCH /api/report/ (Update or finalize report, reqBody = ( report_id, note, user_id, label, rating ) )
 - DELETE /api/report/delete/:rid (Delete report by id)
 
 Image
-- GET /api/image (get image, reqQuery = (result_id, finding, accession_no)) <br />
-  example: /api/image/?accession_no=74 (original file from PACS) <br />
+- GET /api/image/ (get image, reqQuery = (result_id, finding, accession_no, dir)) <br />
+  example: /api/image/?accession_no=0041018 (original file from PACS) <br />
+  example: /api/image/?accession_no=74&dir=local (original file from LOCAL) <br />
   example: /api/image/?result_id=6181884fdb269acd1bf1bd77&finding=Mass (overlay file)
 
 PACS
-- GET /api/pacs/HN/:HN ( Get all patient's data from pacs by HN )
-- GET /api/pacs/HN/:HN/info ( Get patient info by HN )
+- GET /api/pacs/HN/( Get all patient's data from pacs by HN, reqQuery = (HN, dir) )
+- GET /api/pacs/HN/info/ ( Get patient info by HN, reqQuery = (HN, dir) )
 
 Mask
 - PATCH /api/masks/ ( Crete bounding box position, reqBody=(report_id, data: [{label, tool, updated_by, data}, ...]) )
