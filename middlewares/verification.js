@@ -64,11 +64,13 @@ const reportVerification = async (req, res, next) => {
 const checkEditReportStatus = async (req, res, next) => {
     try {
         const report = await webModel.PredResult.findById(req.body.report_id);
-        if (!(report.status === modelStatus.AI_ANNOTATED || report.status === modelStatus.HUMAN_ANNOTATED))
-            return res.status(400).json({
-                success: false,
-                message: `Report's status must be 'Human-Annotated' or 'AI-Annotated' to be able to be updated`
-            });
+        if (req.body.dir !== 'local') {
+            if (!(report.status === modelStatus.AI_ANNOTATED || report.status === modelStatus.HUMAN_ANNOTATED))
+                return res.status(400).json({
+                    success: false,
+                    message: `Report's status must be 'Human-Annotated' or 'AI-Annotated' to be able to be updated`
+                });
+        }
     } catch (e) {
         return res.status(500).json({ success: false, message: 'Internal server error', error: e.message });
     }

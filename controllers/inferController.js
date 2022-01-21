@@ -77,7 +77,7 @@ const inferResult = async (req, res) => {
     // define directory path and AI server url
     const root = path.join(__dirname, "..");
     const projectDir = path.join(root, "/resources/results/", project.id)
-    const resultDir = path.join(projectDir, (req.body.dir === 'local'? "local_": "") + predResult.id)
+    const resultDir = path.join(projectDir, (req.body.dir === 'local' ? "local_" : "") + predResult.id)
 
     let url = ""
     if (req.body.dir === 'local')
@@ -92,12 +92,20 @@ const inferResult = async (req, res) => {
             record: req.body.record
         })
 
-        // create image
-        const image = await webModel.Image.create({
-            project_id: req.body.project_id,
-            accession_no: req.body.accession_no,
-            hn: req.body.record.hn
-        })
+        let image = undefined
+        if (req.body.dir === 'local') {
+            image = await webModel.Image.findOne({ accession_no: req.body.accession_no, dir: "local" })
+        }
+        if (!image) {
+            image = await webModel.Image.create({
+                project_id: req.body.project_id,
+                accession_no: req.body.accession_no,
+                hn: req.body.record.hn,
+                dir: req.body.dir === 'local' ? 'local' : 'pacs'
+            })
+        }
+
+        await webModel.Mask.create({ result_id: predResult._id, data: [], image_id: image._id })
 
         // update predicted result referenced to image and record
         await webModel.PredResult.findByIdAndUpdate(predResult._id, {
@@ -115,7 +123,6 @@ const inferResult = async (req, res) => {
 
         // create predicted class and mask
         const predClass = await webModel.PredClass.create({ result_id: predResult._id, prediction: {} })
-        const mask = await webModel.Mask.create({ result_id: predResult._id, data: [] })
 
         // create FormData to send to python server
         // const data = new FormData()

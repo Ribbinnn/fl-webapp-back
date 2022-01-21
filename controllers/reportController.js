@@ -242,7 +242,6 @@ const viewHistory = async (req, res) => {
           // const patientName = await PACS.findOne({ "Patient ID": String(hn) }, [
           //   "Patient Name",
           // ]);
-
           data.push({
             pred_result_id: item.id,
             status: item.status,
