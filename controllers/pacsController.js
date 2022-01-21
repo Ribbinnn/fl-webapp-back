@@ -137,7 +137,7 @@ const saveToPACS = async (req, res) => {
             .status(200)
             .json({
                 success: true,
-                message: `Save report ${req.query.report_id} to PACS successfully`,
+                message: `Save report to PACS successfully`,
                 data: report,
             });
 

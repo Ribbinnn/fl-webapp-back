@@ -47,8 +47,8 @@ Image
   example: /api/image/?result_id=6181884fdb269acd1bf1bd77&finding=Mass (overlay file)
 
 PACS
-- GET /api/pacs/HN/( Get all patient's data from pacs by HN, reqQuery = (HN, dir) )
-- GET /api/pacs/HN/info/ ( Get patient info by HN, reqQuery = (HN, dir) )
+- GET /api/pacs/( Get all patient's data from pacs by HN, reqQuery = (HN, dir) )
+- GET /api/pacs/info/ ( Get patient info by HN, reqQuery = (HN, dir) )
 
 Mask
 - PATCH /api/masks/ ( Crete bounding box position, reqBody=(report_id, data: [{label, tool, updated_by, data}, ...]) )
