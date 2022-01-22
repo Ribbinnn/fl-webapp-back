@@ -13,7 +13,7 @@ const schema = new Schema(
             data: { type: Object },
             updated_time: { type: Date }
         }],
-        image_id: { type: ObjectId, ref: "images" },
+        accession_no: { type: String },
     },
     {
         timestamps: true

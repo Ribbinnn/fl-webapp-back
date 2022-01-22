@@ -55,8 +55,8 @@ Mask
 - GET /api/masks/report/:report_id ( Get bounding box position by report id )
 
 Mask (Local)
-- PATCH /api/masks/local ( Crete bounding box position, reqBody=(report_id, mask_id, data: [{label, tool, updated_by, data}, ...]) )
-- GET /api/masks/local ( Get bounding box position by report id, reqQuery = (report_id, project_id, HN, accession_no) )
+- PATCH /api/masks/local ( Crete bounding box position, reqBody=( mask_id, data: [{label, tool, updated_by, data}, ...]) )
+- GET /api/masks/local ( Get bounding box position by report id, reqQuery = (accession_no) )
 
 **Admin API PATH** <br />
 Webapp Project

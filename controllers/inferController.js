@@ -87,25 +87,19 @@ const inferResult = async (req, res) => {
 
     try {
         // create record
-        record = await webModel.MedRecord.create({
+        const record = await webModel.MedRecord.create({
             project_id: req.body.project_id,
             record: req.body.record
         })
 
-        let image = undefined
-        if (req.body.dir === 'local') {
-            image = await webModel.Image.findOne({ accession_no: req.body.accession_no, dir: "local" })
-        }
-        if (!image) {
-            image = await webModel.Image.create({
-                project_id: req.body.project_id,
-                accession_no: req.body.accession_no,
-                hn: req.body.record.hn,
-                dir: req.body.dir === 'local' ? 'local' : 'pacs'
-            })
-        }
+        const image = await webModel.Image.create({
+            project_id: req.body.project_id,
+            accession_no: req.body.accession_no,
+            hn: req.body.record.hn,
+            dir: req.body.dir === 'local' ? 'local' : 'pacs'
+        })
 
-        await webModel.Mask.create({ result_id: predResult._id, data: [], image_id: image._id })
+        await webModel.Mask.create({ result_id: predResult._id, data: [] })
 
         // update predicted result referenced to image and record
         await webModel.PredResult.findByIdAndUpdate(predResult._id, {

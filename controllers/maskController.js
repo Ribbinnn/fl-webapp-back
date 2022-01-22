@@ -16,7 +16,7 @@ const schema = {
 };
 
 const validator = Joi.object(schema);
-const validatorLocal = Joi.object({...schema, report_id: Joi.string()});
+const validatorLocal = Joi.object({ ...schema, report_id: Joi.string() });
 
 const insertBBox = async (req, res) => {
     const validatedResult = validator.validate(req.body)
@@ -27,9 +27,9 @@ const insertBBox = async (req, res) => {
         const mask = await webModel.Mask.findOneAndUpdate({ result_id: req.body.report_id }, {
             data: req.body.data
         }, { new: true })
-        await webModel.PredResult.findByIdAndUpdate(req.body.report_id, { 
+        await webModel.PredResult.findByIdAndUpdate(req.body.report_id, {
             status: modelStatus.HUMAN_ANNOTATED,
-            updated_by: req.user._id 
+            updated_by: req.user._id
         })
         return res.status(200).json({
             success: true,
@@ -70,18 +70,13 @@ const insertBBoxLocal = async (req, res) => {
         return res.status(400).json({ success: false, message: `Invalid input: ${(validatedResult.error.message)}` })
     }
     try {
-        const mask = await webModel.Mask.findOneAndUpdate( { _id: req.body.mask_id }, {
+        const mask = await webModel.Mask.findOneAndUpdate({ _id: req.body.mask_id }, {
             data: req.body.data
         }, { new: true })
-        if (req.body.report_id) {
-            await webModel.PredResult.findByIdAndUpdate(req.body.report_id, {
-                status: modelStatus.HUMAN_ANNOTATED,
-                updated_by: req.user._id
-            })
-        }
+
         return res.status(200).json({
             success: true,
-            message: `Insert bounding boxes successfully`,
+            message: `Insert bounding boxes ${req.body.mask_id} successfully`,
             data: mask
         })
     } catch (e) {
@@ -92,41 +87,23 @@ const insertBBoxLocal = async (req, res) => {
 const getBBoxLocal = async (req, res) => {
     // req.query.accession_no , req.query.project_id, req.query.HN
     try {
-        let image = ""
         let mask = ""
-        image = await webModel.Image.findOne({ accession_no: req.query.accession_no, dir: "local" })
-        if (!image) {
-            image = await webModel.Image.create({
-                project_id: req.query.project_id,
-                accession_no: req.query.accession_no,
-                hn: req.query.HN,
-                dir: 'local'
-            })
-            await webModel.Mask.create({ data: [], image_id: image._id })
+        mask = await webModel.Mask.findOne({ accession_no: req.query.accession_no })
+        if (!mask) {
+            mask = await webModel.Mask.create({ data: [], accession_no: req.query.accession_no })
         }
-        mask = await webModel.Mask
-            .find({ image_id: image._id })
-            .populate({
-                path: 'data.updated_by',
-                select: 'username first_name last_name'
-            } );
-        if (mask.length === 1 && mask[0].result_id) {
-            await webModel.Mask.create({ data: [], image_id: image._id })
-            mask = await webModel.Mask
-            .find({ image_id: image._id })
-            .populate({
-                path: 'data.updated_by',
-                select: 'username first_name last_name'
-            } );
-        }
-        // const user = await webModel.User.findById(req.user._id, ['first_name', 'last_name'])
-        // let data = mask.toObject()
-        // data.user = user
+        mask = await webModel.Mask.findOne({ accession_no: req.query.accession_no }).populate({
+            path: 'data.updated_by',
+            select: 'username first_name last_name'
+        });
+        const user = await webModel.User.findById(req.user._id, ['first_name', 'last_name'])
+        const data = mask.toObject()
+        data.user = user
 
         return res.status(200).json({
             success: true,
             message: `Get bounding boxes successfully`,
-            data: mask
+            data
         })
     } catch (e) {
         return res.status(500).json({ success: false, message: 'Internal server error', error: e.message });
