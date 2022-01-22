@@ -155,7 +155,7 @@ const inferResult = async (req, res) => {
 
                 let prediction = []
                 switch (project.task) {
-                    case "classification_pylon_256":
+                    // case "classification_pylon_256":
                     case "classification_pylon_1024":
                         for (let i = 0; i < modelResult["Finding"].length; i++) {
                             prediction.push({
@@ -178,7 +178,8 @@ const inferResult = async (req, res) => {
                                 await webModel.Gradcam.create({
                                     result_id: predResult._id,
                                     finding: item.split('.')[0],
-                                    gradcam_path: `results/${project.id}/${String(predResult._id)}/${item}`
+                                    gradcam_path:
+                                        `results/${project.id}/${(req.body.dir === 'local' ? "local_" : "") + String(predResult._id)}/${item}`
                                 })
                             }))
                             // update result's status to annotated
@@ -191,18 +192,18 @@ const inferResult = async (req, res) => {
                             console.log('Finish')
                         })
                         break;
-                    case "covid19_admission":
-                        prediction = modelResult
-                        fs.rm(resultDir, { recursive: true, force: true }, (err) => {
-                            if (err) throw err
-                        });
-                        await webModel.PredResult.findByIdAndUpdate(predResult._id, {
-                            status: modelStatus.AI_ANNOTATED,
-                            patient_name: "-"
-                        })
-                        await webModel.PredClass.findByIdAndUpdate(predClass._id, { prediction: prediction })
-                        console.log('Finish')
-                        break;
+                    // case "covid19_admission":
+                    //     prediction = modelResult
+                    //     fs.rm(resultDir, { recursive: true, force: true }, (err) => {
+                    //         if (err) throw err
+                    //     });
+                    //     await webModel.PredResult.findByIdAndUpdate(predResult._id, {
+                    //         status: modelStatus.AI_ANNOTATED,
+                    //         patient_name: "-"
+                    //     })
+                    //     await webModel.PredClass.findByIdAndUpdate(predClass._id, { prediction: prediction })
+                    //     console.log('Finish')
+                    //     break;
                     default:
                         break;
                 }
