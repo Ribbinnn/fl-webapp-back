@@ -26,25 +26,40 @@ const getInfoByHN = async (req, res) => {
             data: data.data['Patient ID'] ? data.data : undefined
         })
     } catch (e) {
+        if (e.response)
+            return res.status(e.response.status).json({ success: false, message: e.response.data.message })
         return res.status(500).json({ success: false, message: 'Internal server error', error: e.message })
     }
 }
 
 // get all data from PACS by HN
-const getAllByHN = async (req, res) => {
+const getAllByQuery = async (req, res) => {
     try {
         let url = ""
-        if (req.query.dir === 'local')
-            url = pythonURL + `/local/HN/${req.query.HN}`
+        let params = {}
+        if (req.query.dir === 'local') {
+            
+            url = pythonURL + `/local/HN/`
+            params = {
+                params: {
+                    hn: req.query.HN,
+                    acc_no: req.query.accession_no,
+                    start_date: req.query.start_date? (new Date(req.query.start_date)).getTime(): undefined,
+                    end_date: req.query.end_date? (new Date(req.query.end_date)).getTime(): undefined
+                }
+            }
+        }
         else
             url = pythonURL + `/pacs/HN/${req.query.HN}`
-        const data = (await axios.get(url)).data;
+        const data = (await axios.get(url, params)).data;
         return res.status(200).json({
             success: true,
             message: 'Get dicom files by HN successfully',
             data: data.data
         })
     } catch (e) {
+        if (e.response)
+            return res.status(e.response.status).json({ success: false, message: e.response.data.message })
         return res.status(500).json({ success: false, message: 'Internal server error', error: e.message })
     }
 }
@@ -137,7 +152,7 @@ const saveToPACS = async (req, res) => {
             .status(200)
             .json({
                 success: true,
-                message: `Save report ${req.query.report_id} to PACS successfully`,
+                message: `Save report to PACS successfully`,
                 data: report,
             });
 
@@ -155,6 +170,6 @@ const saveToPACS = async (req, res) => {
 
 module.exports = {
     getInfoByHN,
-    getAllByHN,
-    saveToPACS,
+    getAllByQuery,
+    saveToPACS
 }
