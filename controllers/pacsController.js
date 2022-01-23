@@ -12,29 +12,42 @@ const pythonURL = process.env.PY_SERVER + '/api/pacs';
 const getInfoByHN = async (req, res) => {
     try {
         const data = (
-            await axios.get(pythonURL + `/HN/${req.params.HN}/info`)
+            await axios.get(pythonURL + `/HN/${req.query.HN}/info`)
         ).data;
-        
+
         return res.status(200).json({
             success: true,
             message: "Get patient's info successfully",
-            data: data.data['Patient ID']? data.data: undefined
+            data: data.data['Patient ID'] ? data.data : undefined
         })
     } catch (e) {
+        if (e.response)
+            return res.status(e.response.status).json({ success: false, message: e.response.data.message })
         return res.status(500).json({ success: false, message: 'Internal server error', error: e.message })
     }
 }
 
 // get all data from PACS by HN
-const getAllByHN = async (req, res) => {
+const getAllByQuery = async (req, res) => {
     try {
-        const data = (await axios.get(pythonURL + "/HN/" + req.params.HN)).data;
+        const params = {
+            params: {
+                hn: req.query.HN,
+                acc_no: req.query.accession_no,
+                start_date: req.query.start_date ? (new Date(req.query.start_date)).getTime() : undefined,
+                end_date: req.query.end_date ? (new Date(req.query.end_date)).getTime() : undefined
+            }
+        }
+
+        const data = (await axios.get(pythonURL + "/HN/", params)).data;
         return res.status(200).json({
             success: true,
             message: 'Get dicom files by HN successfully',
             data: data.data
         })
     } catch (e) {
+        if (e.response)
+            return res.status(e.response.status).json({ success: false, message: e.response.data.message })
         return res.status(500).json({ success: false, message: 'Internal server error', error: e.message })
     }
 }
@@ -145,6 +158,6 @@ const saveToPACS = async (req, res) => {
 
 module.exports = {
     getInfoByHN,
-    getAllByHN,
+    getAllByQuery,
     saveToPACS
 }
