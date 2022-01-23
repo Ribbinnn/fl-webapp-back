@@ -5,10 +5,10 @@ const verification = require('../middlewares/verification')
 const tokenValidation = require('../middlewares/tokenVerification')
 
 // get all dicom rows by patient's HN
-router.get('/', pacsController.getAllByQuery)
+router.get('/', tokenValidation, pacsController.getAllByQuery)
 
 // get patient's data from PACS
-router.get('/info/', pacsController.getInfoByHN);
+router.get('/info/', tokenValidation, pacsController.getInfoByHN);
 
 // save back to PACS
 router.post(
