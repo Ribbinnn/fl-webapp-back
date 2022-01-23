@@ -77,7 +77,7 @@ const inferResult = async (req, res) => {
     // define directory path and AI server url
     const root = path.join(__dirname, "..");
     const projectDir = path.join(root, "/resources/results/", project.id)
-    const resultDir = path.join(projectDir, (req.body.dir === 'local'? "local_": "") + predResult.id)
+    const resultDir = path.join(projectDir, (req.body.dir === 'local' ? "local_" : "") + predResult.id)
 
     let url = ""
     if (req.body.dir === 'local')
@@ -87,17 +87,19 @@ const inferResult = async (req, res) => {
 
     try {
         // create record
-        record = await webModel.MedRecord.create({
+        const record = await webModel.MedRecord.create({
             project_id: req.body.project_id,
             record: req.body.record
         })
 
-        // create image
         const image = await webModel.Image.create({
             project_id: req.body.project_id,
             accession_no: req.body.accession_no,
-            hn: req.body.record.hn
+            hn: req.body.record.hn,
+            dir: req.body.dir === 'local' ? 'local' : 'pacs'
         })
+
+        await webModel.Mask.create({ result_id: predResult._id, data: [] })
 
         // update predicted result referenced to image and record
         await webModel.PredResult.findByIdAndUpdate(predResult._id, {
@@ -115,7 +117,6 @@ const inferResult = async (req, res) => {
 
         // create predicted class and mask
         const predClass = await webModel.PredClass.create({ result_id: predResult._id, prediction: {} })
-        const mask = await webModel.Mask.create({ result_id: predResult._id, data: [] })
 
         // create FormData to send to python server
         // const data = new FormData()
@@ -154,7 +155,7 @@ const inferResult = async (req, res) => {
 
                 let prediction = []
                 switch (project.task) {
-                    case "classification_pylon_256":
+                    // case "classification_pylon_256":
                     case "classification_pylon_1024":
                         for (let i = 0; i < modelResult["Finding"].length; i++) {
                             prediction.push({
@@ -177,7 +178,8 @@ const inferResult = async (req, res) => {
                                 await webModel.Gradcam.create({
                                     result_id: predResult._id,
                                     finding: item.split('.')[0],
-                                    gradcam_path: `results/${project.id}/${String(predResult._id)}/${item}`
+                                    gradcam_path:
+                                        `results/${project.id}/${(req.body.dir === 'local' ? "local_" : "") + String(predResult._id)}/${item}`
                                 })
                             }))
                             // update result's status to annotated
@@ -190,18 +192,18 @@ const inferResult = async (req, res) => {
                             console.log('Finish')
                         })
                         break;
-                    case "covid19_admission":
-                        prediction = modelResult
-                        fs.rm(resultDir, { recursive: true, force: true }, (err) => {
-                            if (err) throw err
-                        });
-                        await webModel.PredResult.findByIdAndUpdate(predResult._id, {
-                            status: modelStatus.AI_ANNOTATED,
-                            patient_name: "-"
-                        })
-                        await webModel.PredClass.findByIdAndUpdate(predClass._id, { prediction: prediction })
-                        console.log('Finish')
-                        break;
+                    // case "covid19_admission":
+                    //     prediction = modelResult
+                    //     fs.rm(resultDir, { recursive: true, force: true }, (err) => {
+                    //         if (err) throw err
+                    //     });
+                    //     await webModel.PredResult.findByIdAndUpdate(predResult._id, {
+                    //         status: modelStatus.AI_ANNOTATED,
+                    //         patient_name: "-"
+                    //     })
+                    //     await webModel.PredClass.findByIdAndUpdate(predClass._id, { prediction: prediction })
+                    //     console.log('Finish')
+                    //     break;
                     default:
                         break;
                 }

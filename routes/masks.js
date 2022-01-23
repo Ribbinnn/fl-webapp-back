@@ -10,4 +10,10 @@ router.patch('/', tokenValidation, verification.radiologistVerification, verific
 // get bounding box postion by report id
 router.get('/report/:report_id', tokenValidation, verification.reportVerification, maskController.getBBox)
 
+// create mask(bounding box postion) local
+router.patch('/local', tokenValidation, maskController.insertBBoxLocal)
+
+// get bounding box postion by report id local
+router.get('/local/', tokenValidation, maskController.getBBoxLocal)
+
 module.exports = router;

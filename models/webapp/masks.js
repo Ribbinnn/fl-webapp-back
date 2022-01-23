@@ -13,6 +13,7 @@ const schema = new Schema(
             data: { type: Object },
             updated_time: { type: Date }
         }],
+        accession_no: { type: String },
     },
     {
         timestamps: true
