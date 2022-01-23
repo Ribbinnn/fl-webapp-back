@@ -47,7 +47,7 @@ Image
   example: /api/image/?result_id=6181884fdb269acd1bf1bd77&finding=Mass (overlay file)
 
 PACS
-- GET /api/pacs/( Get all patient's data from pacs by HN, reqQuery = (HN, dir) )
+- GET /api/pacs/( Get all patient's data from pacs by HN, reqQuery = (HN, dir, accession_no, start_date, end_date) ) * dir, accession_no, start_date, and end_date are used when query from local directory only
 - GET /api/pacs/info/ ( Get patient info by HN, reqQuery = (HN, dir) )
 
 Mask
@@ -101,6 +101,8 @@ User
       build: ./fl-webapp-model
       ports:
         - '7000:7000'
+      # volumes:
+        # - /fl-webapp-model/resources:/code/resources
     mongo:
       container_name: mongo
       build: ./
