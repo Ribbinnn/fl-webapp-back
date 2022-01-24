@@ -8,6 +8,49 @@ const schema = new mg.Schema();
 let projectIds = {}
 let userIds = {}
 
+const pylon_classes = [
+  'No Finding',
+  'Mass',
+  'Nodule',
+  'Lung Opacity',
+  'Patchy Opacity',
+  'Reticular Opacity',
+  'Reticulonodular Opacity',
+  'Nodular Opacity',
+  'Linear Opacity',
+  'Nipple Shadow',
+  'Osteoporosis',
+  'Osteopenia',
+  'Osteolytic Lesion',
+  'Fracture',
+  'Healed Fracture',
+  'Old Fracture',
+  'Spondylosis',
+  'Scoliosis',
+  'Sclerotic Lesion',
+  'Mediastinal Mass',
+  'Cardiomegaly',
+  'Pleural Effusion',
+  'Pleural Thickening',
+  'Edema',
+  'Hiatal Hernia',
+  'Pneumothorax',
+  'Atelectasis',
+  'Subsegmental Atelectasis',
+  'Elevation Of Hemidiaphragm',
+  'Tracheal-Mediastinal Shift',
+  'Volume Loss',
+  'Bronchiectasis',
+  'Enlarged Hilum',
+  'Atherosclerosis',
+  'Tortuous Aorta',
+  'Calcified Tortuous Aorta',
+  'Calcified Aorta',
+  'Support Devices',
+  'Surgical Material',
+  'Suboptimal Inspiration'
+]
+
 dotenv.config();
 
 const webappSeed = async () => {
@@ -46,10 +89,42 @@ const webappSeed = async () => {
       status: userStatus.ACTIVE,
       createdAt: new Date('10/1/2021'),
       updatedAt: new Date('10/1/2021')
+    },
+    {
+      username: 'user',
+      password: passwordHash,
+      email: 'user@gmail.com',
+      first_name: 'user',
+      last_name: 'user',
+      role: userRole.RADIOLOGIST,
+      token: [],
+      projects: [],
+      isChulaSSO: false,
+      status: userStatus.ACTIVE,
+      createdAt: new Date('10/1/2021'),
+      updatedAt: new Date('10/1/2021')
     }
   ])
 
-  
+  const project = await Project.collection.insertMany([
+    {
+      name: 'Abnormal Detection',
+      task: 'classification_pylon_1024',
+      description: '2D_image_classification for abnormal detection',
+      requirements: [],
+      predClasses: pylon_classes,
+      users: [user.insertedIds[1]],
+      head: [user.insertedIds[1]],
+      rating: 0,
+      rating_count: 0,
+      createdAt: new Date('10/16/2021'),
+      updatedAt: new Date('10/16/2021')
+    },
+  ])
+
+  await User.collection.updateOne({ _id: user.insertedIds[1] }, { $set: { projects: [project.insertedIds[0]] } })
+
+
   mongoose.close()
 }
 
