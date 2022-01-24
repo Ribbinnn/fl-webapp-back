@@ -88,7 +88,7 @@ User
       ports:
         - '5000:5000'
       volumes:
-        - back:/usr/src/app/resources # /fl-webapp-back/resources:/usr/src/app/resources
+        - /path/to/fl-webapp-back/resources:/usr/src/app/resources # host_directory:docker_directory
     webapp-front:
       container_name: webapp-front
       restart: always
@@ -101,8 +101,8 @@ User
       build: ./fl-webapp-model
       ports:
         - '7000:7000'
-      # volumes:
-        # - /fl-webapp-model/resources:/code/resources
+      volumes:
+        - /path/to/fl-webapp-model/resources:/code/resources # host_directory:docker_directory
     mongo:
       container_name: mongo
       build: ./
@@ -112,13 +112,12 @@ User
         - mongodb:/data/db
   volumes:
     mongodb:
-    back:
   ```
   Dockerfile
   ```
   FROM mongo
-  ENV MONGO_INITDB_ROOT_USERNAME root
-  ENV MONGO_INITDB_ROOT_PASSWORD password
+  ENV MONGO_INITDB_ROOT_USERNAME <root>
+  ENV MONGO_INITDB_ROOT_PASSWORD <password>
   ENV MONGO_INITDB_DATABASE admin
   ADD mongo-init.js /docker-entrypoint-initdb.d/
   ```

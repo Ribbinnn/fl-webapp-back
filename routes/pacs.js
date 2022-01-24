@@ -11,11 +11,11 @@ router.get('/', tokenValidation, pacsController.getAllByHN)
 router.get('/info/', tokenValidation, pacsController.getInfoByHN);
 
 // save back to PACS
-router.post(
-    '/save/:report_id',
-    tokenValidation,
-    verification.reportVerification,
-    pacsController.saveToPACS
-)
+// router.post(
+//     '/save/:report_id',
+//     tokenValidation,
+//     verification.reportVerification,
+//     pacsController.saveToPACS
+// )
 
 module.exports = router;
