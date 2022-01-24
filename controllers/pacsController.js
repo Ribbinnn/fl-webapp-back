@@ -33,7 +33,7 @@ const getInfoByHN = async (req, res) => {
 }
 
 // get all data from PACS by HN
-const getAllByHN = async (req, res) => {
+const getAllByQuery = async (req, res) => {
     try {
         let url = ""
         let params = {}
@@ -152,7 +152,7 @@ const saveToPACS = async (req, res) => {
             .status(200)
             .json({
                 success: true,
-                message: `Save report ${req.query.report_id} to PACS successfully`,
+                message: `Save report to PACS successfully`,
                 data: report,
             });
 
@@ -170,6 +170,6 @@ const saveToPACS = async (req, res) => {
 
 module.exports = {
     getInfoByHN,
-    getAllByHN,
-    saveToPACS,
+    getAllByQuery,
+    saveToPACS
 }

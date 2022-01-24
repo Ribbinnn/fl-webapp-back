@@ -197,7 +197,7 @@ const inferResult = async (req, res) => {
                     //     fs.rm(resultDir, { recursive: true, force: true }, (err) => {
                     //         if (err) throw err
                     //     });
-                    //     await webModel.PredResult.findByIdAndUpdate(predResult._id, {
+                    //     await webModel.PredResult.findByIdAndUpdate(predResult._id, { 
                     //         status: modelStatus.AI_ANNOTATED,
                     //         patient_name: "-"
                     //     })
