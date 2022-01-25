@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "nodemon ./bin/www",
-    "initDB": "node ./db/migration/webappMigrate.js"
+    "initDB": "node ./db/migration/webappMigrate.js",
+    "initAdmin": "node ./db/migration/adminMigrate.js"
   },
   "dependencies": {
     "adm-zip": "^0.5.9",
