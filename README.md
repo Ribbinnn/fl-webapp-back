@@ -46,8 +46,9 @@ Image
   example: /api/image/?result_id=6181884fdb269acd1bf1bd77&finding=Mass (overlay file)
 
 PACS
-- GET /api/pacs/HN/:HN ( Get all patient's data from pacs by HN )
-- GET /api/pacs/HN/:HN/info ( Get patient info by HN )
+- GET /api/pacs/ ( Get all patient's data from pacs by HN, reqQuery = (HN, accession_no, start_date, end_date) )
+- GET /api/pacs/info/ ( Get patient info by HN, reqQuery = (HN, dir) )
+- POST /api/pacs/save/:report_id ( Save report to PACS )
 
 Mask
 - PATCH /api/masks/ ( Crete bounding box position, reqBody=(report_id, data: [{label, tool, updated_by, data}, ...]) )
@@ -96,6 +97,8 @@ User
       build: ./fl-webapp-model
       ports:
         - '7000:7000'
+      # volumes:
+        # - /fl-webapp-model/resources:/code/resources
     mongo:
       container_name: mongo
       build: ./

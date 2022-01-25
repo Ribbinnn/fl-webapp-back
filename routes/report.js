@@ -28,12 +28,4 @@ router.get(
     reportController.viewHistory
 )
 
-// save back to PACS
-router.post(
-    '/pacs/',
-    tokenValidation,
-    verification.reportVerification,
-    reportController.saveToPACS
-)
-
 module.exports = router;

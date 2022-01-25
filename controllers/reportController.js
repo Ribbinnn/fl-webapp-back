@@ -1,7 +1,6 @@
 const Joi = require("joi");
 const webModel = require("../models/webapp");
 const { modelStatus } = require("../utils/status");
-const axios = require('axios');
 
 const schema = {
   report_id: Joi.string().required(),
@@ -239,7 +238,7 @@ const viewHistory = async (req, res) => {
           //     finding = item.label.finding
           // }
 
-          const hn = item.record_id.record.hn;
+          const hn = item.hn;
           // const patientName = await PACS.findOne({ "Patient ID": String(hn) }, [
           //   "Patient Name",
           // ]);
@@ -275,65 +274,9 @@ const viewHistory = async (req, res) => {
   }
 };
 
-// save report back to PACS
-const saveToPACS = async (req, res) => {
-  // request: params = report_id
-  try {
-    let report = await webModel.PredResult.findById(
-      req.params.report_id
-    ).populate("project_id", "image_id");
-
-    // check if report's status is human-annoated and user is project's head
-    if (
-      !report ||
-      report.status !== modelStatus.HUMAN_ANNOTATED ||
-      !report.project_id.head.includes(req.user._id)
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: !report.project_id.head.includes(req.user._id)
-          ? `User must be project's head to save report ${req.params.report_id} back to PACS`
-          : `Report's status must be 'Human-Annotated' to be saved to PACS`,
-      });
-    }
-
-    /* CALLS PYTHON API */
-
-    await webModel.Image.findByIdAndUpdate(report.image_id._id, {
-      hn: "-"
-    })
-    await webModel.MedRecord.findByIdAndUpdate(report.record_id, {
-      hn: ""
-    })
-    report = await webModel.PredResult.findByIdAndUpdate(req.params.report_id, {
-      hn: "-",
-      patient_name: "-",
-      status: modelStatus.FINALIZED
-    }, { new: true })
-
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: `Save report ${req.params.rid} to PACS successfully`,
-        data: report,
-      });
-
-  } catch (e) {
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Internal server error",
-        error: e.message,
-      });
-  }
-};
-
 module.exports = {
   getById,
   update,
   viewHistory,
   deleteById,
-  saveToPACS,
 };
