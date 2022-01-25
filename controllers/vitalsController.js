@@ -11,8 +11,8 @@ const schema = {
         Joi.object({
             'entry_id': Joi.required(),
             'hn': Joi.required(),
-            'gender(male/female)': Joi.required().valid('male', 'female'),
-            'age(year)': Joi.required(),
+            // 'gender(male/female)': Joi.required().valid('male', 'female'),
+            // 'age(year)': Joi.required(),
             'measured_time(yyyy-MM-ddTHH:mm:ssZ)': Joi.required()
         }).unknown(true)).unique('entry_id')
 };
@@ -23,8 +23,8 @@ const update_schema = {
         Joi.object({
             'entry_id': Joi.required(),
             'hn': Joi.required(),
-            'gender': Joi.required(),
-            'age': Joi.required(),
+            // 'gender': Joi.required(),
+            // 'age': Joi.required(),
             'measured_time': Joi.required(),
             // 'updated_time': Joi.required()
         }).unknown(true)).unique('entry_id'),
@@ -63,8 +63,8 @@ const create = async (req, res) => {
         const requirements = [
             { name: "entry_id", type: "number", unit: "none" },
             { name: "hn", type: "number", unit: "none" },
-            { name: "gender", type: "string", unit: "male/female" },
-            { name: "age", type: "number", unit: "year" },
+            // { name: "gender", type: "string", unit: "male/female" },
+            // { name: "age", type: "number", unit: "year" },
             { name: "measured_time", type: "object", unit: "yyyy-MM-ddTHH:mm:ssZ" },
             ...webProject.requirements
         ]
@@ -310,7 +310,7 @@ const generateTemplate = async (req, res) => {
         const project = await webModel.Project.findById(req.params.project_id)
 
         const requirements = project.requirements.map(item => `${item.name}${item.unit == 'none' ? "" : "(" + item.unit + ")"}`)
-        const headerField = ["entry_id", "hn", "measured_time(yyyy-MM-ddTHH:mm:ssZ)", "gender(male/female)", "age(year)", ...requirements]
+        const headerField = ["entry_id", "hn", "measured_time(yyyy-MM-ddTHH:mm:ssZ)", ...requirements]
 
         const ws = XLSX.utils.json_to_sheet([], { header: headerField })
         const wb = XLSX.utils.book_new();
