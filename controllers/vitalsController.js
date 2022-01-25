@@ -11,7 +11,7 @@ const schema = {
         Joi.object({
             'entry_id': Joi.required(),
             'hn': Joi.required(),
-            'gender(male/female)': Joi.required().valid('male', 'female'),
+            'gender(male/female)': Joi.required(), // valid('male', 'female'),
             'age(year)': Joi.required(),
             'measured_time(yyyy-MM-ddTHH:mm:ssZ)': Joi.required()
         }).unknown(true)).unique('entry_id')
