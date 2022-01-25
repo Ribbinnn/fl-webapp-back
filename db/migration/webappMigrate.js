@@ -443,7 +443,7 @@ const webappSeed = async () => {
       name: 'Abnormal Detection',
       task: 'classification_pylon_1024',
       description: '2D_image_classification for abnormal detection',
-      requirements: [{ name: 'fever', type: 'string', unit: 'none' }],
+      requirements: [],
       predClasses: pylon_classes,
       users: [user.insertedIds[0], user.insertedIds[1], user.insertedIds[2], user.insertedIds[3], user.insertedIds[4], user.insertedIds[5]],
       head: [user.insertedIds[2]],
@@ -467,7 +467,7 @@ const webappSeed = async () => {
     },
     {
       name: 'Abnormal Detection (256)',
-      task: 'classification_pylon_256',
+      task: 'classification_pylon_1024',
       description: '2D_image_classification(256) for abnormal detection',
       requirements: [{ name: 'fever', type: 'string', unit: 'none' }],
       predClasses: pylon_classes,

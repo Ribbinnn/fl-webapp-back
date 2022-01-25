@@ -157,6 +157,8 @@ const inferResult = async (req, res) => {
                             prediction.push({
                                 finding: modelResult["Finding"][i],
                                 confidence: modelResult["Confidence"][i],
+                                threshold: modelResult["Threshold"][i],
+                                isPositive: modelResult["isPositive"][i],
                                 selected: false
                             })
                         }
