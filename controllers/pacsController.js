@@ -22,7 +22,7 @@ const getInfoByHN = async (req, res) => {
         })
     } catch (e) {
         if (e.response)
-            return res.status(e.response.status).json({ success: false, message: e.response.data.message })
+            return res.status(e.response.status).json({ success: false, message: `${e.response.data.message}` })
         return res.status(500).json({ success: false, message: 'Internal server error', error: e.message })
     }
 }
@@ -47,7 +47,7 @@ const getAllByQuery = async (req, res) => {
         })
     } catch (e) {
         if (e.response)
-            return res.status(e.response.status).json({ success: false, message: e.response.data.message })
+            return res.status(e.response.status).json({ success: false, message: `${e.response.data.message}` })
         return res.status(500).json({ success: false, message: 'Internal server error', error: e.message })
     }
 }
@@ -93,11 +93,12 @@ const saveToPACS = async (req, res) => {
         let bbox_data = (await webModel.Mask.findOne({ result_id: report._id })).toObject();
         bbox_data['acc_no'] = report.image_id.accession_no
         const zip = new AdmZip();
+        // select heatmap to be sent to pacs
         report.label.finding.map(finding => {
-            if (finding == 'No Finding') finding = 'original'
-            if (fs.existsSync(path.join(resultDir, finding + '.png'))) {
+            if (finding != 'No Finding' && fs.existsSync(path.join(resultDir, finding + '.png'))) {
                 // await fs.promises.copyFile(path.join(resultDir, finding + '.png'), path.join(reqDir, finding + '.png'))
-                zip.addLocalFile(path.join(resultDir, finding + '.png'))
+                imgName = finding.split(' ').join('_')
+                zip.addLocalFile(path.join(resultDir, finding + '.png'), "", imgName + '.png')
             }
         })
         zip.writeZip(reqDir);
@@ -119,7 +120,7 @@ const saveToPACS = async (req, res) => {
             })
         ).data;
 
-        console.log(response)
+        // delete hn in database and change report's status
         await webModel.Image.findByIdAndUpdate(report.image_id._id, {
             hn: null
         })
@@ -148,6 +149,8 @@ const saveToPACS = async (req, res) => {
         if (fs.existsSync(reqDir)) {
             fs.rmSync(reqDir);
         }
+        if (e.response)
+            return res.status(e.response.status).json({ success: false, message: `${e.response.data.message}` })
         return res.status(500).json({
             success: false,
             message: "Internal server error",

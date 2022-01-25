@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 const tokenGenerator = require('../middlewares/tokenGenerator');
 const webModel = require('../models/webapp')
 const axios = require('axios')
-const { userStatus } = require('../utils/status')
+const { userStatus, userRole } = require('../utils/status')
 
 dotenv.config();
 
@@ -75,6 +75,13 @@ const chulaSSO = async (req, res) => {
             }
         })).data
 
+        if (!response.gecos.includes('MED')) {
+            return res.status(401).json({
+                success: false,
+                message: 'User must be a member of The Faculty of Medicine to access this Web Application'
+            })
+        }
+
         // console.log(response.username, response.email, response.roles)
         let user = await webModel.User.findOne({ username: response.username })
         if (!user) {
@@ -83,7 +90,7 @@ const chulaSSO = async (req, res) => {
                 email: response.email,
                 first_name: response.firstname,
                 last_name: response.lastname,
-                role: response.roles[0],
+                role: userRole.RADIOLOGIST,
                 token: [],
                 isChulaSSO: true,
                 projects: [],
