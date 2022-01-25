@@ -18,6 +18,7 @@ const schema = {
 };
 
 const update_schema = {
+    project_id: Joi.string().required(),
     record_id: Joi.string().required(),
     update_data: Joi.array().items(
         Joi.object({
@@ -210,6 +211,30 @@ const updateRecRow = async (req, res) => {
         return res.status(400).json({ success: false, message: `Invalid input: ${(validatedResult.error.message)}` })
     }
     try {
+        // validate requirements
+        const webProject = await webModel.Project.findById(req.body.project_id)
+        if (!webProject)
+            return res.status(400).json({ success: false, message: 'Project not found' });
+        const requirements = [
+            { name: "entry_id", type: "number", unit: "none" },
+            { name: "hn", type: "number", unit: "none" },
+            // { name: "gender", type: "string", unit: "male/female" },
+            // { name: "age", type: "number", unit: "year" },
+            { name: "measured_time", type: "object", unit: "yyyy-MM-ddTHH:mm:ssZ" },
+            ...webProject.requirements
+        ]
+        requirements.forEach((requirement) => {
+            const fieldName = requirement.name
+            if (!req.body.update_data[0][fieldName])
+                throw new Error(`Invalid record input: "${fieldName}" is required`)
+            // check fields' type
+            if (typeof (req.body.update_data[0][fieldName]) !== requirement.type && requirement.name !== "measured_time")
+                throw new Error(`Invalid record input: "${fieldName}" must be a ${requirement.type}`)
+            if (requirement.name == "measured_time" && new Date(req.body.update_data[0][fieldName]) == "Invalid Date")
+                throw new Error(`Invalid record input: Incorrect "${fieldName}" date format`)
+        })
+        req.body.update_data[0]["measured_time"] = new Date(req.body.update_data[0].measured_time)
+
         // change req.body.update_data key from [key] to [records.$.key] to update nested object
         for (const key in req.body.update_data[0]) {
             req.body.update_data[0]["records.$." + key] = req.body.update_data[0][key];
