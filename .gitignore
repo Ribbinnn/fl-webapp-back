@@ -8,3 +8,5 @@ resources/uploads/*
 
 resources/results/*
 !resources/results/20211018CR0846
+
+access.log
