@@ -6,13 +6,13 @@ const dotenv = require('dotenv');
 dotenv.config()
 
 const adminSeed = async () => {
-    const passwordHash = await bcrypt.hash('fl123456', 10);
+    const passwordHash = await bcrypt.hash('12345678', 10);
 
     mongoose.connect(process.env.webappDB);
 
     const schema = new mongoose.Schema()
 
-    const User = mongoose.model('news', schema)
+    const User = mongoose.model('users', schema)
 
     const admin = await User.collection.findOne({ username: 'admin-fl' })
 
