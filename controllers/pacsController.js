@@ -137,6 +137,56 @@ const saveToPACS = async (req, res) => {
             fs.rmSync(reqDir);
         }
 
+        // delete gradcam
+        const gradcams = await webModel.Gradcam.find({ result_id: report._id })
+        gradcams.map(gradcam => {
+            const findingFile = gradcam.gradcam_path.split("/").slice(-1)[0]
+            if (findingFile.split(".")[0] != 'No Finding' && !report.label.finding.includes(findingFile.split(".")[0])) {
+                if (fs.existsSync(path.join(resultDir, findingFile))) {
+                    fs.rmSync(fs.existsSync(path.join(resultDir, findingFile)));
+                    await webModel.Gradcam.findByIdAndDelete(gradcam._id)
+                }
+            }
+        })
+
+        // delete patient's info in report that has the same Accession Number
+        const reportAcc = await webModel.PredResult.aggregate([
+            {
+                $lookup: {
+                    from: "images",
+                    localField: "image_id",
+                    foreignField: "_id",
+                    as: "image"
+                }
+            },
+            {
+                $lookup: {
+                    from: "medrecords",
+                    localField: "record_id",
+                    foreignField: "_id",
+                    as: "record"
+                }
+            },
+            {
+                $match: {
+                    "image.accession_no": report.image_id.accession_no,
+                }
+            },
+            { $unset: ["image", "record"] },
+        ])
+        await Promise.all(reportAcc.map(rep => {
+            await webModel.Image.findByIdAndUpdate(rep.image_id, {
+                hn: null
+            })
+            await webModel.MedRecord.findByIdAndUpdate(rep.record_id, {
+                'record.hn': null
+            })
+            await webModel.PredResult.findByIdAndUpdate(rep._id, {
+                hn: null,
+                patient_name: null,
+            })
+        }))
+
         return res
             .status(200)
             .json({
