@@ -43,11 +43,11 @@ Infer & Report
 Image
 - GET /api/image/ (get image, reqQuery = (result_id, finding, accession_no, dir)) <br />
   example: /api/image/?accession_no=0041018 (original file from PACS) <br />
-  example: /api/image/?accession_no=74&dir=local (original file from LOCAL) <br />
+  example: /api/image/?accession_no=74&dir=local (original file from local directory) <br />
   example: /api/image/?result_id=6181884fdb269acd1bf1bd77&finding=Mass (overlay file)
 
 PACS
-- GET /api/pacs/( Get all patient's data from pacs by HN, reqQuery = (HN, dir, accession_no, start_date, end_date) ) * dir, accession_no, start_date, and end_date are used when query from local directory only
+- GET /api/pacs/( Get all patient's data from pacs by HN, reqQuery = (HN, dir, accession_no, start_date, end_date) )
 - GET /api/pacs/info/ ( Get patient info by HN, reqQuery = (HN, dir) )
 
 Mask
@@ -57,6 +57,10 @@ Mask
 Mask (Local)
 - PATCH /api/masks/local ( Crete bounding box position, reqBody=( mask_id, data: [{label, tool, updated_by, data}, ...]) )
 - GET /api/masks/local ( Get bounding box position by report id, reqQuery = (accession_no) )
+- GET /api/masks/xlsx/ ( Get bounding box in .xlsx format, reqQuery = (is_acc_no, list)) <br />
+  example: /api/masks/xlsx/?is_acc_no=false&list[]=61fc0637a715cf392adb3b0d (list is list of report_id, used in View History) <br />
+  example: /api/masks/xlsx/?is_acc_no=true&list[]=0041018 (list is list of accession_no, used in Annotate) 
+- GET /api/masks/png/ ( Get bounding box in .png format, reqQuery = (is_acc_no, report_id, accession_no) )
 
 **Admin API PATH** <br />
 Webapp Project

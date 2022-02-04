@@ -16,4 +16,10 @@ router.patch('/local', tokenValidation, maskController.insertBBoxLocal)
 // get bounding box postion by report id local
 router.get('/local/', tokenValidation, maskController.getBBoxLocal)
 
+// generate bounding box in .xlsx format
+router.get('/xlsx/', tokenValidation, maskController.generateMaskXLSX)
+
+// generate bounding box in .png format
+router.get('/png/', tokenValidation, maskController.generateMaskPNG)
+
 module.exports = router;
