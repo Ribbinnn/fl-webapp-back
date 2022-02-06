@@ -31,8 +31,8 @@ const inferResult = async (req, res) => {
         return res.status(400).json({ success: false, message: `Invalid input: "user_id" is required` })
     }
 
-    const halfMonthDate = (new Date()).getDate() <= 15 ? 1 : 2
-    const todayMonth = (new Date()).getUTCMonth()
+    const todayYear = String((new Date()).getUTCFullYear())
+    const todayMonth = String((new Date()).getUTCMonth() + 1)
 
     // get filepath (from PACS) by accession no
     let pacs = {}
@@ -80,7 +80,7 @@ const inferResult = async (req, res) => {
 
     // define directory path and AI server url
     const root = path.join(__dirname, "..");
-    const projectDir = path.join(root, "/resources/results/", todayMonth, halfMonthDate)
+    const projectDir = path.join(root, "/resources/results/", todayYear, todayMonth)
     const resultDir = path.join(projectDir, predResult.id)
     const url = process.env.PY_SERVER + '/api/infer';
 
@@ -178,7 +178,7 @@ const inferResult = async (req, res) => {
                                 await webModel.Gradcam.create({
                                     result_id: predResult._id,
                                     finding: item.split('.')[0],
-                                    gradcam_path: `results/${todayMonth}/${halfMonthDate}/${String(predResult._id)}/${item}`
+                                    gradcam_path: `results/${todayYear}/${todayMonth}/${String(predResult._id)}/${item}`
                                 })
                             }))
                             // update result's status to annotated

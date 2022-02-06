@@ -139,7 +139,7 @@ const saveToPACS = async (req, res) => {
 
         // delete gradcam
         const gradcams = await webModel.Gradcam.find({ result_id: report._id })
-        gradcams.map(gradcam => {
+        await Promise.all(gradcams.map(async gradcam => {
             const findingFile = gradcam.gradcam_path.split("/").slice(-1)[0]
             if (findingFile.split(".")[0] != 'No Finding' && !report.label.finding.includes(findingFile.split(".")[0])) {
                 if (fs.existsSync(path.join(resultDir, findingFile))) {
@@ -147,7 +147,7 @@ const saveToPACS = async (req, res) => {
                     await webModel.Gradcam.findByIdAndDelete(gradcam._id)
                 }
             }
-        })
+        }))
 
         // delete patient's info in report that has the same Accession Number
         const reportAcc = await webModel.PredResult.aggregate([
@@ -174,7 +174,7 @@ const saveToPACS = async (req, res) => {
             },
             { $unset: ["image", "record"] },
         ])
-        await Promise.all(reportAcc.map(rep => {
+        await Promise.all(reportAcc.map(async rep => {
             await webModel.Image.findByIdAndUpdate(rep.image_id, {
                 hn: null
             })
