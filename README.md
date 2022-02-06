@@ -23,16 +23,6 @@ Webapp Project
 - GET /api/projects/user/:id ( Get all projects by user id )
 - GET /api/projects/:project_id ( Get project by id )
 
-Vitals
-- POST /api/vitals/records ( Create vitals project and upload medical records, reqBody = {project_name, record_name, user_id, records} )
-- GET /api/vitals/ ( Get projects by field, reqQuery = (user_id, project_id) )
-- GET /api/vitals/projects/:id/medrec ( Get all records by project id )
-- GET /api/vitals/records/ ( Get all records by patient's HN, reqQuery = (HN, project_id) )
-- GET /api/vitals/template/:project_id (Get .xlsx template from project's requirements)
-- PATCH /api/vitals/records/updaterow (Update selected row in record file, reqBody = {record_id, update_data})
-- PATCH /api/vitals/records/deleterow/ (Delete selected row in record file req.boy = {record_id, record_index}) 
-- DELETE /api/vitals/records/deletefile/:id (Delete entire record file by record_id) 
-
 Infer & Report
 - POST /api/infer (Start inference, reqBody = (accession_no, project_id, record, user_id, dir) )
 - GET /api/report/:rid (Get report by id)
@@ -60,7 +50,7 @@ Mask (Local)
 - GET /api/masks/xlsx/ ( Get bounding box in .xlsx format, reqQuery = (is_acc_no, list)) <br />
   example: /api/masks/xlsx/?is_acc_no=false&list[]=61fc0637a715cf392adb3b0d (list is list of report_id, used in View History) <br />
   example: /api/masks/xlsx/?is_acc_no=true&list[]=0041018 (list is list of accession_no, used in Annotate) 
-- GET /api/masks/png/ ( Get bounding box in .png format, reqQuery = (is_acc_no, report_id, accession_no) )
+- GET /api/masks/png/ ( Get bounding box in .png format, reqQuery = (report_id, accession_no) )
 
 **Admin API PATH** <br />
 Webapp Project
@@ -73,7 +63,6 @@ Webapp Project
  
 User
 - POST /api/users ( Create new user, reqBody = {username, password, first_name, last_name, role, email} )
-- PATCH /api/users ( Create new user, reqBody = {id, password, first_name, last_name, role, email, isChulaSSO} )
 - GET /api/users ( Get all users )
 
 

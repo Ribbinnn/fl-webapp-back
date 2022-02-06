@@ -249,11 +249,11 @@ const generateMaskXLSX = async (req, res) => {
 
 const generateMaskPNG = async (req, res) => {
     try {
-        let mask = {}
-        if (req.query.is_acc_no == 'true') {
+        let mask = null
+        if (req.query.accession_no) {
             mask = await webModel.Mask.find({ accession_no: req.query.accession_no })
         }
-        else {
+        else if (req.query.report_id) {
             mask = await webModel.Mask.aggregate([
                 {
                     $lookup: {
@@ -276,6 +276,9 @@ const generateMaskPNG = async (req, res) => {
                 { $unset: ["result", "image"] },
             ])
         }
+
+        if (!mask || mask.length == 0 || mask[0].data.length == 0) 
+            return res.status(400).json({ success: false, message: 'Bounding box data not found' });
 
         mask = JSON.stringify(mask[0])
 
