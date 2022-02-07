@@ -16,7 +16,7 @@ const getImage = async (req, res) => {
                 url = pythonURL + `/local/acc_no/${req.query.accession_no}`
             else
                 url = pythonURL + `/pacs/acc_no/${req.query.accession_no}`
-            data = (await axios.get(url, {
+            let data = (await axios.get(url, {
                 responseType: 'arraybuffer'
             })).data
             return res.status(200).send(data)

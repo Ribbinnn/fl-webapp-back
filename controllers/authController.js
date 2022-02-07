@@ -65,55 +65,7 @@ const logout = async (req, res) => {
     }
 }
 
-const chulaSSO = async (req, res) => {
-    try {
-        const response = (await axios.get('https://account.it.chula.ac.th/serviceValidation', {
-            headers: {
-                'DeeAppId': process.env.DeeAppId,
-                'DeeAppSecret': process.env.DeeAppSecret,
-                'DeeTicket': req.query.ticket
-            }
-        })).data
-
-        // console.log(response.username, response.email, response.roles)
-        let user = await webModel.User.findOne({ username: response.username })
-        if (!user) {
-            user = await webModel.User.create({
-                username: response.username,
-                email: response.email,
-                first_name: response.firstname,
-                last_name: response.lastname,
-                role: response.roles[0],
-                token: [],
-                isChulaSSO: true,
-                projects: [],
-                status: userStatus.ACTIVE
-            })
-        }
-
-        const data = tokenGenerator({
-            _id: user._id,
-            username: user.username,
-            role: user.role
-        }, req.body.remember ? true : false);
-        await webModel.User.findByIdAndUpdate(user._id, { $push: { token: data } })
-        return res.status(200).json({
-            success: true,
-            message: 'Login successfully',
-            data: {
-                user_id: user._id,
-                username: user.username,
-                role: user.role,
-                token: data
-            }
-        })
-    } catch (e) {
-        return res.status(500).json({ success: false, message: 'Internal server error', error: e.message })
-    }
-}
-
 module.exports = {
     login,
     logout,
-    chulaSSO
 }

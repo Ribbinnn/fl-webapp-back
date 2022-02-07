@@ -7,6 +7,6 @@ router.post('/login', authController.login)
 
 router.post('/logout', tokenValidation, authController.logout)
 
-router.post('/chula/sso', authController.chulaSSO)
+// router.post('/chula/sso', authController.chulaSSO)
 
 module.exports = router;

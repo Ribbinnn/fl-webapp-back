@@ -74,10 +74,13 @@ const inferResult = async (req, res) => {
         return res.status(500).json({ success: false, message: 'Internal server error', error: e.message });
     }
 
+    const todayYear = String((new Date()).getUTCFullYear())
+    const todayMonth = String((new Date()).getUTCMonth() + 1)
+
     // define directory path and AI server url
     const root = path.join(__dirname, "..");
-    const projectDir = path.join(root, "/resources/results/", project.id)
-    const resultDir = path.join(projectDir, (req.body.dir === 'local' ? "local_" : "") + predResult.id)
+    const todayDir = path.join(root, "/resources/results/", todayYear, todayMonth)
+    const resultDir = path.join(todayDir, (req.body.dir === 'local' ? "local_" : "") + predResult.id)
 
     let url = ""
     if (req.body.dir === 'local')
@@ -131,12 +134,8 @@ const inferResult = async (req, res) => {
         })
             .then(async res => {
                 // make new directory if does not exist
-                if (!fs.existsSync(projectDir)) {
-                    fs.mkdirSync(projectDir);
-                    fs.mkdirSync(resultDir);
-                }
                 if (!fs.existsSync(resultDir)) {
-                    fs.mkdirSync(resultDir);
+                    fs.mkdirSync(resultDir, { recursive: true });
                 }
 
                 // save zip file sent from AI server
@@ -161,6 +160,8 @@ const inferResult = async (req, res) => {
                             prediction.push({
                                 finding: modelResult["Finding"][i],
                                 confidence: modelResult["Confidence"][i],
+                                threshold: modelResult["Threshold"][i],
+                                isPositive: modelResult["isPositive"][i],
                                 selected: false
                             })
                         }
@@ -179,7 +180,7 @@ const inferResult = async (req, res) => {
                                     result_id: predResult._id,
                                     finding: item.split('.')[0],
                                     gradcam_path:
-                                        `results/${project.id}/${(req.body.dir === 'local' ? "local_" : "") + String(predResult._id)}/${item}`
+                                        `results/${todayYear}/${todayMonth}/${(req.body.dir === 'local' ? "local_" : "") + String(predResult._id)}/${item}`
                                 })
                             }))
                             // update result's status to annotated

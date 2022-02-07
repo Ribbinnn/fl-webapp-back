@@ -10,12 +10,4 @@ router.get('/', tokenValidation, pacsController.getAllByQuery)
 // get patient's data from PACS
 router.get('/info/', tokenValidation, pacsController.getInfoByHN);
 
-// save back to PACS
-router.post(
-    '/save',
-    tokenValidation,
-    verification.reportVerification,
-    pacsController.saveToPACS
-)
-
 module.exports = router;

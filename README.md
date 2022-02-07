@@ -23,16 +23,6 @@ Webapp Project
 - GET /api/projects/user/:id ( Get all projects by user id )
 - GET /api/projects/:project_id ( Get project by id )
 
-Vitals
-- POST /api/vitals/records ( Create vitals project and upload medical records, reqBody = {project_name, record_name, user_id, records} )
-- GET /api/vitals/ ( Get projects by field, reqQuery = (user_id, project_id) )
-- GET /api/vitals/projects/:id/medrec ( Get all records by project id )
-- GET /api/vitals/records/ ( Get all records by patient's HN, reqQuery = (HN, project_id) )
-- GET /api/vitals/template/:project_id (Get .xlsx template from project's requirements)
-- PATCH /api/vitals/records/updaterow (Update selected row in record file, reqBody = {record_id, update_data})
-- PATCH /api/vitals/records/deleterow/ (Delete selected row in record file req.boy = {record_id, record_index}) 
-- DELETE /api/vitals/records/deletefile/:id (Delete entire record file by record_id) 
-
 Infer & Report
 - POST /api/infer (Start inference, reqBody = (accession_no, project_id, record, user_id, dir) )
 - GET /api/report/:rid (Get report by id)
@@ -43,11 +33,11 @@ Infer & Report
 Image
 - GET /api/image/ (get image, reqQuery = (result_id, finding, accession_no, dir)) <br />
   example: /api/image/?accession_no=0041018 (original file from PACS) <br />
-  example: /api/image/?accession_no=74&dir=local (original file from LOCAL) <br />
+  example: /api/image/?accession_no=74&dir=local (original file from local directory) <br />
   example: /api/image/?result_id=6181884fdb269acd1bf1bd77&finding=Mass (overlay file)
 
 PACS
-- GET /api/pacs/( Get all patient's data from pacs by HN, reqQuery = (HN, dir, accession_no, start_date, end_date) ) * dir, accession_no, start_date, and end_date are used when query from local directory only
+- GET /api/pacs/( Get all patient's data from pacs by HN, reqQuery = (HN, dir, accession_no, start_date, end_date) )
 - GET /api/pacs/info/ ( Get patient info by HN, reqQuery = (HN, dir) )
 
 Mask
@@ -57,6 +47,10 @@ Mask
 Mask (Local)
 - PATCH /api/masks/local ( Crete bounding box position, reqBody=( mask_id, data: [{label, tool, updated_by, data}, ...]) )
 - GET /api/masks/local ( Get bounding box position by report id, reqQuery = (accession_no) )
+- GET /api/masks/xlsx/ ( Get bounding box in .xlsx format, reqQuery = (is_acc_no, list)) <br />
+  example: /api/masks/xlsx/?is_acc_no=false&list[]=61fc0637a715cf392adb3b0d (list is list of report_id, used in View History) <br />
+  example: /api/masks/xlsx/?is_acc_no=true&list[]=0041018 (list is list of accession_no, used in Annotate) 
+- GET /api/masks/png/ ( Get bounding box in .png format, reqQuery = (report_id, accession_no) )
 
 **Admin API PATH** <br />
 Webapp Project
@@ -69,7 +63,6 @@ Webapp Project
  
 User
 - POST /api/users ( Create new user, reqBody = {username, password, first_name, last_name, role, email} )
-- PATCH /api/users ( Create new user, reqBody = {id, password, first_name, last_name, role, email, isChulaSSO} )
 - GET /api/users ( Get all users )
 
 
@@ -88,7 +81,7 @@ User
       ports:
         - '5000:5000'
       volumes:
-        - back:/usr/src/app/resources # /fl-webapp-back/resources:/usr/src/app/resources
+        - /path/to/fl-webapp-back/resources:/usr/src/app/resources # host_directory:docker_directory
     webapp-front:
       container_name: webapp-front
       restart: always
@@ -101,8 +94,8 @@ User
       build: ./fl-webapp-model
       ports:
         - '7000:7000'
-      # volumes:
-        # - /fl-webapp-model/resources:/code/resources
+      volumes:
+        - /path/to/fl-webapp-model/resources:/code/resources # host_directory:docker_directory
     mongo:
       container_name: mongo
       build: ./
@@ -112,13 +105,12 @@ User
         - mongodb:/data/db
   volumes:
     mongodb:
-    back:
   ```
   Dockerfile
   ```
   FROM mongo
-  ENV MONGO_INITDB_ROOT_USERNAME root
-  ENV MONGO_INITDB_ROOT_PASSWORD password
+  ENV MONGO_INITDB_ROOT_USERNAME <root>
+  ENV MONGO_INITDB_ROOT_PASSWORD <password>
   ENV MONGO_INITDB_DATABASE admin
   ADD mongo-init.js /docker-entrypoint-initdb.d/
   ```

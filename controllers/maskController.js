@@ -1,6 +1,12 @@
 const Joi = require("joi");
 const webModel = require('../models/webapp')
 const { modelStatus } = require('../utils/status')
+const XLSX = require('xlsx')
+const mongoose = require("mongoose");
+const ObjectId = mongoose.Types.ObjectId;
+const axios = require('axios')
+
+const pythonURL = process.env.PY_SERVER + '/api';
 
 const schema = {
     report_id: Joi.string().required(),
@@ -110,9 +116,186 @@ const getBBoxLocal = async (req, res) => {
     }
 }
 
+const generateMaskXLSX = async (req, res) => {
+    try {
+        let masks = []
+        if (req.query.is_acc_no == 'true') {
+            // generate by accession_no
+            masks = await webModel.Mask.find({ accession_no: { $in: req.query.list } })
+        }
+        else { 
+            // generate by report_id
+            const ids = req.query.list.map(id => ObjectId(id))
+            console.log(req.query)
+            masks = await webModel.Mask.aggregate([
+                {
+                    $lookup: {
+                        from: "pred_results",
+                        localField: "result_id",
+                        foreignField: "_id",
+                        as: "result"
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "images",
+                        localField: "result.image_id",
+                        foreignField: "_id",
+                        as: "image"
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "users",
+                        localField: "result.updated_by",
+                        foreignField: "_id",
+                        as: "user"
+                    }
+                },
+                { $match: { result_id: { $in: ids } } },
+                { $addFields: { 
+                    accession_no: { "$arrayElemAt": ['$image.accession_no', 0] }, 
+                    username: { "$arrayElemAt": ['$user.username', 0] }, 
+                } },
+                { $unset: ["result", "image", "user"] },
+            ])
+        }
+
+        let xlsxData = []
+        masks.map((mask) => {
+            mask.data.map(obj => {
+                let row = {}
+                switch (obj.tool) {
+                    case "rectangleRoi" || "length":
+                        row = {
+                            'Image ID': "",
+                            'Accession Number': mask.accession_no,
+                            'Class Name': obj.label,
+                            'User': req.query.is_acc_no == 'true'? req.user.username: mask.username,
+                            'Tool': obj.tool == "length" ? "Length" : "Rectangle",
+                            'Index': 0,
+                            'x': obj.data.handles.start.x,
+                            'y': obj.data.handles.start.y,
+                            'Value': "",
+                            'Folder Name': ""
+                        }
+                        xlsxData.push(row)
+                        row = {
+                            'Image ID': "",
+                            'Accession Number': mask.accession_no,
+                            'Class Name': obj.label,
+                            'User': req.query.is_acc_no == 'true'? req.user.username: mask.username,
+                            'Tool': obj.tool == "length" ? "Length" : "Rectangle",
+                            'Index': 1,
+                            'x': obj.data.handles.end.x,
+                            'y': obj.data.handles.end.y,
+                            'Value': "",
+                            'Folder Name': ""
+                        }
+                        xlsxData.push(row)
+                        break
+                    case "freehand":
+                        obj.data.handles.map((point, idx) => {
+                            row = {
+                                'Image ID': "",
+                                'Accession Number': mask.accession_no,
+                                'Class Name': obj.label,
+                                'User': req.query.is_acc_no == 'true'? req.user.username: mask.username,
+                                'Tool': "Polygon",
+                                'Index': idx,
+                                'x': point.x,
+                                'y': point.y,
+                                'Value': "",
+                                'Folder Name': ""
+                            }
+                            xlsxData.push(row)
+                        })
+                        break
+                    case "ratio":
+                        row = {
+                            'Image ID': "",
+                            'Accession Number': mask.accession_no,
+                            'Class Name': obj.label,
+                            'User': req.query.is_acc_no == 'true'? req.user.username: mask.username,
+                            'Tool': "Ratio",
+                            'Index': 0,
+                            'x': "",
+                            'y': "",
+                            'Value': obj.data.ratio,
+                            'Folder Name': ""
+                        }
+                        xlsxData.push(row)
+                        break
+                }
+            })
+        })
+
+        const response = (await axios.patch(pythonURL + '/local/loc/', { data: xlsxData })).data;
+
+        const ws = XLSX.utils.json_to_sheet(response.data)
+        const wb = XLSX.utils.book_new();
+
+        XLSX.utils.book_append_sheet(wb, ws);
+        const wbbuf = XLSX.write(wb, { type: 'buffer' });
+
+        res.writeHead(200, [
+            ['Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
+        ]);
+        return res.end(wbbuf)
+    } catch (e) {
+        return res.status(500).json({ success: false, message: 'Internal server error', error: e.message });
+    }
+}
+
+const generateMaskPNG = async (req, res) => {
+    try {
+        let mask = null
+        if (req.query.accession_no) {
+            mask = await webModel.Mask.find({ accession_no: req.query.accession_no })
+        }
+        else if (req.query.report_id) {
+            mask = await webModel.Mask.aggregate([
+                {
+                    $lookup: {
+                        from: "pred_results",
+                        localField: "result_id",
+                        foreignField: "_id",
+                        as: "result"
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "images",
+                        localField: "result.image_id",
+                        foreignField: "_id",
+                        as: "image"
+                    }
+                },
+                { $match: { result_id: ObjectId(req.query.report_id) } },
+                { $addFields: { accession_no: { "$arrayElemAt": ['$image.accession_no', 0] }, } },
+                { $unset: ["result", "image"] },
+            ])
+        }
+
+        if (!mask || mask.length == 0 || mask[0].data.length == 0) 
+            return res.status(400).json({ success: false, message: 'Bounding box data not found' });
+
+        mask = JSON.stringify(mask[0])
+
+        const data = (await axios.post(pythonURL + '/local/png/', { bbox_data: mask }, {
+            responseType: 'arraybuffer'
+        })).data
+        return res.status(200).send(data)
+    } catch (e) {
+        return res.status(500).json({ success: false, message: 'Internal server error', error: e.message });
+    }
+}
+
 module.exports = {
     insertBBox,
     getBBox,
     insertBBoxLocal,
-    getBBoxLocal
+    getBBoxLocal,
+    generateMaskXLSX,
+    generateMaskPNG
 }
