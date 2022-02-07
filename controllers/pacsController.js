@@ -11,6 +11,13 @@ const pythonURL = process.env.PY_SERVER + '/api/pacs';
 // get patient information from PACS by HN
 const getInfoByHN = async (req, res) => {
     try {
+        if(isNaN(Number(req.query.HN))) {
+            return res.status(200).json({
+                success: true,
+                message: "Invalid HN",
+            })
+        }
+
         const data = (
             await axios.get(pythonURL + `/HN/${req.query.HN}/info`)
         ).data;
@@ -127,11 +134,11 @@ const saveToPACS = async (req, res) => {
         await webModel.MedRecord.findByIdAndUpdate(report.record_id, {
             'record.hn': null
         })
-        report = await webModel.PredResult.findByIdAndUpdate(req.params.report_id, {
+        await webModel.PredResult.findByIdAndUpdate(req.params.report_id, {
             hn: null,
             patient_name: null,
             status: modelStatus.FINALIZED
-        }, { new: true })
+        })
 
         if (fs.existsSync(reqDir)) {
             fs.rmSync(reqDir);
@@ -140,12 +147,9 @@ const saveToPACS = async (req, res) => {
         // delete gradcam
         const gradcams = await webModel.Gradcam.find({ result_id: report._id })
         await Promise.all(gradcams.map(async gradcam => {
-            const findingFile = gradcam.gradcam_path.split("/").slice(-1)[0]
-            if (findingFile.split(".")[0] != 'No Finding' && !report.label.finding.includes(findingFile.split(".")[0])) {
-                if (fs.existsSync(path.join(resultDir, findingFile))) {
-                    fs.rmSync(fs.existsSync(path.join(resultDir, findingFile)));
-                    await webModel.Gradcam.findByIdAndDelete(gradcam._id)
-                }
+            const findingFile = gradcam.finding
+            if (findingFile != 'original' && !report.label.finding.includes(findingFile)) {
+                await webModel.Gradcam.findOneAndDelete({ _id: gradcam._id })
             }
         }))
 
@@ -192,7 +196,6 @@ const saveToPACS = async (req, res) => {
             .json({
                 success: true,
                 message: `Save report to PACS successfully`,
-                data: report,
             });
 
     } catch (e) {

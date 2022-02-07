@@ -129,12 +129,8 @@ const inferResult = async (req, res) => {
         })
             .then(async res => {
                 // make new directory if does not exist
-                if (!fs.existsSync(projectDir)) {
-                    fs.mkdirSync(projectDir);
-                    fs.mkdirSync(resultDir);
-                }
                 if (!fs.existsSync(resultDir)) {
-                    fs.mkdirSync(resultDir);
+                    fs.mkdirSync(resultDir, { recursive: true });
                 }
 
                 // save zip file sent from AI server
