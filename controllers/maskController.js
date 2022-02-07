@@ -250,7 +250,7 @@ const generateMaskXLSX = async (req, res) => {
 const generateMaskPNG = async (req, res) => {
     try {
         let mask = null
-        if (req.query.accession_no) {
+        if (req.query.is_acc_no == 'true' && req.query.accession_no) {
             mask = await webModel.Mask.find({ accession_no: req.query.accession_no })
         }
         else if (req.query.report_id) {
