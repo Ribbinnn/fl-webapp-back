@@ -7,10 +7,12 @@ const job = new CronJob('0 1 * * *', async () => {
   try {
     const response = (await axios.delete(process.env.PY_SERVER + '/api/pacs/clear')).data
 
+    // Accession Number list to be used to find report and delete hn
     const accList = response.data
     imageIds = await webModel.Image.find({ "accession_no": { "$in": accList } }, ["_id"])
     results = await webModel.PredResult.find({ "image_id": { "$in": imageIds } })
 
+    // delete hn and patient name from all associated reports
     await Promise.all(results.map(async result => {
       await webModel.Image.findByIdAndUpdate(result.image_id, {
         hn: null

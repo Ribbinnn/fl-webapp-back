@@ -140,6 +140,7 @@ const saveToPACS = async (req, res) => {
             status: modelStatus.FINALIZED
         })
 
+        // delete zip file
         if (fs.existsSync(reqDir)) {
             fs.rmSync(reqDir);
         }
