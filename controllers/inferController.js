@@ -59,7 +59,7 @@ const inferResult = async (req, res) => {
     if (!req.body.record)
         return res.status(400).json({ success: false, message: `Invalid record input: "record" is required` })
     // check required fields
-    requirements.forEach((requirement) => {
+    for (const requirement of requirements) {
         const fieldName = requirement.name
         if (!req.body.record[fieldName])
             return res.status(400).json({ success: false, message: `Invalid record input: "${fieldName}" is required` })
@@ -68,7 +68,7 @@ const inferResult = async (req, res) => {
             return res.status(400).json({ success: false, message: `Invalid record input: "${fieldName}" must be a ${requirement.type}` })
         if (fieldName == "measured_time" && new Date(req.body.record[fieldName]) == "Invalid Date")
             return res.status(400).json({ success: false, message: `Invalid record input: Incorrect "${fieldName}" date format` })
-    })
+    }
 
     let predResult = {}
     try {

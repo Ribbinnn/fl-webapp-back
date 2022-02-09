@@ -152,7 +152,7 @@ const getProject = async (req, res) => {
                     "record_name": { "$arrayElemAt": ['$project.record_name', 0] }
                 }
             },
-            { $unset: ["project", "_id"] },
+            // { $unset: ["project", "_id"] },
         ])
 
         return res.status(200).json({ success: true, message: `Get vitals project by user ${req.query.user_id} successfully`, data: data });
