@@ -177,7 +177,7 @@ const saveToPACS = async (req, res) => {
                     "image.accession_no": report.image_id.accession_no,
                 }
             },
-            { $unset: ["image", "record"] },
+            // { $unset: ["image", "record"] },
         ])
         await Promise.all(reportAcc.map(async rep => {
             await webModel.Image.findByIdAndUpdate(rep.image_id, {
