@@ -31,7 +31,9 @@ const inferResult = async (req, res) => {
         return res.status(400).json({ success: false, message: `Invalid input: "user_id" is required` })
     }
 
-    // mock-up
+    const todayYear = String((new Date()).getUTCFullYear())
+    const todayMonth = String((new Date()).getUTCMonth() + 1)
+
     // get filepath (from PACS) by accession no
     let pacs = {}
     let project = {}
@@ -78,7 +80,7 @@ const inferResult = async (req, res) => {
 
     // define directory path and AI server url
     const root = path.join(__dirname, "..");
-    const projectDir = path.join(root, "/resources/results/", project.id)
+    const projectDir = path.join(root, "/resources/results/", todayYear, todayMonth)
     const resultDir = path.join(projectDir, predResult.id)
     const url = process.env.PY_SERVER + '/api/infer';
 
@@ -127,19 +129,15 @@ const inferResult = async (req, res) => {
         })
             .then(async res => {
                 // make new directory if does not exist
-                if (!fs.existsSync(projectDir)) {
-                    fs.mkdirSync(projectDir);
-                    fs.mkdirSync(resultDir);
-                }
                 if (!fs.existsSync(resultDir)) {
-                    fs.mkdirSync(resultDir);
+                    fs.mkdirSync(resultDir, { recursive: true });
                 }
 
                 // save zip file sent from AI server
                 fs.writeFileSync(path.join(resultDir, '/result.zip'), res.data);
 
                 // extract zip file to result directory (overlay files + prediction file)
-                await extract(path.join(resultDir, '/result.zip'), { dir: resultDir })            
+                await extract(path.join(resultDir, '/result.zip'), { dir: resultDir })
 
                 // parse prediction.txt to JSON
                 let modelResult = JSON.parse(fs.readFileSync(path.join(resultDir, '/prediction.txt')));
@@ -147,8 +145,8 @@ const inferResult = async (req, res) => {
                 patient_name = "-"
                 if (modelResult.patient_name)
                     patient_name = modelResult.patient_name
-                    delete modelResult.patient_name
-                
+                delete modelResult.patient_name
+
                 let prediction = []
                 switch (project.task) {
                     // case "classification_pylon_256":
@@ -176,13 +174,13 @@ const inferResult = async (req, res) => {
                                 await webModel.Gradcam.create({
                                     result_id: predResult._id,
                                     finding: item.split('.')[0],
-                                    gradcam_path: `results/${project.id}/${String(predResult._id)}/${item}`
+                                    gradcam_path: `results/${todayYear}/${todayMonth}/${String(predResult._id)}/${item}`
                                 })
                             }))
                             // update result's status to annotated
-                            await webModel.PredResult.findByIdAndUpdate(predResult._id, { 
+                            await webModel.PredResult.findByIdAndUpdate(predResult._id, {
                                 status: modelStatus.AI_ANNOTATED,
-                                patient_name 
+                                patient_name
                             })
                             // update probability prediction
                             await webModel.PredClass.findByIdAndUpdate(predClass._id, { prediction: prediction })

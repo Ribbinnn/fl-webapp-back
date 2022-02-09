@@ -11,6 +11,13 @@ const pythonURL = process.env.PY_SERVER + '/api/pacs';
 // get patient information from PACS by HN
 const getInfoByHN = async (req, res) => {
     try {
+        if(isNaN(Number(req.query.HN))) {
+            return res.status(200).json({
+                success: true,
+                message: "Invalid HN",
+            })
+        }
+
         const data = (
             await axios.get(pythonURL + `/HN/${req.query.HN}/info`)
         ).data;
@@ -127,22 +134,69 @@ const saveToPACS = async (req, res) => {
         await webModel.MedRecord.findByIdAndUpdate(report.record_id, {
             'record.hn': null
         })
-        report = await webModel.PredResult.findByIdAndUpdate(req.params.report_id, {
+        await webModel.PredResult.findByIdAndUpdate(req.params.report_id, {
             hn: null,
             patient_name: null,
             status: modelStatus.FINALIZED
-        }, { new: true })
+        })
 
+        // delete zip file
         if (fs.existsSync(reqDir)) {
             fs.rmSync(reqDir);
         }
+
+        // delete gradcam
+        const gradcams = await webModel.Gradcam.find({ result_id: report._id })
+        await Promise.all(gradcams.map(async gradcam => {
+            const findingFile = gradcam.finding
+            if (findingFile != 'original' && !report.label.finding.includes(findingFile)) {
+                await webModel.Gradcam.findOneAndDelete({ _id: gradcam._id })
+            }
+        }))
+
+        // delete patient's info in report that has the same Accession Number
+        const reportAcc = await webModel.PredResult.aggregate([
+            {
+                $lookup: {
+                    from: "images",
+                    localField: "image_id",
+                    foreignField: "_id",
+                    as: "image"
+                }
+            },
+            {
+                $lookup: {
+                    from: "medrecords",
+                    localField: "record_id",
+                    foreignField: "_id",
+                    as: "record"
+                }
+            },
+            {
+                $match: {
+                    "image.accession_no": report.image_id.accession_no,
+                }
+            },
+            { $unset: ["image", "record"] },
+        ])
+        await Promise.all(reportAcc.map(async rep => {
+            await webModel.Image.findByIdAndUpdate(rep.image_id, {
+                hn: null
+            })
+            await webModel.MedRecord.findByIdAndUpdate(rep.record_id, {
+                'record.hn': null
+            })
+            await webModel.PredResult.findByIdAndUpdate(rep._id, {
+                hn: null,
+                patient_name: null,
+            })
+        }))
 
         return res
             .status(200)
             .json({
                 success: true,
                 message: `Save report to PACS successfully`,
-                data: report,
             });
 
     } catch (e) {
