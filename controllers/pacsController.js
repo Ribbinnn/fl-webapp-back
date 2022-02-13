@@ -16,6 +16,13 @@ const getInfoByHN = async (req, res) => {
             url = pythonURL + `/local/HN/${req.query.HN}/info`
         else
             url = pythonURL + `/pacs/HN/${req.query.HN}/info`
+        if(isNaN(Number(req.query.HN))) {
+            return res.status(200).json({
+                success: true,
+                message: "Invalid HN",
+            })
+        }
+
         const data = (
             await axios.get(url)
         ).data;

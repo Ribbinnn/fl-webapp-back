@@ -34,6 +34,20 @@ schema.pre('deleteMany', { document: false, query: true }, async function () {
     }
 })
 
+schema.pre('findOneAndDelete', { document: false, query: true }, async function () {
+    const gid = this.getQuery()['_id']
+    const gradcam = await Gradcam.findOne({_id: gid})
+
+    if (gradcam) {
+        let dir = gradcam['gradcam_path']
+        const resultLoc = path.join(__dirname, "../../resources", dir)
+        
+        if (fs.existsSync(resultLoc)) {
+            await fs.promises.unlink(resultLoc)
+        }
+    }
+})
+
 const Gradcam = db.model("gradcams", schema);
 
 module.exports = Gradcam;
