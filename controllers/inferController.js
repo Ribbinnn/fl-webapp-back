@@ -210,9 +210,6 @@ const inferResult = async (req, res) => {
 
         return res.status(200).json({ success: true, message: `Start inference` })
     } catch (e) {
-        if (e.message.includes('Invalid record input'))
-            return res.status(400).json({ success: false, message: e.message });
-
         // delete result folder if error occurs
         if (fs.existsSync(resultDir)) {
             fs.rm(resultDir, { recursive: true, force: true }, (err) => {

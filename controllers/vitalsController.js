@@ -71,16 +71,16 @@ const create = async (req, res) => {
         ]
 
         const records = req.body.records.map((item) => {
-            requirements.forEach((requirement) => {
+            for (const requirement of requirements) {
                 const fieldName = requirement.name + (requirement.unit == 'none' ? "" : "(" + requirement.unit + ")")
                 if (!item[fieldName])
-                    throw new Error(`Invalid record input: "${fieldName}" is required`)
+                    return res.status(400).json({ success: false, message: `Invalid record input: "${fieldName}" is required` });
                 // check fields' type
                 if (typeof (item[fieldName]) !== requirement.type && requirement.name !== "measured_time")
-                    throw new Error(`Invalid record input: "${fieldName}" must be a ${requirement.type}`)
+                    return res.status(400).json({ success: false, message: `Invalid record input: "${fieldName}" must be a ${requirement.type}` });
                 if (requirement.name == "measured_time" && new Date(item[fieldName]) == "Invalid Date")
-                    throw new Error(`Invalid record input: Incorrect "${fieldName}" date format`)
-            })
+                    return res.status(400).json({ success: false, message: `Invalid record input: Incorrect "${fieldName}" date format` });
+            }
             for (const k in item) {
                 if (k.includes("(")) {
                     item[k.split("(")[0]] = item[k]
@@ -118,8 +118,6 @@ const create = async (req, res) => {
         })
     } catch (e) {
         // error
-        if (e.message.includes('Invalid record input'))
-            return res.status(400).json({ success: false, message: e.message });
         return res.status(500).json({ success: false, message: 'Internal server error', error: e.message })
     }
 }

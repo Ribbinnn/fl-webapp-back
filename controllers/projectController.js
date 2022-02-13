@@ -1,7 +1,7 @@
 const Joi = require("joi");
 const webModel = require('../models/webapp')
 const { task } = require('../utils/taskList')
-const { checkExistedUser } = require('../utils/checkExistedUser')
+const { checkExistedUser } = require('../utils/reusuableFunctions')
 const { userStatus, userRole } = require('../utils/status')
 
 const schema = {
@@ -178,10 +178,10 @@ const manageUser = async (req, res) => {
     }
     try {
         const project = await webModel.Project.findById(req.body.id);
-        project.head.forEach((id) => {
+        for (const id of project.head) {
             if (!req.body.users.includes(String(id)))
-                throw new Error(`Invalid input: Cannot delete head user ${id}`)
-        })
+                return res.status(400).json({ success: false, message: `Invalid input: Cannot delete head user ${id}` })
+        }
 
         // if user is inactive, then do not add that user to the project
         const existedUsers = await checkExistedUser(req.body.users, [userRole.RADIOLOGIST, userRole.CLINICIAN])
@@ -215,8 +215,6 @@ const manageUser = async (req, res) => {
             data: existedUsers
         })
     } catch (e) {
-        if (e.message.includes('head user'))
-            return res.status(400).json({ success: false, message: e.message })
         return res.status(500).json({ success: false, message: 'Internal server error', error: e.message })
     }
 }

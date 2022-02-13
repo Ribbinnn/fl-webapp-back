@@ -1,6 +1,7 @@
 const Joi = require("joi");
 const webModel = require("../models/webapp");
 const { modelStatus } = require("../utils/status");
+const { convertIdToShorthand } = require('../utils/reusuableFunctions')
 
 const schema = {
   report_id: Joi.string().required(),
@@ -45,6 +46,7 @@ const getById = async (req, res) => {
       message: `Get report ${req.params.rid} successfully`,
       data: {
         result,
+        no: convertIdToShorthand(result.id),
         patient: Object.keys(result.record_id.record).reduce((json, item) => {
           if (["gender", "age", "height", "weight"].includes(item)) {
             json[item.charAt(0).toUpperCase() + item.slice(1)] =
@@ -208,7 +210,6 @@ const viewHistory = async (req, res) => {
       .populate("image_id");
 
     let data = [];
-
     if (results) {
       await Promise.all(
         results.map(async (item) => {
@@ -225,28 +226,29 @@ const viewHistory = async (req, res) => {
             });
             let mx = -1;
             let mk = -1;
+            let mxNeg = -1;
+            let mkNeg = -1;
             predClass.prediction.forEach((v, k) => {
-              if (v.confidence > mx) {
+              if (v.isPositive && v.confidence > mx) {
                 mx = v.confidence;
                 mk = k;
               }
+              if (!v.isPositive && v.confidence > mxNeg) {
+                mxNeg = v.confidence;
+                mkNeg = k;
+              }
             });
-            finding = predClass.prediction[mk].finding;
+            finding = mk != -1 ? predClass.prediction[mk].finding : predClass.prediction[mkNeg].finding;
           }
 
           // if (item.status==="finalized") {
           //     finding = item.label.finding
           // }
 
-          const hn = item.hn;
-          // const patientName = await PACS.findOne({ "Patient ID": String(hn) }, [
-          //   "Patient Name",
-          // ]);
-
           data.push({
             pred_result_id: item.id,
             status: item.status,
-            hn: hn,
+            hn: item.hn,
             patient_name: item.patient_name,
             clinician_name: item.created_by.first_name,
             clinician_lastname: item.created_by.last_name,
@@ -254,6 +256,7 @@ const viewHistory = async (req, res) => {
             accession_no: item.image_id.accession_no,
             createdAt: item.createdAt,
             updatedAt: item.updatedAt,
+            no: convertIdToShorthand(item.id)
           });
         })
       );
