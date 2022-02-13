@@ -4,6 +4,7 @@ const tokenGenerator = require('../middlewares/tokenGenerator');
 const webModel = require('../models/webapp')
 const axios = require('axios')
 const { userStatus, userRole } = require('../utils/status')
+const https = require('https');
 
 dotenv.config();
 
@@ -67,20 +68,25 @@ const logout = async (req, res) => {
 
 const chulaSSO = async (req, res) => {
     try {
-        const response = (await axios.get('https://account.it.chula.ac.th/serviceValidation', {
+        const agent = new https.Agent({
+            rejectUnauthorized: false
+        });
+
+        const response = (await axios.get('https://161.200.194.26/serviceValidation', {
             headers: {
                 'DeeAppId': process.env.DeeAppId,
                 'DeeAppSecret': process.env.DeeAppSecret,
                 'DeeTicket': req.query.ticket
-            }
+            },
+            httpsAgent: agent
         })).data
 
-        if (!response.gecos.includes('MED')) {
-            return res.status(401).json({
-                success: false,
-                message: 'User must be a member of The Faculty of Medicine to access this Web Application'
-            })
-        }
+        // if (!response.gecos.includes('MED')) {
+        //     return res.status(401).json({
+        //         success: false,
+        //         message: 'User must be a member of The Faculty of Medicine to access this Web Application'
+        //     })
+        // }
 
         // console.log(response.username, response.email, response.roles)
         let user = await webModel.User.findOne({ username: response.username })
