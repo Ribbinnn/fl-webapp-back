@@ -178,7 +178,7 @@ const update = async (req, res) => {
     ).populate('updated_by', ["first_name", "last_name"]);
     return res.status(200).json({
       success: true,
-      message: `Update report ${req.body.report_id} successfully`,
+      message: `Update report ${convertIdToShorthand(req.body.report_id)} successfully`,
       data,
     });
   } catch (e) {
