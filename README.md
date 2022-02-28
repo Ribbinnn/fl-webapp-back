@@ -35,6 +35,7 @@ Vitals
 
 Infer & Report
 - POST /api/infer (Start inference, reqBody = (accession_no, project_id, record, user_id) )
+- POST /api/infer/batch (Start batch inference, reqBody = {project_id, user_id, dicom_info_list: {accession_no, record: {...}}} )
 - GET /api/report/:rid (Get report by id)
 - GET /api/report/list/project/:project_id (View history by project id)
 - PATCH /api/report/ (Update or finalize report, reqBody = ( report_id, note, user_id, label, rating ) )
