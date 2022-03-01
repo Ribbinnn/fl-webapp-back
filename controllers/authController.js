@@ -26,7 +26,7 @@ const login = async (req, res) => {
         const data = tokenGenerator({
             _id: user._id,
             username: req.body.username,
-            // first_name: user.first_name, 
+            first_name: user.first_name, 
             // last_name: user.last_name, 
             role: user.role
         }, req.body.remember ? true : false);
@@ -41,7 +41,7 @@ const login = async (req, res) => {
             data: {
                 user_id: user._id,
                 username: user.username,
-                // name: user.name,first_name: user.first_name, 
+                first_name: user.first_name, 
                 // last_name: user.last_name, 
                 role: user.role,
                 token: data
@@ -107,6 +107,7 @@ const chulaSSO = async (req, res) => {
         const data = tokenGenerator({
             _id: user._id,
             username: user.username,
+            first_name: user.first_name, 
             role: user.role
         }, req.body.remember ? true : false);
         await webModel.User.findByIdAndUpdate(user._id, { $push: { token: data } })
@@ -116,6 +117,7 @@ const chulaSSO = async (req, res) => {
             data: {
                 user_id: user._id,
                 username: user.username,
+                first_name: user.first_name, 
                 role: user.role,
                 token: data
             }

@@ -14,6 +14,15 @@ router.post(
     inferController.inferResult
 );
 
+// predict result from multiple dicom files
+router.post(
+    '/batch',
+    tokenValidation,
+    verification.userVerification,
+    verification.projectVerification,
+    inferController.batchInfer
+);
+
 // get all results
 // router.get('/', tokenValidation, inferController.getAllResult);
 
