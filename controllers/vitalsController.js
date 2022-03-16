@@ -13,7 +13,7 @@ const schema = {
             'hn': Joi.required(),
             // 'gender(male/female)': Joi.required(), // valid('male', 'female'),
             // 'age(year)': Joi.required(),
-            'measured_time(yyyy-MM-ddTHH:mm:ssZ)': Joi.required()
+            'measured_time(YYYY-MM-DD HH:mm)': Joi.required()
         }).unknown(true)).unique('entry_id')
 };
 
@@ -66,7 +66,7 @@ const create = async (req, res) => {
             { name: "hn", type: "number", unit: "none" },
             // { name: "gender", type: "string", unit: "male/female" },
             // { name: "age", type: "number", unit: "year" },
-            { name: "measured_time", type: "object", unit: "yyyy-MM-ddTHH:mm:ssZ" },
+            { name: "measured_time", type: "object", unit: "YYYY-MM-DD HH:mm" },
             ...webProject.requirements
         ]
 
@@ -218,7 +218,7 @@ const updateRecRow = async (req, res) => {
             { name: "hn", type: "number", unit: "none" },
             // { name: "gender", type: "string", unit: "male/female" },
             // { name: "age", type: "number", unit: "year" },
-            { name: "measured_time", type: "object", unit: "yyyy-MM-ddTHH:mm:ssZ" },
+            { name: "measured_time", type: "object", unit: "YYYY-MM-DD HH:mm" },
             ...webProject.requirements
         ]
         requirements.forEach((requirement) => {
@@ -333,7 +333,7 @@ const generateTemplate = async (req, res) => {
         const project = await webModel.Project.findById(req.params.project_id)
 
         const requirements = project.requirements.map(item => `${item.name}${item.unit == 'none' ? "" : "(" + item.unit + ")"}`)
-        const headerField = ["entry_id", "hn", "measured_time(yyyy-MM-ddTHH:mm:ssZ)", ...requirements]
+        const headerField = ["entry_id", "hn", "measured_time(YYYY-MM-DD HH:mm)", ...requirements]
 
         const ws = XLSX.utils.json_to_sheet([], { header: headerField })
         const wb = XLSX.utils.book_new();

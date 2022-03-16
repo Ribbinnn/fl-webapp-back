@@ -37,12 +37,16 @@ const getInfoByHN = async (req, res) => {
 // get all data from PACS by HN
 const getAllByQuery = async (req, res) => {
     try {
+        const startDate = new Date(req.query.start_date)
+        startDate.setHours(startDate.getHours() + 7);
+        const endDate = new Date(req.query.end_date)
+        endDate.setHours(endDate.getHours() + 7);
         const params = {
             params: {
                 hn: req.query.HN,
                 acc_no: req.query.accession_no,
-                start_date: req.query.start_date ? (new Date(req.query.start_date)).getTime() : undefined,
-                end_date: req.query.end_date ? (new Date(req.query.end_date)).getTime() : undefined
+                start_date: req.query.start_date ? startDate.getTime() : undefined,
+                end_date: req.query.end_date ? endDate.getTime() : undefined
             }
         }
 

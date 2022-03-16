@@ -51,7 +51,7 @@ const inferResult = async (req, res) => {
         { name: "hn", type: "number", unit: "none" },
         { name: "gender", type: "string", unit: "male/female" },
         { name: "age", type: "number", unit: "year" },
-        { name: "measured_time", type: "object", unit: "yyyy-MM-ddTHH:mm:ssZ" },
+        { name: "measured_time", type: "object", unit: "YYYY-MM-DD HH:mm" },
         ...project.requirements
     ]
 
@@ -255,7 +255,7 @@ const batchInfer = async (req, res) => {
                 { name: "hn", type: "number", unit: "none" },
                 { name: "gender", type: "string", unit: "male/female" },
                 { name: "age", type: "number", unit: "year" },
-                { name: "measured_time", type: "object", unit: "yyyy-MM-ddTHH:mm:ssZ" }
+                { name: "measured_time", type: "object", unit: "YYYY-MM-DD HH:mm" }
             ]
 
             // check required fields
@@ -459,7 +459,7 @@ module.exports = {
 //                 { name: "hn", type: "number", unit: "none" },
 //                 { name: "gender", type: "string", unit: "male/female" },
 //                 { name: "age", type: "number", unit: "year" },
-//                 { name: "measured_time", type: "object", unit: "yyyy-MM-ddTHH:mm:ssZ" }
+//                 { name: "measured_time", type: "object", unit: "YYYY-MM-DD HH:mm" }
 //             ]
 
 //             // check required fields
