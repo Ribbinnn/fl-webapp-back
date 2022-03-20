@@ -221,16 +221,16 @@ const updateRecRow = async (req, res) => {
             { name: "measured_time", type: "object", unit: "YYYY-MM-DD HH:mm" },
             ...webProject.requirements
         ]
-        requirements.forEach((requirement) => {
+        for (const requirement of requirements) {
             const fieldName = requirement.name
             if (!req.body.update_data[0][fieldName])
                 throw new Error(`Invalid record input: "${fieldName}" is required`)
             // check fields' type
             if (typeof (req.body.update_data[0][fieldName]) !== requirement.type && requirement.name !== "measured_time")
-                throw new Error(`Invalid record input: "${fieldName}" must be a ${requirement.type}`)
+                return res.status(400).json({ success: false, message: `Invalid record input: "${fieldName}" must be a ${requirement.type}` });
             if (requirement.name == "measured_time" && new Date(req.body.update_data[0][fieldName]) == "Invalid Date")
-                throw new Error(`Invalid record input: Incorrect "${fieldName}" date format`)
-        })
+                return res.status(400).json({ success: false, message: `Invalid record input: Incorrect "${fieldName}" date format` });
+        }
         req.body.update_data[0]["measured_time"] = new Date(req.body.update_data[0].measured_time)
 
         // change req.body.update_data key from [key] to [records.$.key] to update nested object
