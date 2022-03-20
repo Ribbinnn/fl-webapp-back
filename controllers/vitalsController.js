@@ -224,7 +224,7 @@ const updateRecRow = async (req, res) => {
         for (const requirement of requirements) {
             const fieldName = requirement.name
             if (!req.body.update_data[0][fieldName])
-                throw new Error(`Invalid record input: "${fieldName}" is required`)
+                return res.status(400).json({ success: false, message: `Invalid record input: "${fieldName}" is required` });
             // check fields' type
             if (typeof (req.body.update_data[0][fieldName]) !== requirement.type && requirement.name !== "measured_time")
                 return res.status(400).json({ success: false, message: `Invalid record input: "${fieldName}" must be a ${requirement.type}` });
