@@ -72,12 +72,44 @@ User
 
 **Docker** <br />
 1. Go to root directory of all three fl servers
-2. Copy docker-compose.yml, Dockerfile, and mongo-init.js to the root directory <br />
+2. Copy docker-compose.yml, Dockerfile, .env, and mongo-init.js to the root directory <br />
 ![image](https://user-images.githubusercontent.com/47110972/148223267-2b95e1ec-f038-41d2-b8d2-13ee7e23c6b5.png) <br />
   docker-compose.yml
   ```
   version: "3.8"
   services:
+    webapp-front:
+      container_name: webapp-front
+      restart: always
+      build: ./fl-webapp-front
+      ports:
+        - '3000:3000'
+      env_file:
+        - ./.env
+    webapp-model:
+      container_name: webapp-model
+      restart: always
+      build: ./fl-webapp-model
+      ports:
+        - '7000:7000'
+        - '11112:11112'
+      volumes:
+        - /fl-webapp-model/resources:/code/resources
+      env_file:
+        - ./.env
+    mongo:
+      container_name: mongo
+      build: 
+        context: ./
+        args: 
+          - ROOT_PASSWORD=$ROOT_PASSWORD
+          - ROOT_USER=$ROOT_USER
+      ports:
+        - '27018:27017' # host_port:container_port
+      volumes:
+        - /fl-webapp-mongo/resources:/data/db
+      env_file:
+        - ./.env
     webapp-back:
       container_name: webapp-back
       restart: always
@@ -85,47 +117,28 @@ User
       ports:
         - '5000:5000'
       volumes:
-        - back:/usr/src/app/resources # /fl-webapp-back/resources:/usr/src/app/resources
-    webapp-front:
-      container_name: webapp-front
-      restart: always
-      build: ./fl-webapp-front
-      ports:
-        - '3000:3000'
-    webapp-model:
-      container_name: webapp-model
-      restart: always
-      build: ./fl-webapp-model
-      ports:
-        - '7000:7000'
-      # volumes:
-        # - /fl-webapp-model/resources:/code/resources
-    mongo:
-      container_name: mongo
-      build: ./
-      ports:
-        - '27018:27017' # host_port:container_port
-      volumes:
-        - mongodb:/data/db
-  volumes:
-    mongodb:
-    back:
+        - /fl-webapp-back/resources:/usr/src/app/resources
+      env_file:
+        - ./.env
   ```
   Dockerfile
   ```
-  FROM mongo
-  ENV MONGO_INITDB_ROOT_USERNAME root
-  ENV MONGO_INITDB_ROOT_PASSWORD password
+  FROM mongo:4.0.3
+  ARG ROOT_PASSWORD
+  ARG ROOT_USER
+  ENV MONGO_INITDB_ROOT_USERNAME $ROOT_USER
+  ENV MONGO_INITDB_ROOT_PASSWORD $ROOT_PASSWORD
   ENV MONGO_INITDB_DATABASE admin
   ADD mongo-init.js /docker-entrypoint-initdb.d/
   ```
   mongo-init.js
   ```
-  db.auth('<root>', '<password>')
+  db.auth(process.env.ROOT_USER, process.env.ROOT_PASSWORD)
+
   db = db.getSiblingDB('webapp')
   db.createUser({
-    user: '<admin>',
-    pwd: '<admin>',
+    user: process.env.WEB_DB_USER,
+    pwd: process.env.DB_PASSWORD,
     roles: [
       {
         role: 'readWrite',
@@ -136,8 +149,8 @@ User
 
   db = db.getSiblingDB('vitals')
   db.createUser({
-    user: '<admin>',
-    pwd: '<admin>',
+    user: process.env.VITALS_DB_USER,
+    pwd: process.env.DB_PASSWORD,
     roles: [
       {
         role: 'readWrite',
@@ -145,18 +158,37 @@ User
       },
     ],
   });
+  ```
+  .env
+  ```
+  # DATABASE
+  webappDB = mongodb://<admin>:<admin>@mongo:27017/webapp?authSource=webapp&w=1
+  vitalsDB = mongodb://<admin>:<admin>@mongo:27017/vitals?authSource=vitals&w=1
 
-  db = db.getSiblingDB('pacs')
-  db.createUser({
-    user: '<admin>',
-    pwd: '<admin>',
-    roles: [
-      {
-        role: 'readWrite',
-        db: 'pacs',
-      },
-    ],
-  });
+  # ROOT DATABASE USERNAME/PASSWORD
+  ROOT_USER = <root>
+  ROOT_PASSWORD = <password>
+  
+  # USER DATABASE USERNAME/PASSWORD
+  VITALS_DB_USER = <admin>
+  WEB_DB_USER = <admin>
+  DB_PASSWORD = <admin>
+
+  # SECRET
+  SECRET_TOKEN = oUQF9vv5MB77302BJm6HDKulKKPqfukuiW5zMeamAx2JJU21cJkx23MBShP3GVt
+
+  # BACKEND
+  DeeAppId = DEE_APP_ID
+  DeeAppSecret = DEE_APP_SECRET
+  GROUP_SIZE = 2
+  PY_SERVER = http://webapp-model:7000
+
+  # FRONTEND
+  REACT_APP_IP_ADDRESS=localhost
+
+  # PYTHON
+  PACS_ADDR = 127.0.0.1
+  PACS_PORT = 11113
   ```
 3. For frontend, change serverURL in `config.js` to `http://localhost:5000/api`, for backend remove comments under #DOCKER in `.env`
 3. Build docker compose. Frontend, backend, and model will be run at port 3000, 5000, and 7000
