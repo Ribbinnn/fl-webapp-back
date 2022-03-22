@@ -72,8 +72,8 @@ User
 
 **Docker** <br />
 1. Go to root directory of all three fl servers
-2. Copy docker-compose.yml, Dockerfile, .env, and mongo-init.js to the root directory <br />
-![image](https://user-images.githubusercontent.com/47110972/148223267-2b95e1ec-f038-41d2-b8d2-13ee7e23c6b5.png) <br />
+2. Copy `docker-compose.yml` and `.env` into root directory and copy `init-mongo.sh` into mongo volume directory <br />
+![image](https://user-images.githubusercontent.com/47110972/159545612-269a81f4-4c47-4624-841f-920c60c8fe84.png) <br />
   docker-compose.yml
   ```
   version: "3.8"
@@ -83,7 +83,7 @@ User
       restart: always
       build: ./fl-webapp-front
       ports:
-        - '3000:3000'
+        - '80:3000'
       env_file:
         - ./.env
     webapp-model:
@@ -98,16 +98,16 @@ User
       env_file:
         - ./.env
     mongo:
+      image: mongo:4.0.3
       container_name: mongo
-      build: 
-        context: ./
-        args: 
-          - ROOT_PASSWORD=$ROOT_PASSWORD
-          - ROOT_USER=$ROOT_USER
       ports:
         - '27018:27017' # host_port:container_port
+      environment:
+        MONGO_INITDB_ROOT_USERNAME: $ROOT_USER
+        MONGO_INITDB_ROOT_PASSWORD: $ROOT_PASSWORD
       volumes:
-        - /fl-webapp-mongo/resources:/data/db
+        - /mongo-test/migrations:/docker-entrypoint-initdb.d # path to init-mongo.sh
+        - /mongo-test/db:/data/db # can be anywhere
       env_file:
         - ./.env
     webapp-back:
@@ -121,77 +121,62 @@ User
       env_file:
         - ./.env
   ```
-  Dockerfile
+  init-mongo.sh
   ```
-  FROM mongo:4.0.3
-  ARG ROOT_PASSWORD
-  ARG ROOT_USER
-  ENV MONGO_INITDB_ROOT_USERNAME $ROOT_USER
-  ENV MONGO_INITDB_ROOT_PASSWORD $ROOT_PASSWORD
-  ENV MONGO_INITDB_DATABASE admin
-  ADD mongo-init.js /docker-entrypoint-initdb.d/
-  ```
-  mongo-init.js
-  ```
-  db.auth(process.env.ROOT_USER, process.env.ROOT_PASSWORD)
-
-  db = db.getSiblingDB('webapp')
+  set -e
+  mongo <<EOF
+  use webapp
   db.createUser({
-    user: process.env.WEB_DB_USER,
-    pwd: process.env.DB_PASSWORD,
-    roles: [
-      {
-        role: 'readWrite',
-        db: 'webapp',
-      },
-    ],
-  });
-
-  db = db.getSiblingDB('vitals')
+    user: '$WEB_DB_USER',
+    pwd: '$DB_PASSWORD',
+    roles: [{
+      role: 'readWrite',
+      db: 'webapp'
+    }]
+  })
+  use vitals
   db.createUser({
-    user: process.env.VITALS_DB_USER,
-    pwd: process.env.DB_PASSWORD,
-    roles: [
-      {
-        role: 'readWrite',
-        db: 'vitals',
-      },
-    ],
-  });
+    user: '$VITALS_DB_USER',
+    pwd: '$DB_PASSWORD',
+    roles: [{
+      role: 'readWrite',
+      db: 'vitals'
+    }]
+  })
+  EOF
   ```
   .env
   ```
-  # DATABASE
-  webappDB = mongodb://<admin>:<admin>@mongo:27017/webapp?authSource=webapp&w=1
-  vitalsDB = mongodb://<admin>:<admin>@mongo:27017/vitals?authSource=vitals&w=1
+  # DATABASE URL FOR BACK AND MODEL
+  webappDB=mongodb://<admin>:<admin>@mongo:27017/webapp?authSource=webapp&w=1
+  vitalsDB=mongodb://<admin>:<admin>@mongo:27017/vitals?authSource=vitals&w=1
 
   # ROOT DATABASE USERNAME/PASSWORD
-  ROOT_USER = <root>
-  ROOT_PASSWORD = <password>
+  ROOT_USER=<root>
+  ROOT_PASSWORD=<password>
   
   # USER DATABASE USERNAME/PASSWORD
-  VITALS_DB_USER = <admin>
-  WEB_DB_USER = <admin>
-  DB_PASSWORD = <admin>
+  VITALS_DB_USER=<admin>
+  WEB_DB_USER=<admin>
+  DB_PASSWORD=<admin> # same for both db
 
   # SECRET
-  SECRET_TOKEN = oUQF9vv5MB77302BJm6HDKulKKPqfukuiW5zMeamAx2JJU21cJkx23MBShP3GVt
+  SECRET_TOKEN=oUQF9vv5MB77302BJm6HDKulKKPqfukuiW5zMeamAx2JJU21cJkx23MBShP3GVt
 
   # BACKEND
-  DeeAppId = DEE_APP_ID
-  DeeAppSecret = DEE_APP_SECRET
-  GROUP_SIZE = 2
-  PY_SERVER = http://webapp-model:7000
+  DeeAppId=DEE_APP_ID
+  DeeAppSecret=DEE_APP_SECRET
+  GROUP_SIZE=2
+  PY_SERVER=http://webapp-model:7000
 
   # FRONTEND
   REACT_APP_IP_ADDRESS=localhost
 
   # PYTHON
-  PACS_ADDR = 127.0.0.1
-  PACS_PORT = 11113
+  PACS_ADDR=127.0.0.1
+  PACS_PORT=11113
   ```
-3. For frontend, change serverURL in `config.js` to `http://localhost:5000/api`, for backend remove comments under #DOCKER in `.env`
-3. Build docker compose. Frontend, backend, and model will be run at port 3000, 5000, and 7000
+3. Build docker compose. Frontend, backend, and model will be run at port 80, 5000, and 7000
    ```
    docker-compose up -d --build
    ```
