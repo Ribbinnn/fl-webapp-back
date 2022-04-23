@@ -13,6 +13,8 @@ dotenv.config()
 const imageSchema = {
     project_id: Joi.string().required(),
     accession_no: Joi.string().required(),
+    user_id: Joi.string().required(),
+    record: Joi.object().required()
 };
 
 const imageValidator = Joi.object(imageSchema);
@@ -22,13 +24,12 @@ const inferResult = async (req, res) => {
     // validate input
     const validatedImage = imageValidator.validate({
         project_id: req.body.project_id,
-        accession_no: req.body.accession_no
+        accession_no: req.body.accession_no,
+        user_id: req.body.user_id,
+        record: req.body.record
     })
     if (validatedImage.error) {
-        return res.status(400).json({ success: false, message: `Invalid image input: ${(validatedImage.error.message)}` })
-    }
-    if (!req.body.user_id) {
-        return res.status(400).json({ success: false, message: `Invalid input: "user_id" is required` })
+        return res.status(400).json({ success: false, message: `Invalid input: ${(validatedImage.error.message)}` })
     }
 
     const todayYear = String((new Date()).getUTCFullYear())
@@ -38,7 +39,7 @@ const inferResult = async (req, res) => {
     let pacs = {}
     let project = {}
     try {
-        project = await webModel.Project.findById(req.body.project_id)
+        project = (await webModel.Project.findById(req.body.project_id)).toObject()
         if (!project)
             return res.status(400).json({ success: false, message: 'Project not found' });
     } catch (e) {
@@ -47,21 +48,22 @@ const inferResult = async (req, res) => {
 
     // project's requirements
     const requirements = [
-        { name: "entry_id", type: "number", unit: "none" },
-        { name: "hn", type: "number", unit: "none" },
-        { name: "gender", type: "string", unit: "male/female" },
-        { name: "age", type: "number", unit: "year" },
-        { name: "measured_time", type: "object", unit: "YYYY-MM-DD HH:mm" },
+        { name: "entry_id", type: "number", unit: "none", required: true },
+        { name: "hn", type: "number", unit: "none", required: true },
+        { name: "gender", type: "string", unit: "male/female", required: true },
+        { name: "age", type: "number", unit: "year", required: true },
+        { name: "measured_time", type: "object", unit: "YYYY-MM-DD HH:mm", required: true },
         ...project.requirements
     ]
 
-    // record can be null (might be changed in the future)
-    if (!req.body.record)
-        return res.status(400).json({ success: false, message: `Invalid record input: "record" is required` })
     // check required fields
     for (const requirement of requirements) {
         const fieldName = requirement.name
-        if (!req.body.record[fieldName])
+        if (!req.body.record[fieldName] && !requirement.required) {
+            req.body.record[fieldName] = null
+            continue
+        }
+        if (!req.body.record[fieldName] && requirement.required)
             return res.status(400).json({ success: false, message: `Invalid record input: "${fieldName}" is required` })
         // check fields' type
         if (typeof (req.body.record[fieldName]) !== requirement.type && fieldName !== "measured_time")
@@ -86,7 +88,7 @@ const inferResult = async (req, res) => {
 
     try {
         // create record
-        record = await webModel.MedRecord.create({
+        const record = await webModel.MedRecord.create({
             project_id: req.body.project_id,
             record: req.body.record
         })
@@ -116,17 +118,20 @@ const inferResult = async (req, res) => {
         const predClass = await webModel.PredClass.create({ result_id: predResult._id, prediction: {} })
         const mask = await webModel.Mask.create({ result_id: predResult._id, data: [] })
 
-        // create FormData to send to python server
-        // const data = new FormData()
-        // data.append('file', fs.createReadStream(path.join(root, '/resources', '/uploads', filename)))
-        // data.append('model_name', project.task)
+        let reqRecord = req.body.record
+        delete reqRecord.hn
+        delete reqRecord.entry_id
+        delete reqRecord.measured_time
+        // console.log(reqRecord)
 
         console.log('Start Inference')
 
         // get result from python model
-        axios.get(url + `/${project.task}/${req.body.accession_no}`, {
-            responseType: 'arraybuffer'
-        })
+        axios.post(url, {
+            'model_name': project.task,
+            'acc_no': String(req.body.accession_no),
+            'record': JSON.stringify(reqRecord)
+        }, { responseType: 'arraybuffer' })
             .then(async res => {
                 // make new directory if does not exist
                 if (!fs.existsSync(resultDir)) {
@@ -147,61 +152,48 @@ const inferResult = async (req, res) => {
                     patient_name = modelResult.patient_name
                 delete modelResult.patient_name
 
+                // zip file received from python includes:
+                // 1. prediction.txt (JSON format consisted of Finding, Confidence, Threshold, and isPositive)
+                // 2. original.png (original dicom file in png format)
+                // 3. gradcam/heatmap (any png file that is not original.png)
                 let prediction = []
-                switch (project.task) {
-                    // case "classification_pylon_256":
-                    case "classification_pylon_1024":
-                        for (let i = 0; i < modelResult["Finding"].length; i++) {
-                            prediction.push({
-                                finding: modelResult["Finding"][i],
-                                confidence: modelResult["Confidence"][i],
-                                threshold: modelResult["Threshold"][i],
-                                isPositive: modelResult["isPositive"][i],
-                                selected: false
-                            })
-                        }
-                        // delete zip file
-                        await fs.promises.unlink(path.join(resultDir, '/result.zip'))
-
-                        // delete probability prediction file
-                        await fs.promises.unlink(path.join(resultDir, '/prediction.txt'))
-
-                        // iterate over files in result directory to get overlay files
-                        fs.readdir(resultDir, async (err, files) => {
-                            if (err) throw err
-                            // create gradcam from each overlay file paths
-                            await Promise.all(files.map(async (item, i) => {
-                                await webModel.Gradcam.create({
-                                    result_id: predResult._id,
-                                    finding: item.split('.')[0],
-                                    gradcam_path: `results/${todayYear}/${todayMonth}/${String(predResult._id)}/${item}`
-                                })
-                            }))
-                            // update result's status to annotated
-                            await webModel.PredResult.findByIdAndUpdate(predResult._id, {
-                                status: modelStatus.AI_ANNOTATED,
-                                patient_name
-                            })
-                            // update probability prediction
-                            await webModel.PredClass.findByIdAndUpdate(predClass._id, { prediction: prediction })
-                            console.log('Finish Inference')
-                        })
-                        break;
-                    // case "covid19_admission":
-                    //     prediction = modelResult
-                    //     fs.rm(resultDir, { recursive: true, force: true }, (err) => {
-                    //         if (err) throw err
-                    //     });
-                    //     await webModel.PredResult.findByIdAndUpdate(predResult._id, { 
-                    //         status: modelStatus.AI_ANNOTATED,
-                    //         patient_name: "-"
-                    //     })
-                    //     await webModel.PredClass.findByIdAndUpdate(predClass._id, { prediction: prediction })
-                    //     console.log('Finish')
-                    //     break;
-                    default:
-                        break;
+                for (let i = 0; i < modelResult["Finding"].length; i++) {
+                    prediction.push({
+                        finding: modelResult["Finding"][i],
+                        confidence: modelResult["Confidence"][i],
+                        threshold: modelResult["Threshold"][i],
+                        isPositive: modelResult["isPositive"][i],
+                        selected: false
+                    })
                 }
+
+                // delete zip file
+                await fs.promises.unlink(path.join(resultDir, '/result.zip'))
+
+                // delete probability prediction file
+                await fs.promises.unlink(path.join(resultDir, '/prediction.txt'))
+
+                // iterate over files in result directory to get gradcam/heatmap files
+                fs.readdir(resultDir, async (err, files) => {
+                    if (err) throw err
+                    // create gradcam in database from each gradcam file paths
+                    await Promise.all(files.map(async (item, i) => {
+                        await webModel.Gradcam.create({
+                            result_id: predResult._id,
+                            finding: item.split('.')[0],
+                            gradcam_path: `results/${todayYear}/${todayMonth}/${String(predResult._id)}/${item}`
+                        })
+                    }))
+                    // update result's status to annotated
+                    await webModel.PredResult.findByIdAndUpdate(predResult._id, {
+                        status: modelStatus.AI_ANNOTATED,
+                        patient_name
+                    })
+                    // update probability prediction
+                    await webModel.PredClass.findByIdAndUpdate(predClass._id, { prediction: prediction })
+                    console.log('Finish Saving Gradcam')
+                })
+                console.log('Finish Inference')
             }).catch(async e => {
                 // if AI server send an error, then change result's status to canceled
                 await webModel.PredResult.findByIdAndUpdate(predResult._id, { status: modelStatus.CANCELED })
@@ -212,6 +204,7 @@ const inferResult = async (req, res) => {
                     });
                 }
                 console.log(e.message)
+                // console.log(e.response.data.toString())
             })
 
         return res.status(200).json({ success: true, message: `Start inference` })
@@ -251,11 +244,11 @@ const batchInfer = async (req, res) => {
         await Promise.all(req.body.dicom_info_list.map(async dcm_info => {
             // project's requirements
             const requirements = [
-                { name: "entry_id", type: "number", unit: "none" },
-                { name: "hn", type: "number", unit: "none" },
-                { name: "gender", type: "string", unit: "male/female" },
-                { name: "age", type: "number", unit: "year" },
-                { name: "measured_time", type: "object", unit: "YYYY-MM-DD HH:mm" }
+                { name: "entry_id", type: "number", unit: "none", required: true },
+                { name: "hn", type: "number", unit: "none", required: true },
+                { name: "gender", type: "string", unit: "male/female", required: true },
+                { name: "age", type: "number", unit: "year", required: true },
+                { name: "measured_time", type: "object", unit: "YYYY-MM-DD HH:mm", required: true }
             ]
 
             // check required fields

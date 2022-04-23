@@ -7,7 +7,7 @@ const { userStatus, userRole } = require('../utils/status')
 const schema = {
     name: Joi.string().required().max(32),
     task: Joi.string().required().valid(
-        "classification_pylon_256",
+        // "classification_pylon_256",
         "classification_pylon_1024",
         "covid19_admission"
     ),
