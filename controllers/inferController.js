@@ -203,8 +203,8 @@ const inferResult = async (req, res) => {
                         console.log(err)
                     });
                 }
-                console.log(e.message)
-                // console.log(e.response.data.toString())
+                console.log(e.message, e.response?.data.toString())
+                // const errMsg = e.message.includes('status code 500')? `Model Error: ${e.response?.data.toString()}`: e.message
             })
 
         return res.status(200).json({ success: true, message: `Start inference` })
@@ -316,97 +316,90 @@ const batchInfer = async (req, res) => {
         }
         const startTime = new Date()
         console.log('Start Batch Inference')
-        for (let predResultGroup of predResultGroups) {
-            await Promise.all(predResultGroup.map(async result => {
-                const root = path.join(__dirname, "..");
-                const projectDir = path.join(root, "/resources/results/", todayYear, todayMonth)
-                const resultDir = path.join(projectDir, String(result.result_id))
-                const url = process.env.PY_SERVER + '/api/infer';
-                try {
-                    await webModel.PredResult.findByIdAndUpdate(result.result_id, { status: modelStatus.IN_PROGRESS })
+        for (let result of predResults) {
+            const root = path.join(__dirname, "..");
+            const projectDir = path.join(root, "/resources/results/", todayYear, todayMonth)
+            const resultDir = path.join(projectDir, String(result.result_id))
+            const url = process.env.PY_SERVER + '/api/infer';
+            try {
+                await webModel.PredResult.findByIdAndUpdate(result.result_id, { status: modelStatus.IN_PROGRESS })
 
-                    // create predicted class and mask
-                    const predClass = await webModel.PredClass.create({ result_id: result.result_id, prediction: {} })
-                    const mask = await webModel.Mask.create({ result_id: result.result_id, data: [] })
+                // create predicted class and mask
+                const predClass = await webModel.PredClass.create({ result_id: result.result_id, prediction: {} })
+                const mask = await webModel.Mask.create({ result_id: result.result_id, data: [] })
 
-                    // get result from python model
-                    const res = await axios.get(url + `/${project.task}/${result.accession_no}`, {
-                        responseType: 'arraybuffer'
-                    })
+                // get result from python model
+                const res = await axios.post(url, {
+                    'model_name': project.task,
+                    'acc_no': String(result.accession_no),
+                    'record': '{}'
+                }, { responseType: 'arraybuffer' })
 
-                    // make new directory if does not exist
-                    if (!fs.existsSync(resultDir)) {
-                        fs.mkdirSync(resultDir, { recursive: true });
-                    }
-
-                    // save zip file sent from AI server
-                    fs.writeFileSync(path.join(resultDir, '/result.zip'), res.data);
-
-                    // extract zip file to result directory (overlay files + prediction file)
-                    await extract(path.join(resultDir, '/result.zip'), { dir: resultDir })
-
-                    // parse prediction.txt to JSON
-                    let modelResult = JSON.parse(fs.readFileSync(path.join(resultDir, '/prediction.txt')));
-
-                    patient_name = "-"
-                    if (modelResult.patient_name)
-                        patient_name = modelResult.patient_name
-                    delete modelResult.patient_name
-
-                    let prediction = []
-                    switch (project.task) {
-                        // case "classification_pylon_256":
-                        case "classification_pylon_1024":
-                            for (let i = 0; i < modelResult["Finding"].length; i++) {
-                                prediction.push({
-                                    finding: modelResult["Finding"][i],
-                                    confidence: modelResult["Confidence"][i],
-                                    threshold: modelResult["Threshold"][i],
-                                    isPositive: modelResult["isPositive"][i],
-                                    selected: false
-                                })
-                            }
-                            // delete zip file
-                            await fs.promises.unlink(path.join(resultDir, '/result.zip'))
-
-                            // delete probability prediction file
-                            await fs.promises.unlink(path.join(resultDir, '/prediction.txt'))
-
-                            // iterate over files in result directory to get overlay files
-                            fs.readdir(resultDir, async (err, files) => {
-
-                                if (err) throw err
-                                // create gradcam from each overlay file paths
-                                await Promise.all(files.map(async (item, i) => {
-                                    await webModel.Gradcam.create({
-                                        result_id: result.result_id,
-                                        finding: item.split('.')[0],
-                                        gradcam_path: `results/${todayYear}/${todayMonth}/${String(result.result_id)}/${item}`
-                                    })
-                                }))
-                                // update result's status to annotated
-                                await webModel.PredResult.findByIdAndUpdate(result.result_id, {
-                                    status: modelStatus.AI_ANNOTATED,
-                                    patient_name
-                                })
-                                // update probability prediction
-                                await webModel.PredClass.findByIdAndUpdate(predClass._id, { prediction: prediction })
-                            })
-                            break;
-                        default:
-                            break;
-                    }
-                } catch (e) {
-                    console.log(`[Error: ${result.result_id}] ${e.message}`)
-                    await webModel.PredResult.findByIdAndUpdate(result.result_id, { status: modelStatus.CANCELED })
-                    // delete result folder if error occurs
-                    if (fs.existsSync(resultDir)) {
-                        fs.rm(resultDir, { recursive: true, force: true }, (err) => {
-                            console.log(err)
-                        });
-                    }
+                // make new directory if does not exist
+                if (!fs.existsSync(resultDir)) {
+                    fs.mkdirSync(resultDir, { recursive: true });
                 }
-            }))
+
+                // save zip file sent from AI server
+                await fs.promises.writeFile(path.join(resultDir, '/result.zip'), res.data);
+
+                // extract zip file to result directory (overlay files + prediction file)
+                await extract(path.join(resultDir, '/result.zip'), { dir: resultDir })
+
+                // parse prediction.txt to JSON
+                let modelResult = JSON.parse(await fs.promises.readFile(path.join(resultDir, '/prediction.txt')));
+
+                patient_name = "-"
+                if (modelResult.patient_name)
+                    patient_name = modelResult.patient_name
+                delete modelResult.patient_name
+
+                let prediction = []
+
+                for (let i = 0; i < modelResult["Finding"].length; i++) {
+                    prediction.push({
+                        finding: modelResult["Finding"][i],
+                        confidence: modelResult["Confidence"][i],
+                        threshold: modelResult["Threshold"][i],
+                        isPositive: modelResult["isPositive"][i],
+                        selected: false
+                    })
+                }
+                // delete zip file
+                await fs.promises.unlink(path.join(resultDir, '/result.zip'))
+
+                // delete probability prediction file
+                await fs.promises.unlink(path.join(resultDir, '/prediction.txt'))
+
+                const files = await fs.promises.readdir(resultDir)
+                // iterate over files in result directory to get overlay files
+                // create gradcam from each overlay file paths
+                await Promise.all(files.map(async (item, i) => {
+                    await webModel.Gradcam.create({
+                        result_id: result.result_id,
+                        finding: item.split('.')[0],
+                        gradcam_path: `results/${todayYear}/${todayMonth}/${String(result.result_id)}/${item}`
+                    })
+                }))
+                // update result's status to annotated
+                await webModel.PredResult.findByIdAndUpdate(result.result_id, {
+                    status: modelStatus.AI_ANNOTATED,
+                    patient_name
+                })
+                // update probability prediction
+                await webModel.PredClass.findByIdAndUpdate(predClass._id, { prediction: prediction })
+
+            } catch (e) {
+                console.log(`[Error: ${result.result_id}] ${e.message}`)
+                await webModel.PredResult.findByIdAndUpdate(result.result_id, { status: modelStatus.CANCELED })
+                // delete result folder if error occurs
+                if (fs.existsSync(resultDir)) {
+                    fs.rm(resultDir, { recursive: true, force: true }, (err) => {
+                        console.log(err)
+                    });
+                }
+            }
+
         }
         console.log(`Time: ${(new Date() - startTime) / 1000}s`)
     }

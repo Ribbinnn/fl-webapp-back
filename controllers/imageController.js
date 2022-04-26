@@ -37,7 +37,8 @@ const getImage = async (req, res) => {
         }
         return res.status(400).json({ success: false, message: 'Incorrect image query' })
     } catch (e) {
-        return res.status(500).json({ success: false, message: 'Internal server error', error: e.message })
+        const errMsg = e.response? `Model Error`: e.message
+        return res.status(500).json({ success: false, message: 'Internal server error', error: errMsg })
     }
 }
 

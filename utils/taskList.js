@@ -1,5 +1,5 @@
 // AI task
-const task = {
+const tasks = {
     // "classification_pylon_256": [],
     "classification_pylon_1024": [],
     "covid19_admission": [
@@ -395,5 +395,5 @@ const task = {
 }
 
 module.exports = {
-    task
+    tasks
 }

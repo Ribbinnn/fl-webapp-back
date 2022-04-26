@@ -1,16 +1,12 @@
 const Joi = require("joi");
 const webModel = require('../models/webapp')
-const { task } = require('../utils/taskList')
+const { tasks } = require('../utils/taskList')
 const { checkExistedUser } = require('../utils/reusuableFunctions')
 const { userStatus, userRole } = require('../utils/status')
 
 const schema = {
     name: Joi.string().required().max(32),
-    task: Joi.string().required().valid(
-        // "classification_pylon_256",
-        "classification_pylon_1024",
-        "covid19_admission"
-    ),
+    task: Joi.string().required().valid(...Object.keys(tasks)),
     description: Joi.string().max(160),
     predClasses: Joi.array().items(Joi.string()),
     head: Joi.array().items(Joi.string()).required().min(1)
@@ -47,7 +43,7 @@ const create = async (req, res) => {
             users: existedUsers,
             rating: 0,
             rating_count: 0,
-            requirements: task[req.body.task]
+            requirements: tasks[req.body.task]
         })
 
         // update project list of associated user
@@ -110,7 +106,7 @@ const getAll = async (req, res) => {
 
 // get all AI tasks
 const getTask = async (req, res) => {
-    return res.status(200).json({ success: true, message: 'Get task successfully', data: Object.keys(task) });
+    return res.status(200).json({ success: true, message: 'Get task successfully', data: Object.keys(tasks) });
 }
 
 // update project by id
