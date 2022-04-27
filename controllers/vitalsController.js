@@ -56,24 +56,28 @@ const create = async (req, res) => {
     try {
 
         // validate requirements
-        const webProject = await webModel.Project.findById(req.body.project_id)
+        const webProject = (await webModel.Project.findById(req.body.project_id)).toObject()
 
         if (!webProject)
             return res.status(400).json({ success: false, message: 'Project not found' });
 
         const requirements = [
-            { name: "entry_id", type: "number", unit: "none" },
-            { name: "hn", type: "number", unit: "none" },
+            { name: "entry_id", type: "number", unit: "none", required: true },
+            { name: "hn", type: "number", unit: "none", required: true },
             // { name: "gender", type: "string", unit: "male/female" },
             // { name: "age", type: "number", unit: "year" },
-            { name: "measured_time", type: "object", unit: "YYYY-MM-DD HH:mm" },
+            { name: "measured_time", type: "object", unit: "YYYY-MM-DD HH:mm", required: true },
             ...webProject.requirements
         ]
 
         const records = req.body.records.map((item) => {
             for (const requirement of requirements) {
                 const fieldName = requirement.name + (requirement.unit == 'none' ? "" : "(" + requirement.unit + ")")
-                if (!item[fieldName])
+                if (!item[fieldName] && !requirement.required) {
+                    item[fieldName] = null
+                    continue
+                }
+                if (!item[fieldName] && requirement.required)
                     return res.status(400).json({ success: false, message: `Invalid record input: "${fieldName}" is required` });
                 // check fields' type
                 if (typeof (item[fieldName]) !== requirement.type && requirement.name !== "measured_time")
@@ -214,16 +218,20 @@ const updateRecRow = async (req, res) => {
         if (!webProject)
             return res.status(400).json({ success: false, message: 'Project not found' });
         const requirements = [
-            { name: "entry_id", type: "number", unit: "none" },
-            { name: "hn", type: "number", unit: "none" },
+            { name: "entry_id", type: "number", unit: "none", required: true },
+            { name: "hn", type: "number", unit: "none", required: true },
             // { name: "gender", type: "string", unit: "male/female" },
             // { name: "age", type: "number", unit: "year" },
-            { name: "measured_time", type: "object", unit: "YYYY-MM-DD HH:mm" },
+            { name: "measured_time", type: "object", unit: "YYYY-MM-DD HH:mm", required: true },
             ...webProject.requirements
         ]
         for (const requirement of requirements) {
             const fieldName = requirement.name
-            if (!req.body.update_data[0][fieldName])
+            if (!req.body.update_data[0][fieldName] && !requirement.required) {
+                req.body.update_data[0][fieldName] = null
+                continue
+            }
+            if (!req.body.update_data[0][fieldName] && requirement.required)
                 return res.status(400).json({ success: false, message: `Invalid record input: "${fieldName}" is required` });
             // check fields' type
             if (typeof (req.body.update_data[0][fieldName]) !== requirement.type && requirement.name !== "measured_time")
@@ -330,8 +338,7 @@ const deleteRecFile = async (req, res) => {
 const generateTemplate = async (req, res) => {
     try {
         // should find by web project id
-        const project = await webModel.Project.findById(req.params.project_id)
-
+        const project = (await webModel.Project.findById(req.params.project_id)).toObject()
         const requirements = project.requirements.map(item => `${item.name}${item.unit == 'none' ? "" : "(" + item.unit + ")"}`)
         const headerField = ["entry_id", "hn", "measured_time(YYYY-MM-DD HH:mm)", ...requirements]
 

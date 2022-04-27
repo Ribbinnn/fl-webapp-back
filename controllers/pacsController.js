@@ -207,12 +207,13 @@ const saveToPACS = async (req, res) => {
         if (fs.existsSync(reqDir)) {
             fs.rmSync(reqDir);
         }
-        if (e.response)
-            return res.status(e.response.status).json({ success: false, message: `${e.response.data.message}` })
+        // if (e.response)
+        //     return res.status(e.response.status).json({ success: false, message: `${e.response.data.message}` })
+        const errMsg = e.response? `Model Error`: e.message
         return res.status(500).json({
             success: false,
             message: "Internal server error",
-            error: e.message,
+            error: errMsg,
         });
     }
 };

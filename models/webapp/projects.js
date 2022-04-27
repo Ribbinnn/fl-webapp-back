@@ -13,7 +13,13 @@ const schema = new Schema(
         name: { type: String, required: true },
         task: { type: String, required: true },
         description: { type: String },
-        requirements: { type: Object },
+        requirements: [{ type: Object }],
+        // requirements: [{ 
+        //     name: { type: String },
+        //     type: { type: String },
+        //     unit: { type: String },
+        //     required: {type: Boolean}
+        // }],
         predClasses: [{ type: String }],
         users: [{ type: ObjectId, ref: "users" }],
         head: [{ type: ObjectId, ref: "users", required: true }],
