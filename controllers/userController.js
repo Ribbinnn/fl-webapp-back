@@ -171,10 +171,10 @@ const update = async (req, res) => {
   }
   try {
     // hash password
-    let passwordHash = "";
-
-    if (req.body.password)
+    if (req.body.password) {
       req.body.password = await bcrypt.hash(req.body.password, salt);
+      req.body.token = []
+    }
 
     if (req.user.role !== userRole.ADMIN) delete req.body.role;
 
@@ -186,11 +186,11 @@ const update = async (req, res) => {
       },
       req.body.isChulaSSO && req.user.role === userRole.ADMIN
         ? {
-            role: req.body.role,
-          }
+          role: req.body.role,
+        }
         : req.body.isChulaSSO
-        ? {}
-        : req.body
+          ? {}
+          : req.body
     );
     if (!user)
       return res

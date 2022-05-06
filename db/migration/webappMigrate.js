@@ -507,9 +507,9 @@ const webappSeed = async () => {
       task: 'classification_pylon_1024',
       description: '2D-classification for COVID-19',
       requirements: [
-        { name: 'pulse', type: 'number', unit: 'bpm' },
-        { name: 'weight', type: 'number', unit: 'kg' },
-        { name: 'height', type: 'number', unit: 'cm' }
+        { name: 'pulse', type: 'number', unit: 'bpm', required: true },
+        { name: 'weight', type: 'number', unit: 'kg', required: false },
+        { name: 'height', type: 'number', unit: 'cm', required: true }
       ],
       predClasses: pylon_classes,
       users: [user.insertedIds[0], user.insertedIds[4], user.insertedIds[5]],
@@ -536,7 +536,7 @@ const webappSeed = async () => {
       name: 'Tuberculosis',
       task: 'classification_pylon_1024',
       description: '2D-classification for Tuberculosis',
-      requirements: [{ name: 'cough', type: 'string', unit: 'none' }],
+      requirements: [{ name: 'cough', type: 'string', unit: 'none', required: true }],
       predClasses: pylon_classes,
       users: [user.insertedIds[2], user.insertedIds[3], user.insertedIds[4]],
       head: [user.insertedIds[4]],
@@ -549,7 +549,7 @@ const webappSeed = async () => {
       name: 'Abnormal Detection (256)',
       task: 'classification_pylon_1024',
       description: '2D_image_classification(256) for abnormal detection',
-      requirements: [{ name: 'fever', type: 'string', unit: 'none' }],
+      requirements: [{ name: 'fever', type: 'string', unit: 'none', required: true }],
       predClasses: pylon_classes,
       users: [user.insertedIds[0]],
       head: [user.insertedIds[0]],
