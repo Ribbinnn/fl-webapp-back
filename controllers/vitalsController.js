@@ -73,7 +73,7 @@ const create = async (req, res) => {
         const records = req.body.records.map((item) => {
             for (const requirement of requirements) {
                 const fieldName = requirement.name + (requirement.unit == 'none' ? "" : "(" + requirement.unit + ")")
-                if (!item[fieldName] && !requirement.required) {
+                if (item[fieldName] === undefined && !requirement.required) {
                     item[fieldName] = null
                     continue
                 }
