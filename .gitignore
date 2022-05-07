@@ -11,4 +11,5 @@ resources/results/*
 
 access.log
 
+.DS_Store
 *.env

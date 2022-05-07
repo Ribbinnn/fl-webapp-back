@@ -10,13 +10,13 @@ const tasks = {
             'unit': 'none'
         },
         {
-            'name': 'pre_peripheral_O2_saturation_day1_0',
+            'name': 'pre_peripheral_o2_saturation_day1_0',
             'required': false,
             'type': 'number',
             'unit': 'none'
         },
         {
-            'name': 'post_peripheral_O2_saturation_day1_0',
+            'name': 'post_peripheral_o2_saturation_day1_0',
             'required': false,
             'type': 'number',
             'unit': 'none'
@@ -73,13 +73,13 @@ const tasks = {
             'unit': 'none'
         },
         {
-            'name': 'pre_peripheral_O2_saturation_day1_1',
+            'name': 'pre_peripheral_o2_saturation_day1_1',
             'required': false,
             'type': 'number',
             'unit': 'none'
         },
         {
-            'name': 'post_peripheral_O2_saturation_day1_1',
+            'name': 'post_peripheral_o2_saturation_day1_1',
             'required': false,
             'type': 'number',
             'unit': 'none'
@@ -136,13 +136,13 @@ const tasks = {
             'unit': 'none'
         },
         {
-            'name': 'pre_peripheral_O2_saturation_day2_0',
+            'name': 'pre_peripheral_o2_saturation_day2_0',
             'required': false,
             'type': 'number',
             'unit': 'none'
         },
         {
-            'name': 'post_peripheral_O2_saturation_day2_0',
+            'name': 'post_peripheral_o2_saturation_day2_0',
             'required': false,
             'type': 'number',
             'unit': 'none'
@@ -199,13 +199,13 @@ const tasks = {
             'unit': 'none'
         },
         {
-            'name': 'pre_peripheral_O2_saturation_day2_1',
+            'name': 'pre_peripheral_o2_saturation_day2_1',
             'required': false,
             'type': 'number',
             'unit': 'none'
         },
         {
-            'name': 'post_peripheral_O2_saturation_day2_1',
+            'name': 'post_peripheral_o2_saturation_day2_1',
             'required': false,
             'type': 'number',
             'unit': 'none'
@@ -262,13 +262,13 @@ const tasks = {
             'unit': 'none'
         },
         {
-            'name': 'pre_peripheral_O2_saturation_day3_0',
+            'name': 'pre_peripheral_o2_saturation_day3_0',
             'required': false,
             'type': 'number',
             'unit': 'none'
         },
         {
-            'name': 'post_peripheral_O2_saturation_day3_0',
+            'name': 'post_peripheral_o2_saturation_day3_0',
             'required': false,
             'type': 'number',
             'unit': 'none'
@@ -325,13 +325,13 @@ const tasks = {
             'unit': 'none'
         },
         {
-            'name': 'pre_peripheral_O2_saturation_day3_1',
+            'name': 'pre_peripheral_o2_saturation_day3_1',
             'required': false,
             'type': 'number',
             'unit': 'none'
         },
         {
-            'name': 'post_peripheral_O2_saturation_day3_1',
+            'name': 'post_peripheral_o2_saturation_day3_1',
             'required': false,
             'type': 'number',
             'unit': 'none'
