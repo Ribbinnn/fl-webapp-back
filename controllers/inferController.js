@@ -59,7 +59,7 @@ const inferResult = async (req, res) => {
     // check required fields
     for (const requirement of requirements) {
         const fieldName = requirement.name
-        if (req.body.record[fieldName] === undefined && !requirement.required) {
+        if ((req.body.record[fieldName] === undefined || req.body.record[fieldName] === null) && !requirement.required) {
             req.body.record[fieldName] = null
             continue
         }
