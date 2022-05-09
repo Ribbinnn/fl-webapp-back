@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const dotenv = require('dotenv');
 const { modelStatus, userStatus, userRole } = require('../../utils/status');
+const { tasks } = require('../../utils/taskList');
 const vitalsSeed = require('./vitalsMigrate');
 const mongoose = require('../webapp')
 const mg = require("mongoose");
@@ -503,16 +504,12 @@ const webappSeed = async () => {
 
   const project = await Project.collection.insertMany([
     {
-      name: 'COVID-19',
-      task: 'classification_pylon_1024',
-      description: '2D-classification for COVID-19',
-      requirements: [
-        { name: 'pulse', type: 'number', unit: 'bpm', required: true },
-        { name: 'weight', type: 'number', unit: 'kg', required: false },
-        { name: 'height', type: 'number', unit: 'cm', required: true }
-      ],
-      predClasses: pylon_classes,
-      users: [user.insertedIds[0], user.insertedIds[4], user.insertedIds[5]],
+      name: 'COVID-19 Admission Prediction',
+      task: 'covid19_admission',
+      description: 'Predict COVID-19 patient probability of hospital admission within 1, 2, and 3 days',
+      requirements: tasks['covid19_admission'],
+      predClasses: ['Admission within 1 day', 'Admission within 2 days', 'Admission within 3 days'],
+      users: [user.insertedIds[0], user.insertedIds[1], user.insertedIds[2], user.insertedIds[3], user.insertedIds[4], user.insertedIds[5]],
       head: [user.insertedIds[0]],
       rating: 0,
       rating_count: 0,
@@ -563,9 +560,9 @@ const webappSeed = async () => {
   projectIds = { 'COVID-19': project.insertedIds[0], 'Abnormal Detection': project.insertedIds[1], 'Tuberculosis': project.insertedIds[2] }
 
   await User.collection.updateOne({ _id: user.insertedIds[0] }, { $set: { projects: [project.insertedIds[0], project.insertedIds[1], project.insertedIds[3]] } })
-  await User.collection.updateOne({ _id: user.insertedIds[1] }, { $set: { projects: [project.insertedIds[1]] } })
-  await User.collection.updateOne({ _id: user.insertedIds[2] }, { $set: { projects: [project.insertedIds[2], project.insertedIds[1]] } })
-  await User.collection.updateOne({ _id: user.insertedIds[3] }, { $set: { projects: [project.insertedIds[1], project.insertedIds[2]] } })
+  await User.collection.updateOne({ _id: user.insertedIds[1] }, { $set: { projects: [project.insertedIds[0], project.insertedIds[1]] } })
+  await User.collection.updateOne({ _id: user.insertedIds[2] }, { $set: { projects: [project.insertedIds[0], project.insertedIds[2], project.insertedIds[1]] } })
+  await User.collection.updateOne({ _id: user.insertedIds[3] }, { $set: { projects: [project.insertedIds[0], project.insertedIds[1], project.insertedIds[2]] } })
   await User.collection.updateOne({ _id: user.insertedIds[4] }, { $set: { projects: [project.insertedIds[0], project.insertedIds[1], project.insertedIds[2]] } })
   await User.collection.updateOne({ _id: user.insertedIds[5] }, { $set: { projects: [project.insertedIds[0], project.insertedIds[1]] } })
 
