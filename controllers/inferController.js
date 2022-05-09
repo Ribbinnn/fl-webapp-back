@@ -63,7 +63,6 @@ const inferResult = async (req, res) => {
             req.body.record[fieldName] = null
             continue
         }
-        console.log(fieldName, req.body.record[fieldName])
         if (!req.body.record[fieldName] && requirement.required)
             return res.status(400).json({ success: false, message: `Invalid record input: "${fieldName}" is required` })
         // check fields' type
