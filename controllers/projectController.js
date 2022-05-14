@@ -1,12 +1,12 @@
 const Joi = require("joi");
 const webModel = require('../models/webapp')
-const { tasks } = require('../utils/taskList')
 const { checkExistedUser } = require('../utils/reusuableFunctions')
+const { getTaskReq, getTaskNames } = require('../utils/taskFunctions')
 const { userStatus, userRole } = require('../utils/status')
 
 const schema = {
     name: Joi.string().required().max(32),
-    task: Joi.string().required().valid(...Object.keys(tasks)),
+    task: Joi.string().required().valid(await getTaskNames()),
     description: Joi.string().max(160),
     predClasses: Joi.array().items(Joi.string()),
     head: Joi.array().items(Joi.string()).required().min(1)
@@ -43,7 +43,7 @@ const create = async (req, res) => {
             users: existedUsers,
             rating: 0,
             rating_count: 0,
-            requirements: tasks[req.body.task]
+            requirements: getTaskReq(req.body.task)
         })
 
         // update project list of associated user
@@ -106,7 +106,13 @@ const getAll = async (req, res) => {
 
 // get all AI tasks
 const getTask = async (req, res) => {
-    return res.status(200).json({ success: true, message: 'Get task successfully', data: Object.keys(tasks) });
+    try {
+        const taskNames = await getTaskNames()
+        return res.status(200).json({ success: true, message: 'Get task successfully', data: taskNames });
+    } catch (e) {
+        return res.status(500).json({ success: false, message: 'Internal server error', error: e.message })
+    }
+    
 }
 
 // update project by id

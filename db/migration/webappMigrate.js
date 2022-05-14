@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs');
 const dotenv = require('dotenv');
 const { modelStatus, userStatus, userRole } = require('../../utils/status');
-const { tasks } = require('../../utils/taskList');
+const { getTaskReq } = require('../../utils/taskFunctions')
 const vitalsSeed = require('./vitalsMigrate');
 const mongoose = require('../webapp')
 const mg = require("mongoose");
@@ -502,12 +502,13 @@ const webappSeed = async () => {
     'Edward': user.insertedIds[5]
   }
 
+  const reqs = await getTaskReq('covid19_admission')
   const project = await Project.collection.insertMany([
     {
       name: 'COVID-19 Admission Prediction',
       task: 'covid19_admission',
       description: 'Predict COVID-19 patient probability of hospital admission within 1, 2, and 3 days',
-      requirements: tasks['covid19_admission'],
+      requirements: reqs,
       predClasses: ['Admission within 1 day', 'Admission within 2 days', 'Admission within 3 days'],
       users: [user.insertedIds[0], user.insertedIds[1], user.insertedIds[2], user.insertedIds[3], user.insertedIds[4], user.insertedIds[5]],
       head: [user.insertedIds[0]],

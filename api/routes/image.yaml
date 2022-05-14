@@ -1,0 +1,53 @@
+/:
+  get:
+    summary: Get image
+    tags:
+      - Image
+    parameters:
+      - in: query
+        name: result_id
+        schema:
+          type: string
+      - in: query
+        name: finding
+        schema:
+          type: string
+      - in: query
+        name: accession_no
+        schema:
+          type: string
+    responses:
+      200:
+        description: Success
+        schema:
+          type: file 
+      400:
+        description: Invalid input
+        content:
+          application/json:
+              schema:
+                $ref: "#/components/badReqResponse"
+      500:
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/errorResponse"
+
+components:
+  badReqResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      message:
+        type: string
+  errorResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      message:
+        type: string
+      error:
+        type: string

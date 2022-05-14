@@ -17,7 +17,7 @@ const getImage = async (req, res) => {
             return res.status(200).send(data)
         }
 
-        // overlay image
+        // gradcam image
         if (req.query.result_id && req.query.finding) {
             const gradcam = await webModel.Gradcam
                 .findOne({ result_id: req.query.result_id, finding: req.query.finding })
@@ -29,7 +29,7 @@ const getImage = async (req, res) => {
                 })
 
             if (!gradcam) {
-                return res.status(200).json({ success: true, message: 'File not found' });
+                return res.status(400).json({ success: true, message: 'File not found' });
             }
 
             resPath = path.join(root, "/resources/", gradcam.gradcam_path)
