@@ -4,7 +4,21 @@ info:
   version: "1.0"
 servers:
   - url: http://localhost:5000/api/
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
 paths:
+  # authentication
+  /auth/login:
+    $ref: "./routes/auth.yaml#/~1login"
+  /auth/logout:
+    $ref: "./routes/auth.yaml#/~1logout"
+    
   # user
   /users:
     $ref: "./routes/user.yaml#/~1"
@@ -24,12 +38,6 @@ paths:
     $ref: "./routes/webProject.yaml#/~1getById"
   /projects/delete/{project_id}:
     $ref: "./routes/webProject.yaml#/~1deleteById"
-  
-  # authentication
-  /auth/login:
-    $ref: "./routes/auth.yaml#/~1login"
-  /auth/logout:
-    $ref: "./routes/auth.yaml#/~1logout"
 
   # vitals
   /vitals:

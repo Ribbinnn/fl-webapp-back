@@ -6,7 +6,7 @@ const { userStatus, userRole } = require('../utils/status')
 
 const schema = {
     name: Joi.string().required().max(32),
-    task: Joi.string().required().valid(await getTaskNames()),
+    task: Joi.string().required(),
     description: Joi.string().max(160),
     predClasses: Joi.array().items(Joi.string()),
     head: Joi.array().items(Joi.string()).required().min(1)
@@ -28,6 +28,10 @@ const create = async (req, res) => {
     if (validatedResult.error) {
         return res.status(400).json({ success: false, message: `Invalid input: ${(validatedResult.error.message)}` })
     }
+    // check if task is valid
+    const taskNames = await getTaskNames()
+    if (!taskNames.includes(req.body.task))
+        return res.status(400).json({ success: false, message: `Invalid input: "task" must be one of [${taskNames}]` })
     try {
         const existedUsers = await checkExistedUser(req.body.head, [userRole.RADIOLOGIST])
         if (existedUsers.length < 1)
@@ -162,6 +166,7 @@ const update = async (req, res) => {
 // delete project by id
 const deleteById = async (req, res) => {
     try {
+        // delete asscociated reports and the project
         const project = await webModel.Project.findOneAndDelete({ _id: req.params.project_id })
         return res.status(200).json({
             success: true,

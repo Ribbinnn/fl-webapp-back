@@ -41,6 +41,8 @@
     summary: Logout
     tags:
       - Authentication
+    security:
+      - bearerAuth: []
     responses:
       200:
         description: Success

@@ -96,6 +96,7 @@ const deleteById = async (req, res) => {
     });
   }
   try {
+    // delete associated gradcam / image / medrec / mask / predclass
     const result = await webModel.PredResult.findOneAndDelete({
       _id: req.params.rid,
     });

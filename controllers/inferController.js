@@ -303,19 +303,21 @@ const batchInfer = async (req, res) => {
     }
 
     const inferPromise = async () => {
-        const groupSize = process.env.GROUP_SIZE
-        const groupCount = Math.ceil(predResults.length / groupSize)
-        let predResultGroups = []
-        for (let i = 0; i < groupCount; i++) {
-            let group = []
-            for (let j = 0; j < groupSize; j++) {
-                if (!predResults[i * groupSize + j]) break
-                group.push(predResults[i * groupSize + j])
-            }
-            predResultGroups.push(group)
-        }
+        // const groupSize = process.env.GROUP_SIZE
+        // const groupCount = Math.ceil(predResults.length / groupSize)
+        // let predResultGroups = []
+        // for (let i = 0; i < groupCount; i++) {
+        //     let group = []
+        //     for (let j = 0; j < groupSize; j++) {
+        //         if (!predResults[i * groupSize + j]) break
+        //         group.push(predResults[i * groupSize + j])
+        //     }
+        //     predResultGroups.push(group)
+        // }
         const startTime = new Date()
         console.log('Start Batch Inference')
+
+        // infer all of selected images
         for (let result of predResults) {
             const root = path.join(__dirname, "..");
             const projectDir = path.join(root, "/resources/results/", todayYear, todayMonth)

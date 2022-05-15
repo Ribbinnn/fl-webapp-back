@@ -3,6 +3,8 @@
     summary: Create user
     tags:
       - User
+    security:
+      - bearerAuth: []
     requestBody:
       required: true
       content:
@@ -45,6 +47,8 @@
     summary: Update user
     tags:
       - User
+    security:
+      - bearerAuth: []
     requestBody:
       required: true
       content:
@@ -89,6 +93,8 @@
     summary: Get all users
     tags:
       - User
+    security:
+      - bearerAuth: []
     responses:
       200:
         description: Success
@@ -108,6 +114,8 @@
     summary: Get user by id
     tags:
       - User
+    security:
+      - bearerAuth: []
     parameters:
       - in: path
         name: id

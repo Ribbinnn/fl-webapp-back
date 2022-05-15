@@ -3,6 +3,8 @@
     summary: Get bounding box by report id
     tags:
       - Mask
+    security:
+      - bearerAuth: []
     parameters:
       - in: path
         name: report_id
@@ -33,6 +35,8 @@
     summary: Update bounding box by report id
     tags:
       - Mask
+    security:
+      - bearerAuth: []
     requestBody:
       required: true
       content:

@@ -3,6 +3,8 @@
     summary: Get patient data by condition
     tags:
       - PACS
+    security:
+      - bearerAuth: []
     parameters:
       - in: query
         name: HN
@@ -45,6 +47,8 @@
     summary: Get patient information by HN
     tags:
       - PACS
+    security:
+      - bearerAuth: []
     parameters:
       - in: query
         name: HN
@@ -75,6 +79,8 @@
     summary: Save gradcam and/or rendered bounding box image to PACS
     tags:
       - PACS
+    security:
+      - bearerAuth: []
     parameters:
       - in: path
         name: report_id

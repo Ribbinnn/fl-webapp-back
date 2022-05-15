@@ -66,6 +66,7 @@ const logout = async (req, res) => {
     }
 }
 
+// login with chula sso
 const chulaSSO = async (req, res) => {
     try {
         const agent = new https.Agent({
@@ -88,8 +89,9 @@ const chulaSSO = async (req, res) => {
         //     })
         // }
 
-        // console.log(response.username, response.email, response.roles)
         let user = await webModel.User.findOne({ username: response.username })
+
+        // create new user if user not found
         if (!user) {
             user = await webModel.User.create({
                 username: response.username,
@@ -110,6 +112,7 @@ const chulaSSO = async (req, res) => {
             first_name: user.first_name, 
             role: user.role
         }, req.body.remember ? true : false);
+        
         await webModel.User.findByIdAndUpdate(user._id, { $push: { token: data } })
         return res.status(200).json({
             success: true,

@@ -217,6 +217,7 @@ const updateRecRow = async (req, res) => {
         const webProject = await webModel.Project.findById(req.body.project_id)
         if (!webProject)
             return res.status(400).json({ success: false, message: 'Project not found' });
+        // requirements required for all projects
         const requirements = [
             { name: "entry_id", type: "number", unit: "none", required: true },
             { name: "hn", type: "number", unit: "none", required: true },
@@ -308,6 +309,7 @@ const deleteRecRow = async (req, res) => {
     }
 }
 
+// delete entire record
 const deleteRecFile = async (req, res) => {
     const validatedResult = delete_validator.validate({ record_id: req.params.id, entry_id: req.body.entry_id })
     console.log(req.params)

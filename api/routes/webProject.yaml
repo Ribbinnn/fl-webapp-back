@@ -3,6 +3,8 @@
     summary: Create project
     tags:
       - WebApp Project
+    security:
+      - bearerAuth: []
     requestBody:
       required: true
       content:
@@ -47,6 +49,8 @@
     summary: Update project by id
     tags:
       - WebApp Project
+    security:
+      - bearerAuth: []
     requestBody:
       required: true
       content:
@@ -93,6 +97,8 @@
     summary: Get all projects
     tags:
       - WebApp Project
+    security:
+      - bearerAuth: []
     responses:
       200:
         description: Success
@@ -118,6 +124,8 @@
     summary: Manage users in project
     tags:
       - WebApp Project
+    security:
+      - bearerAuth: []
     requestBody:
       required: true
       content:
@@ -156,6 +164,8 @@
     summary: Get all AI tasks
     tags:
       - WebApp Project
+    security:
+      - bearerAuth: []
     responses:
       200:
         description: Success
@@ -181,6 +191,8 @@
     summary: Get project by user id
     tags:
       - WebApp Project
+    security:
+      - bearerAuth: []
     parameters:
       - in: path
         name: id
@@ -211,6 +223,8 @@
     summary: Get project by id
     tags:
       - WebApp Project
+    security:
+      - bearerAuth: []
     parameters:
       - in: path
         name: project_id
@@ -241,6 +255,8 @@
     summary: Delete project by id
     tags:
       - WebApp Project
+    security:
+      - bearerAuth: []
     parameters:
       - in: path
         name: project_id

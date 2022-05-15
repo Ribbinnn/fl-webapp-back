@@ -15,6 +15,7 @@ const schema = {
 
 const validator = Joi.object(schema);
 
+// update bounding box
 const insertBBox = async (req, res) => {
     const validatedResult = validator.validate(req.body)
     if (validatedResult.error) {
@@ -38,6 +39,7 @@ const insertBBox = async (req, res) => {
     }
 }
 
+// get bounding box
 const getBBox = async (req, res) => {
     try {
         const mask = await webModel.Mask

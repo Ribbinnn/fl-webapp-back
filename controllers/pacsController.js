@@ -50,7 +50,7 @@ const getAllByQuery = async (req, res) => {
             }
         }
 
-        const data = (await axios.get(pythonURL + "/HN/", params)).data;
+        const data = (await axios.get(pythonURL + "/", params)).data;
         return res.status(200).json({
             success: true,
             message: 'Get dicom files by HN successfully',
@@ -105,7 +105,7 @@ const saveToPACS = async (req, res) => {
         bbox_data['acc_no'] = report.image_id.accession_no
         const zip = new AdmZip();
         // select heatmap to be sent to pacs
-        report.label.finding.map(finding => {
+        report.label?.finding?.map(finding => {
             if (finding != 'No Finding' && fs.existsSync(path.join(resultDir, finding + '.png'))) {
                 // await fs.promises.copyFile(path.join(resultDir, finding + '.png'), path.join(reqDir, finding + '.png'))
                 imgName = finding.split(' ').join('_')

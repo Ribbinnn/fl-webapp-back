@@ -3,6 +3,8 @@
     summary: Individual inference
     tags:
       - Inference
+    security:
+      - bearerAuth: []
     requestBody:
       required: true
       content:
@@ -43,6 +45,8 @@
     summary: Batch inference
     tags:
       - Inference
+    security:
+      - bearerAuth: []
     requestBody:
       required: true
       content:
