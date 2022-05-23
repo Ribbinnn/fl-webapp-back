@@ -6,6 +6,7 @@ const PredResult = require('./predResults')
 const Mask = require('./masks')
 const PredClass = require('./predClasses')
 const Gradcam = require('./gradcams')
+const PythonDCMPath = require('./pythonDCMPaths')
 
 module.exports = {
     User,
@@ -15,5 +16,6 @@ module.exports = {
     PredResult,
     Mask,
     PredClass,
-    Gradcam
+    Gradcam,
+    PythonDCMPath
 }

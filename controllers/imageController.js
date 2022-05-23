@@ -29,7 +29,7 @@ const getImage = async (req, res) => {
                 })
 
             if (!gradcam) {
-                return res.status(400).json({ success: true, message: 'File not found' });
+                return res.status(200).json({ success: true, message: 'File not found' });
             }
 
             resPath = path.join(root, "/resources/", gradcam.gradcam_path)

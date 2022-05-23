@@ -25,9 +25,15 @@ const job = new CronJob('0 1 * * *', async () => {
         patient_name: null,
       })
     }))
+
+    await Promise.all(accList.map(async accNo => {
+      await webModel.PythonDCMPath.findOneAndUpdate({ accession_no: accNo }, {
+        hn: null
+      })
+    }))
     console.log((new Date()).toLocaleDateString(), 'Finish clearing dicom process');
   } catch (e) {
-    console.log((new Date()).toLocaleDateString(), '[Error]', e)
+    console.log((new Date()).toLocaleDateString(), '[Error]', e.message)
   }
 });
 

@@ -352,6 +352,7 @@ const webappSeed = async () => {
   const Mask = mongoose.model('masks', schema)
   const Image = mongoose.model('images', schema)
   const Gradcam = mongoose.model('gradcams', schema)
+  const PythonDCMPath = mongoose.model('python_dcm_paths', schema)
 
   await Project.collection.drop()
   await User.collection.drop()
@@ -361,8 +362,47 @@ const webappSeed = async () => {
   await Mask.collection.drop()
   await Image.collection.drop()
   await Gradcam.collection.drop()
+  await PythonDCMPath.collection.drop()
 
   const passwordHash = await bcrypt.hash('12345678', 10);
+
+  await PythonDCMPath.collection.insertMany([
+    {
+      "accession_no": "20211018CR0846",
+      "hn": "1234567",
+      "study_time": new Date("2021-10-18 00:00:00")
+    },
+    // {
+    //   "accession_no": "20220208CR0212",
+    //   "hn": "165784",
+    //   "study_time": new Date("2022-02-08 05:14:56")
+    // },
+    // {
+    //   "accession_no": "20220209CR0803",
+    //   "hn": "132840",
+    //   "study_time": new Date("2022-02-09 11:52:55")
+    // },
+    // {
+    //   "accession_no": "20220209CR0907",
+    //   "hn": "176810",
+    //   "study_time": new Date("2022-02-09 13:30:09")
+    // },
+    // {
+    //   "accession_no": "20220209CR0949",
+    //   "hn": "133024",
+    //   "study_time": new Date("2022-02-09 14:05:46")
+    // },
+    // {
+    //   "accession_no": "20220209CR0950",
+    //   "hn": "127304",
+    //   "study_time": new Date("2022-02-09 14:03:31")
+    // },
+    // {
+    //   "accession_no": "20220209CR0952",
+    //   "hn": "153778",
+    //   "study_time": new Date("2022-02-09 14:04:21")
+    // }
+  ])
 
   const user = await User.collection.insertMany([
     {
