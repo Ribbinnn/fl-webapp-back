@@ -14,14 +14,19 @@
             properties:
               username:
                 type: string
+                example: john
               password:
                 type: string
+                example: xxxxxxxx
               first_name:
                 type: string
+                example: John
               last_name:
                 type: string
+                example: Doe
               role:
                 type: string
+                enum: ['radiologist', 'clinician', 'admin']
               email:
                 type: string
     responses:
@@ -37,6 +42,12 @@
           application/json:
               schema:
                 $ref: "#/components/badReqResponse"
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/unauthorizedResponse"
       500:
         description: Internal server error
         content:
@@ -58,18 +69,25 @@
             properties:
               id:
                 type: string
+                example: 628b2f93d001f72cf2d0625f
               password:
                 type: string
+                example: xxxxxxxx
               first_name:
                 type: string
+                example: John
               last_name:
                 type: string
+                example: Doe
               role:
                 type: string
+                enum: ['radiologist', 'clinician', 'admin']
               email:
                 type: string
+                example: john@fl.com
               isChulaSSO:
                 type: boolean
+                summary: true if user login with ChulaSSO
     responses:
       200:
         description: Success
@@ -83,6 +101,12 @@
           application/json:
               schema:
                 $ref: "#/components/badReqResponse"
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/unauthorizedResponse"
       500:
         description: Internal server error
         content:
@@ -102,6 +126,12 @@
           application/json:
             schema:
               $ref: "#/components/successResponse"
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/unauthorizedResponse"
       500:
         description: Internal server error
         content:
@@ -121,6 +151,7 @@
         name: id
         schema:
           type: string
+          example: 628b2f93d001f72cf2d0625f
     responses:
         200:
           description: Success
@@ -128,6 +159,12 @@
             application/json:
               schema:
                 $ref: "#/components/successResponse"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+                schema:
+                  $ref: "#/components/unauthorizedResponse"
         500:
           description: Internal server error
           content:
@@ -147,6 +184,13 @@ components:
       data:
         type: object
   badReqResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      message:
+        type: string
+  unauthorizedResponse:
     type: object
     properties:
       success:

@@ -8,14 +8,17 @@
         name: result_id
         schema:
           type: string
+          example: 628b2f93d001f72cf2d0625f
       - in: query
         name: finding
         schema:
           type: string
+          example: original
       - in: query
         name: accession_no
         schema:
           type: string
+          example: 20211018CR0846
     responses:
       200:
         description: Success

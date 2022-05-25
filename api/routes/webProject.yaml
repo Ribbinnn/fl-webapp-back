@@ -14,18 +14,25 @@
             properties:
               name:
                 type: string
+                example: COVID-19
               task:
                 type: string
+                enum: ['classification_pylon_1024', 'covid19_admission']
               description:
                 type: string
+                example: Model for disease classification
               predClasses:
                 type: array
                 items:
                   type: string
+                  example: Nodule
+                summary: For user to view in frontend, do not have to be the same with the actual prediction class from model.
               head:
                 type: array
                 items:
                   type: string
+                  example: 628b2f93d001f72cf2d0625f
+                summary: User's ID
     responses:
       200:
         description: Success
@@ -39,6 +46,12 @@
           application/json:
               schema:
                 $ref: "#/components/badReqResponse"
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/unauthorizedResponse"
       500:
         description: Internal server error
         content:
@@ -60,20 +73,28 @@
             properties:
               id:
                 type: string
+                example: 628b2f93d001f72cf2d0625f
               name:
                 type: string
+                example: COVID-19
               task:
                 type: string
+                enum: ['classification_pylon_1024', 'covid19_admission']
               description:
                 type: string
+                example: Model for disease classification
               predClasses:
                 type: array
                 items:
                   type: string
+                  example: Nodule
+                summary: For user to view in frontend, do not have to be the same with the actual prediction class from model.
               head:
                 type: array
                 items:
                   type: string
+                  example: 628b2f93d001f72cf2d06250
+                summary: User's ID
     responses:
       200:
         description: Success
@@ -87,6 +108,12 @@
           application/json:
               schema:
                 $ref: "#/components/badReqResponse"
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/unauthorizedResponse"
       500:
         description: Internal server error
         content:
@@ -106,12 +133,12 @@
           application/json:
             schema:
               $ref: "#/components/successResponse"
-      400:
-        description: Invalid input
+      401:
+        description: Unauthorized
         content:
           application/json:
-              schema:
-                $ref: "#/components/badReqResponse"
+            schema:
+              $ref: "#/components/unauthorizedResponse"
       500:
         description: Internal server error
         content:
@@ -135,10 +162,14 @@
             properties:
               id:
                 type: string
+                example: 628b2f93d001f72cf2d0625f
+                summary: Project's ID
               users:
                 type: array
                 items:
                   type: string
+                  example: 628b2f93d001f72cf2d06250
+                summary: User's ID
     responses:
       200:
         description: Success
@@ -152,6 +183,12 @@
           application/json:
               schema:
                 $ref: "#/components/badReqResponse"
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/unauthorizedResponse"
       500:
         description: Internal server error
         content:
@@ -173,12 +210,12 @@
           application/json:
             schema:
               $ref: "#/components/successResponse"
-      400:
-        description: Invalid input
+      401:
+        description: Unauthorized
         content:
           application/json:
-              schema:
-                $ref: "#/components/badReqResponse"
+            schema:
+              $ref: "#/components/unauthorizedResponse"
       500:
         description: Internal server error
         content:
@@ -198,6 +235,8 @@
         name: id
         schema:
           type: string
+          example: 628b2f93d001f72cf2d0625f
+        description: User's ID
     responses:
       200:
         description: Success
@@ -205,12 +244,12 @@
           application/json:
             schema:
               $ref: "#/components/successResponse"
-      400:
-        description: Invalid input
+      401:
+        description: Unauthorized
         content:
           application/json:
-              schema:
-                $ref: "#/components/badReqResponse"
+            schema:
+              $ref: "#/components/unauthorizedResponse"
       500:
         description: Internal server error
         content:
@@ -230,6 +269,7 @@
         name: project_id
         schema:
           type: string
+          example: 628b2f93d001f72cf2d0625f
     responses:
       200:
         description: Success
@@ -237,12 +277,12 @@
           application/json:
             schema:
               $ref: "#/components/successResponse"
-      400:
-        description: Invalid input
+      401:
+        description: Unauthorized
         content:
           application/json:
-              schema:
-                $ref: "#/components/badReqResponse"
+            schema:
+              $ref: "#/components/unauthorizedResponse"
       500:
         description: Internal server error
         content:
@@ -262,6 +302,7 @@
         name: project_id
         schema:
           type: string
+          example: 628b2f93d001f72cf2d0625f
     responses:
       200:
         description: Success
@@ -269,12 +310,12 @@
           application/json:
             schema:
               $ref: "#/components/successResponse"
-      400:
-        description: Invalid input
+      401:
+        description: Unauthorized
         content:
           application/json:
-              schema:
-                $ref: "#/components/badReqResponse"
+            schema:
+              $ref: "#/components/unauthorizedResponse"
       500:
         description: Internal server error
         content:
@@ -293,6 +334,13 @@ components:
       data:
         type: object
   badReqResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      message:
+        type: string
+  unauthorizedResponse:
     type: object
     properties:
       success:

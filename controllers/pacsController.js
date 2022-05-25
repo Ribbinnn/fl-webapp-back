@@ -11,7 +11,7 @@ const pythonURL = process.env.PY_SERVER + '/api/pacs';
 // get patient information from PACS by HN
 const getInfoByHN = async (req, res) => {
     try {
-        let acc_no = (await webModel.PythonDCMPath.findOne({ hn: req.query.HN }))
+        let acc_no = (await webModel.PythonDCMPath.findOne({ hn: String(req.query.HN) }))
 
         if (!acc_no) {
             return res.status(200).json({
@@ -38,7 +38,7 @@ const getInfoByHN = async (req, res) => {
         })
     } catch (e) {
         if (e.response)
-            return res.status(e.response.status).json({ success: false, message: `${e.response.data.message}` })
+            return res.status(e.response.status).json({ success: false, message: `${e.response?.data?.message}` })
         return res.status(500).json({ success: false, message: 'Internal server error', error: e.message })
     }
 }
@@ -51,7 +51,7 @@ const getAllByQuery = async (req, res) => {
         const endDate = new Date(req.query.end_date)
         endDate.setHours(endDate.getHours() + 7);
 
-        const hn = req.query.HN
+        const hn = String(req.query.HN)
         const acc_no = req.query.accession_no
         const start_date = req.query.start_date
         const end_date = req.query.end_date
@@ -81,7 +81,7 @@ const getAllByQuery = async (req, res) => {
         })
     } catch (e) {
         if (e.response)
-            return res.status(e.response.status).json({ success: false, message: `${e.response.data.message}` })
+            return res.status(e.response.status).json({ success: false, message: `${e.response?.data?.message}` })
         return res.status(500).json({ success: false, message: 'Internal server error', error: e.message })
     }
 }

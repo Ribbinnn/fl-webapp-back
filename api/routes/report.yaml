@@ -1,6 +1,6 @@
 /:
   get:
-    summary: Get report (pred_result) by id
+    summary: Get report by id
     tags:
       - Report
     security:
@@ -10,6 +10,7 @@
         name: rid
         schema:
           type: string
+          example: 628b2f93d001f72cf2d0625f
     responses:
       200:
         description: Success
@@ -23,6 +24,12 @@
           application/json:
               schema:
                 $ref: "#/components/badReqResponse"
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/unauthorizedResponse"
       500:
         description: Internal server error
         content:
@@ -32,7 +39,7 @@
 
 /updatedById:
   patch:
-    summary: Update report by id
+    summary: Update report by id (report=pred_result)
     tags:
       - Report
     security:
@@ -46,14 +53,21 @@
               properties:
                 report_id:
                   type: string
+                  example: 628b2f93d001f72cf2d0625f
                 note:
                   type: string
+                  example: The patient is a woman
                 user_id:
                   type: string
+                  example: 628b2f93d001f72cf2d06250
                 rating:
                   type: number
+                  example: 5
                 label:
                   type: object
+                  example: { 
+                    "finding": [ "Lung Opacity", "Patchy Opacity" ] 
+                  }
     responses:
       200:
         description: Success
@@ -67,6 +81,12 @@
           application/json:
               schema:
                 $ref: "#/components/badReqResponse"
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/unauthorizedResponse"
       500:
         description: Internal server error
         content:
@@ -86,6 +106,7 @@
         name: project_id
         schema:
           type: string
+          example: 628b2f93d001f72cf2d0625f
     responses:
       200:
         description: Success
@@ -99,6 +120,12 @@
           application/json:
               schema:
                 $ref: "#/components/badReqResponse"
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/unauthorizedResponse"
       500:
         description: Internal server error
         content:
@@ -118,6 +145,7 @@
         name: rid
         schema:
           type: string
+          example: 628b2f93d001f72cf2d0625f
     responses:
       200:
         description: Success
@@ -131,6 +159,12 @@
           application/json:
               schema:
                 $ref: "#/components/badReqResponse"
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/unauthorizedResponse"
       500:
         description: Internal server error
         content:
@@ -149,6 +183,13 @@ components:
       data:
         type: object
   badReqResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      message:
+        type: string
+  unauthorizedResponse:
     type: object
     properties:
       success:

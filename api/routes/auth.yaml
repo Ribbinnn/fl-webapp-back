@@ -12,10 +12,13 @@
             properties:
               username:
                 type: string
+                example: john
               password:
                 type: string
+                example: xxxxxxxx
               remember:
                 type: boolean
+                summary: true for 'remember me'
     responses:
       200:
         description: Success
@@ -27,8 +30,8 @@
         description: Unauthorized
         content:
           application/json:
-              schema:
-                $ref: "#/components/badReqResponse"
+            schema:
+              $ref: "#/components/unauthorizedResponse"
       500:
         description: Internal server error
         content:
@@ -54,8 +57,8 @@
         description: Unauthorized
         content:
           application/json:
-              schema:
-                $ref: "#/components/badReqResponse"
+            schema:
+              $ref: "#/components/unauthorizedResponse"
       500:
         description: Internal server error
         content:
@@ -73,7 +76,7 @@ components:
         type: string
       data:
         type: object
-  badReqResponse:
+  unauthorizedResponse:
     type: object
     properties:
       success:

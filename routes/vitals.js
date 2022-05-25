@@ -4,6 +4,8 @@ const vitalsController = require('../controllers/vitalsController')
 const tokenValidation = require('../middlewares/tokenVerification')
 const verification = require('../middlewares/verification')
 
+// vitals database management
+
 // create project
 router.post(
     '/records/',

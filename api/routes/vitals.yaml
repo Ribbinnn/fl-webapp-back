@@ -14,14 +14,23 @@
             properties:
               project_name:
                 type: string
+                example: COVID-19
+                summary: Vitals Project's name should be the same as Web Project's name
               record_name:
                 type: string
+                example: covid_record
               user_id:
                 type: string
+                example: 628b2f93d001f72cf2d0625f
               records:
                 type: array
                 items:
                   type: object
+                  example: {
+                    "entry_id": 0,
+                    "hn": 1234567,
+                    "measured_time(YYYY-MM-DD HH:mm)": "2021-11-11 11:11"
+                  }
     responses:
       200:
         description: Success
@@ -35,6 +44,12 @@
           application/json:
               schema:
                 $ref: "#/components/badReqResponse"
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/unauthorizedResponse"
       500:
         description: Internal server error
         content:
@@ -42,7 +57,7 @@
             schema:
               $ref: "#/components/errorResponse"
   get:
-    summary: Get all record by HN
+    summary: "Get all medical records by HN (frontend: Diagnosis)"
     tags:
       - Vitals
     security:
@@ -52,10 +67,13 @@
         name: HN
         schema:
           type: string
+          example: 1234567
       - in: query
-        name: project_id
+        name: project_name
         schema:
           type: string
+          example: COVID-19
+        description: Web Project's Name
     responses:
       200:
         description: Success
@@ -69,6 +87,12 @@
           application/json:
               schema:
                 $ref: "#/components/badReqResponse"
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/unauthorizedResponse"
       500:
         description: Internal server error
         content:
@@ -78,7 +102,7 @@
 
 /getByQuery:
   get:
-    summary: Get vitals project by user id and project id
+    summary: "Get vitals project by user id and web project id (frontend: My Record)"
     tags:
       - Vitals
     security:
@@ -88,10 +112,14 @@
         name: user_id
         schema:
           type: string
+          example: 628b2f93d001f72cf2d06250
+        description: User's ID
       - in: query
         name: project_id
         schema:
           type: string
+          example: 628b2f93d001f72cf2d0625f
+        description: Web Project's ID
     responses:
       200:
         description: Success
@@ -99,6 +127,12 @@
           application/json:
             schema:
               $ref: "#/components/successResponse"
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/unauthorizedResponse"
       500:
         description: Internal server error
         content:
@@ -108,7 +142,7 @@
 
 /getRecordByProjectId:
   get:
-    summary: Get medical reocords by vitals project id
+    summary: "Get medical reocords by vitals project id (frontend: My Record)"
     tags:
       - Vitals
     security:
@@ -118,6 +152,8 @@
         name: id
         schema:
           type: string
+          example: 628b2f93d001f72cf2d0625f
+        description: Vitals Project's ID
     responses:
       200:
         description: Success
@@ -125,6 +161,12 @@
           application/json:
             schema:
               $ref: "#/components/successResponse"
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/unauthorizedResponse"
       500:
         description: Internal server error
         content:
@@ -148,8 +190,18 @@
             properties:
               record_id:
                 type: string
+                example: 628b2f93d001f72cf2d0625f
               update_data:
-                type: object
+                type: array
+                items:
+                  type: object
+                  example: {
+                    "entry_id": 0,
+                    "hn": 1234567,
+                    "body_temperature_day1_0": 35,
+                    "measured_time": "2022-03-11T11:50:00.000Z",
+                    "updated_time": "2022-05-25T09:20:38.000Z"
+                  }
     responses:
       200:
         description: Success
@@ -163,6 +215,12 @@
           application/json:
               schema:
                 $ref: "#/components/badReqResponse"
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/unauthorizedResponse"
       500:
         description: Internal server error
         content:
@@ -186,8 +244,10 @@
             properties:
               record_id:
                 type: string
+                example: 628b2f93d001f72cf2d0625f
               record_index:
                 type: number
+                example: 1
     responses:
       200:
         description: Success
@@ -201,6 +261,12 @@
           application/json:
               schema:
                 $ref: "#/components/badReqResponse"
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/unauthorizedResponse"
       500:
         description: Internal server error
         content:
@@ -220,6 +286,7 @@
         name: record_id
         schema:
           type: string
+          example: 628b2f93d001f72cf2d0625f
     responses:
       200:
         description: Success
@@ -233,6 +300,12 @@
           application/json:
               schema:
                 $ref: "#/components/badReqResponse"
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/unauthorizedResponse"
       500:
         description: Internal server error
         content:
@@ -252,6 +325,8 @@
         name: project_id
         schema:
           type: string
+          example: 628b2f93d001f72cf2d0625f
+        description: Vital Project's ID
     responses:
       200:
         description: Success
@@ -259,6 +334,12 @@
           application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
             schema:
               type: file  
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/unauthorizedResponse"
       500:
         description: Internal server error
         content:
@@ -277,6 +358,13 @@ components:
       data:
         type: object
   badReqResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      message:
+        type: string
+  unauthorizedResponse:
     type: object
     properties:
       success:

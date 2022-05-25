@@ -130,10 +130,12 @@ const update = async (req, res) => {
       result_id: req.body.report_id,
     });
 
+    // make all classes in predClass to be false
     let selectedClass = predClass.prediction.map((item) => {
       item["selected"] = false;
       return item;
     });
+    // only selected label will be true
     selectedClass = selectedClass.map((item) => {
       if (req.body.label["finding"].includes(item["finding"]))
         item["selected"] = true;
@@ -153,6 +155,7 @@ const update = async (req, res) => {
       const ratingCount = report.project_id.rating_count;
       const projectRating = report.project_id.rating;
       if (report.rating == 0) {
+        // if the report is rated for the first time
         await webModel.Project.findByIdAndUpdate(report.project_id._id, {
           rating:
             (req.body.rating + ratingCount * projectRating) / (ratingCount + 1),

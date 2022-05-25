@@ -10,18 +10,22 @@
         name: HN
         schema:
           type: string
+          example: 1234567
       - in: query
         name: accession_no
         schema:
           type: string
+          example: 20211018CR0846
       - in: query
         name: start_date
         schema:
           type: string
+          example: '2019-05-01T08:10:00.000Z'
       - in: query
         name: end_date
         schema:
           type: string
+          example: '2022-05-01T08:10:00.000Z'
     responses:
       200:
         description: Success
@@ -35,6 +39,12 @@
           application/json:
               schema:
                 $ref: "#/components/badReqResponse"
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/unauthorizedResponse"
       500:
         description: Internal server error
         content:
@@ -54,6 +64,7 @@
         name: HN
         schema:
           type: string
+          example: 1234567
     responses:
       200:
         description: Success
@@ -67,6 +78,12 @@
           application/json:
               schema:
                 $ref: "#/components/badReqResponse"
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/unauthorizedResponse"
       500:
         description: Internal server error
         content:
@@ -86,6 +103,7 @@
         name: report_id
         schema:
           type: string
+          example: 628b2f93d001f72cf2d0625f
     responses:
       200:
         description: Success
@@ -99,6 +117,12 @@
           application/json:
               schema:
                 $ref: "#/components/badReqResponse"
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/unauthorizedResponse"
       500:
         description: Internal server error
         content:
@@ -117,6 +141,13 @@ components:
       data:
         type: object
   badReqResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      message:
+        type: string
+  unauthorizedResponse:
     type: object
     properties:
       success:

@@ -126,7 +126,7 @@ const create = async (req, res) => {
     }
 }
 
-// get vitals project by clinician
+// get vitals project by user id (clinician) and projet id
 const getProject = async (req, res) => {
     try {
         const user = await webModel.User.findById(req.query.user_id);
@@ -163,7 +163,7 @@ const getProject = async (req, res) => {
     }
 }
 
-// get record by project id
+// get record by project id (frontend: My Record)
 const getRecordByProjectId = async (req, res) => {
     try {
         // get all records from this project
@@ -174,7 +174,7 @@ const getRecordByProjectId = async (req, res) => {
     }
 }
 
-// get all records by patient HN
+// get all records by patient HN (frontend: Diagnosis > Select Medical Record)
 const getRecordByHN = async (req, res) => {
     try {
         const records = await vitalsModel.Record.aggregate([
