@@ -11,25 +11,34 @@ const pythonURL = process.env.PY_SERVER + '/api/pacs';
 // get patient information from PACS by HN
 const getInfoByHN = async (req, res) => {
     try {
-        if(isNaN(Number(req.query.HN))) {
+        let acc_no = (await webModel.PythonDCMPath.findOne({ hn: String(req.query.HN) }))
+
+        if (!acc_no) {
             return res.status(200).json({
                 success: true,
-                message: "Invalid HN",
+                message: "Get patient's info successfully"
             })
         }
 
-        const data = (
-            await axios.get(pythonURL + `/HN/${req.query.HN}/info`)
-        ).data;
+        acc_no = acc_no.accession_no
+        const data = (await axios.post(pythonURL, {
+            'acc_no_list': [acc_no]
+        })).data
 
         return res.status(200).json({
             success: true,
             message: "Get patient's info successfully",
-            data: data.data['Patient ID'] ? data.data : undefined
+            data: data.data == [] ? undefined : {
+                'Patient ID': data.data[0]['Patient ID'],
+                'Patient Name': data.data[0]['Patient Name'],
+                'Patient Sex': data.data[0]['Patient Sex'],
+                'Patient Birthdate': data.data[0]['Patient Birthdate'],
+                'Age': data.data[0]['Age']
+            }
         })
     } catch (e) {
         if (e.response)
-            return res.status(e.response.status).json({ success: false, message: `${e.response.data.message}` })
+            return res.status(e.response.status).json({ success: false, message: `${e.response?.data?.message}` })
         return res.status(500).json({ success: false, message: 'Internal server error', error: e.message })
     }
 }
@@ -41,16 +50,30 @@ const getAllByQuery = async (req, res) => {
         startDate.setHours(startDate.getHours() + 7);
         const endDate = new Date(req.query.end_date)
         endDate.setHours(endDate.getHours() + 7);
-        const params = {
-            params: {
-                hn: req.query.HN,
-                acc_no: req.query.accession_no,
-                start_date: req.query.start_date ? startDate.getTime() : undefined,
-                end_date: req.query.end_date ? endDate.getTime() : undefined
-            }
-        }
 
-        const data = (await axios.get(pythonURL + "/HN/", params)).data;
+        const hn = String(req.query.HN)
+        const acc_no = req.query.accession_no
+        const start_date = req.query.start_date
+        const end_date = req.query.end_date
+
+        var accNoList = []
+        if (!hn && !acc_no && !start_date && !end_date) {
+            accNoList = await webModel.PythonDCMPath.find()
+        } else {
+            let conditions = []
+            conditions.push({ hn: { $ne: null } })
+            if (hn) conditions.push({ hn: hn })
+            if (acc_no) conditions.push({ accession_no: accession_no })
+            if (start_date) conditions.push({ study_time: { $gte: start_date } })
+            if (end_date) conditions.push({ study_time: { $lte: end_date } })
+            accNoList = await webModel.PythonDCMPath.find({ $and: conditions })
+        }
+        const acc_no_list = accNoList.map(item => item.accession_no)
+
+        const data = (await axios.post(pythonURL, {
+            'acc_no_list': acc_no_list
+        })).data
+
         return res.status(200).json({
             success: true,
             message: 'Get dicom files by HN successfully',
@@ -58,7 +81,7 @@ const getAllByQuery = async (req, res) => {
         })
     } catch (e) {
         if (e.response)
-            return res.status(e.response.status).json({ success: false, message: `${e.response.data.message}` })
+            return res.status(e.response.status).json({ success: false, message: `${e.response?.data?.message}` })
         return res.status(500).json({ success: false, message: 'Internal server error', error: e.message })
     }
 }
@@ -105,7 +128,7 @@ const saveToPACS = async (req, res) => {
         bbox_data['acc_no'] = report.image_id.accession_no
         const zip = new AdmZip();
         // select heatmap to be sent to pacs
-        report.label.finding.map(finding => {
+        report.label?.finding?.map(finding => {
             if (finding != 'No Finding' && fs.existsSync(path.join(resultDir, finding + '.png'))) {
                 // await fs.promises.copyFile(path.join(resultDir, finding + '.png'), path.join(reqDir, finding + '.png'))
                 imgName = finding.split(' ').join('_')
@@ -142,6 +165,9 @@ const saveToPACS = async (req, res) => {
             hn: null,
             patient_name: null,
             status: modelStatus.FINALIZED
+        })
+        await webModel.PythonDCMPath.findOneAndUpdate({ accession_no: report.image_id.accession_no }, {
+            hn: null
         })
 
         // delete zip file
@@ -209,7 +235,7 @@ const saveToPACS = async (req, res) => {
         }
         // if (e.response)
         //     return res.status(e.response.status).json({ success: false, message: `${e.response.data.message}` })
-        const errMsg = e.response? `Model Error`: e.message
+        const errMsg = e.response ? `Model Error` : e.message
         return res.status(500).json({
             success: false,
             message: "Internal server error",

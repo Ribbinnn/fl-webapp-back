@@ -1,0 +1,149 @@
+/:
+  post:
+    summary: Individual inference
+    tags:
+      - Inference
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              accession_no:
+                type: string
+                example: 20211018CR0846
+              project_id:
+                type: string
+                example: 628b2f93d001f72cf2d0625f
+              user_id:
+                type: string
+                example: 628b2f93d001f72cf2d06250
+              record:
+                type: object
+                example: {
+                  "entry_id": 0,
+                  "hn": 1234567,
+                  "gender": "F",
+                  "age": 49,
+                  "measured_time": "2022-02-09T04:52:55.000Z",
+                }
+    responses:
+      200:
+        description: Success
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/successResponse"
+      400:
+        description: Invalid input
+        content:
+          application/json:
+              schema:
+                $ref: "#/components/badReqResponse"
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/unauthorizedResponse"
+      500:
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/errorResponse"
+
+/batch:
+  post:
+    summary: Batch inference
+    tags:
+      - Inference
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              project_id:
+                type: string
+              user_id:
+                type: string
+              dicom_info_list:
+                type: array
+                items:
+                  type: object
+                  example: {
+                    "record": {
+                      "entry_id": 0,
+                      "hn": 1234567,
+                      "gender": "F",
+                      "age": 49,
+                      "measured_time": "2022-02-09T04:52:55.000Z",
+                    }, 
+                    "accession_no": "20191107CR0388"
+                  }
+    responses:
+      200:
+        description: Success
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/successResponse"
+      400:
+        description: Invalid input
+        content:
+          application/json:
+              schema:
+                $ref: "#/components/badReqResponse"
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/unauthorizedResponse"
+      500:
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/errorResponse"
+
+components:
+  successResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      message:
+        type: string
+      data:
+        type: object
+  badReqResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      message:
+        type: string
+  unauthorizedResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      message:
+        type: string
+  errorResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      message:
+        type: string
+      error:
+        type: string

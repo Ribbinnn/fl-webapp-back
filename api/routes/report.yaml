@@ -1,0 +1,207 @@
+/:
+  get:
+    summary: Get report by id
+    tags:
+      - Report
+    security:
+      - bearerAuth: []
+    parameters:
+      - in: path
+        name: rid
+        schema:
+          type: string
+          example: 628b2f93d001f72cf2d0625f
+    responses:
+      200:
+        description: Success
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/successResponse"
+      400:
+        description: Invalid input
+        content:
+          application/json:
+              schema:
+                $ref: "#/components/badReqResponse"
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/unauthorizedResponse"
+      500:
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/errorResponse"
+
+/updatedById:
+  patch:
+    summary: Update report by id (report=pred_result)
+    tags:
+      - Report
+    security:
+      - bearerAuth: []
+    requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                report_id:
+                  type: string
+                  example: 628b2f93d001f72cf2d0625f
+                note:
+                  type: string
+                  example: The patient is a woman
+                user_id:
+                  type: string
+                  example: 628b2f93d001f72cf2d06250
+                rating:
+                  type: number
+                  example: 5
+                label:
+                  type: object
+                  example: { 
+                    "finding": [ "Lung Opacity", "Patchy Opacity" ] 
+                  }
+    responses:
+      200:
+        description: Success
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/successResponse"
+      400:
+        description: Invalid input
+        content:
+          application/json:
+              schema:
+                $ref: "#/components/badReqResponse"
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/unauthorizedResponse"
+      500:
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/errorResponse"
+
+/getByProjectId:
+  get:
+    summary: Get reports by project id
+    tags:
+      - Report
+    security:
+      - bearerAuth: []
+    parameters:
+      - in: path
+        name: project_id
+        schema:
+          type: string
+          example: 628b2f93d001f72cf2d0625f
+    responses:
+      200:
+        description: Success
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/successResponse"
+      400:
+        description: Invalid input
+        content:
+          application/json:
+              schema:
+                $ref: "#/components/badReqResponse"
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/unauthorizedResponse"
+      500:
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/errorResponse"
+
+/deleteById:
+  delete:
+    summary: Delete report by id
+    tags:
+      - Report
+    security:
+      - bearerAuth: []
+    parameters:
+      - in: path
+        name: rid
+        schema:
+          type: string
+          example: 628b2f93d001f72cf2d0625f
+    responses:
+      200:
+        description: Success
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/successResponse"
+      400:
+        description: Invalid input
+        content:
+          application/json:
+              schema:
+                $ref: "#/components/badReqResponse"
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/unauthorizedResponse"
+      500:
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/errorResponse"
+
+components:
+  successResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      message:
+        type: string
+      data:
+        type: object
+  badReqResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      message:
+        type: string
+  unauthorizedResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      message:
+        type: string
+  errorResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      message:
+        type: string
+      error:
+        type: string

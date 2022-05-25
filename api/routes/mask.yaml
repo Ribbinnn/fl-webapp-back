@@ -1,0 +1,160 @@
+/getByReportId:
+  get:
+    summary: Get bounding box by report id
+    tags:
+      - Mask
+    security:
+      - bearerAuth: []
+    parameters:
+      - in: path
+        name: report_id
+        schema:
+          type: string
+    responses:
+      200:
+        description: Success
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/successResponse"
+      400:
+        description: Invalid input
+        content:
+          application/json:
+              schema:
+                $ref: "#/components/badReqResponse"
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/unauthorizedResponse"
+      500:
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/errorResponse"
+
+/updateByReportId:
+  patch:
+    summary: Update bounding box by report id
+    tags:
+      - Mask
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              report_id:
+                type: string
+                example: 628b2f93d001f72cf2d0625f
+              data:
+                type: array
+                items:
+                  type: object
+                  example: {
+                    "tool": "length",
+                    "updated_by": "61b9f9b83c3925fa1fda5251",
+                    "label": "label_xxx",
+                    "updated_time":"1/1/2021",
+                    "data": {
+                    "visible": true,
+                    "active": false,
+                    "handles": {
+                        "start": {
+                            "x": 307.15,
+                            "y": 946.2749999999999,
+                            "highlight": true,
+                            "active": false
+                        },
+                        "end": {
+                            "x": 1920.6999999999998,
+                            "y": 936.9749999999998,
+                            "highlight": true,
+                            "active": false
+                        },
+                        "textBox": {
+                            "active": false,
+                            "hasMoved": false,
+                            "movesIndependently": false,
+                            "drawnIndependently": true,
+                            "allowedOutsideImage": true,
+                            "hasBoundingBox": true,
+                            "x": 1920.6999999999998,
+                            "y": 936.9749999999998,
+                            "boundingBox": {
+                                "width": 85.03662109375,
+                                "height": 25,
+                                "left": 543,
+                                "top": 188.99999999999997
+                            }
+                        }
+                      },
+                      "length": 234.44446570139695,
+                      "invalidated": true
+                    }
+                  }
+    responses:
+      200:
+        description: Success
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/successResponse"
+      400:
+        description: Invalid input
+        content:
+          application/json:
+              schema:
+                $ref: "#/components/badReqResponse"
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/unauthorizedResponse"
+      500:
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/errorResponse"
+
+components:
+  successResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      message:
+        type: string
+      data:
+        type: object
+  badReqResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      message:
+        type: string
+  unauthorizedResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      message:
+        type: string
+  errorResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      message:
+        type: string
+      error:
+        type: string

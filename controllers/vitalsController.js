@@ -126,7 +126,7 @@ const create = async (req, res) => {
     }
 }
 
-// get vitals project by clinician
+// get vitals project by user id (clinician) and projet id
 const getProject = async (req, res) => {
     try {
         const user = await webModel.User.findById(req.query.user_id);
@@ -163,7 +163,7 @@ const getProject = async (req, res) => {
     }
 }
 
-// get record by project id
+// get record by project id (frontend: My Record)
 const getRecordByProjectId = async (req, res) => {
     try {
         // get all records from this project
@@ -174,7 +174,7 @@ const getRecordByProjectId = async (req, res) => {
     }
 }
 
-// get all records by patient HN
+// get all records by patient HN (frontend: Diagnosis > Select Medical Record)
 const getRecordByHN = async (req, res) => {
     try {
         const records = await vitalsModel.Record.aggregate([
@@ -217,6 +217,7 @@ const updateRecRow = async (req, res) => {
         const webProject = await webModel.Project.findById(req.body.project_id)
         if (!webProject)
             return res.status(400).json({ success: false, message: 'Project not found' });
+        // requirements required for all projects
         const requirements = [
             { name: "entry_id", type: "number", unit: "none", required: true },
             { name: "hn", type: "number", unit: "none", required: true },
@@ -308,6 +309,7 @@ const deleteRecRow = async (req, res) => {
     }
 }
 
+// delete entire record
 const deleteRecFile = async (req, res) => {
     const validatedResult = delete_validator.validate({ record_id: req.params.id, entry_id: req.body.entry_id })
     console.log(req.params)

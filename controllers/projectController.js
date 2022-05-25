@@ -1,12 +1,12 @@
 const Joi = require("joi");
 const webModel = require('../models/webapp')
-const { tasks } = require('../utils/taskList')
 const { checkExistedUser } = require('../utils/reusuableFunctions')
+const { getTaskReq, getTaskNames } = require('../utils/taskFunctions')
 const { userStatus, userRole } = require('../utils/status')
 
 const schema = {
     name: Joi.string().required().max(32),
-    task: Joi.string().required().valid(...Object.keys(tasks)),
+    task: Joi.string().required(),
     description: Joi.string().max(160),
     predClasses: Joi.array().items(Joi.string()),
     head: Joi.array().items(Joi.string()).required().min(1)
@@ -28,6 +28,10 @@ const create = async (req, res) => {
     if (validatedResult.error) {
         return res.status(400).json({ success: false, message: `Invalid input: ${(validatedResult.error.message)}` })
     }
+    // check if task is valid
+    const taskNames = await getTaskNames()
+    if (!taskNames.includes(req.body.task))
+        return res.status(400).json({ success: false, message: `Invalid input: "task" must be one of [${taskNames}]` })
     try {
         const existedUsers = await checkExistedUser(req.body.head, [userRole.RADIOLOGIST])
         if (existedUsers.length < 1)
@@ -43,7 +47,7 @@ const create = async (req, res) => {
             users: existedUsers,
             rating: 0,
             rating_count: 0,
-            requirements: tasks[req.body.task]
+            requirements: getTaskReq(req.body.task)
         })
 
         // update project list of associated user
@@ -106,7 +110,13 @@ const getAll = async (req, res) => {
 
 // get all AI tasks
 const getTask = async (req, res) => {
-    return res.status(200).json({ success: true, message: 'Get task successfully', data: Object.keys(tasks) });
+    try {
+        const taskNames = await getTaskNames()
+        return res.status(200).json({ success: true, message: 'Get task successfully', data: taskNames });
+    } catch (e) {
+        return res.status(500).json({ success: false, message: 'Internal server error', error: e.message })
+    }
+    
 }
 
 // update project by id
@@ -156,6 +166,7 @@ const update = async (req, res) => {
 // delete project by id
 const deleteById = async (req, res) => {
     try {
+        // delete asscociated reports and the project
         const project = await webModel.Project.findOneAndDelete({ _id: req.params.project_id })
         return res.status(200).json({
             success: true,

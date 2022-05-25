@@ -14,6 +14,7 @@
   ```
 
 ## API PATH
+**Clinician & Radiologist API PATH** <br />
 Authentication & User <br />
 - POST /api/auth/login ( reqBody = {username, password, remember} )
 - POST /api/auth/logout 
@@ -27,10 +28,10 @@ Vitals
 - POST /api/vitals/records ( Create vitals project and upload medical records, reqBody = {project_name, record_name, user_id, records} )
 - GET /api/vitals/ ( Get projects by field, reqQuery = (user_id, project_id) )
 - GET /api/vitals/projects/:id/medrec ( Get all records by project id )
-- GET /api/vitals/records/ ( Get all records by patient's HN, reqQuery = (HN, project_id) )
+- GET /api/vitals/records/ ( Get all records by patient's HN, reqQuery = (HN, project_name) )
 - GET /api/vitals/template/:project_id (Get .xlsx template from project's requirements)
 - PATCH /api/vitals/records/updaterow (Update selected row in record file, reqBody = {record_id, update_data})
-- PATCH /api/vitals/records/deleterow/ (Delete selected row in record file req.boy = {record_id, record_index}) 
+- PATCH /api/vitals/records/deleterow/ (Delete selected row in record file reqBody = {record_id, record_index}) 
 - DELETE /api/vitals/records/deletefile/:id (Delete entire record file by record_id) 
 
 Infer & Report
@@ -58,7 +59,7 @@ Mask
 **Admin API PATH** <br />
 Webapp Project
 - POST /api/projects ( Create new project, reqBody = {name, task, description, predClasses, head} )
-- PATCH /api/projects ( Create new project, reqBody = {id, name, task, description, predClasses, head} )
+- PATCH /api/projects ( Update project, reqBody = {id, name, task, description, predClasses, head} )
 - PATCH /api/projects/manage ( Manage project's user list, reqBody = {id, users} )
 - GET /api/projects ( Get all projects )
 - GET /api/projects/tasks ( Get all AI tasks )
@@ -66,7 +67,7 @@ Webapp Project
  
 User
 - POST /api/users ( Create new user, reqBody = {username, password, first_name, last_name, role, email} )
-- PATCH /api/users ( Create new user, reqBody = {id, password, first_name, last_name, role, email, isChulaSSO} )
+- PATCH /api/users ( Update user, reqBody = {id, password, first_name, last_name, role, email, isChulaSSO} )
 - GET /api/users ( Get all users )
 
 

@@ -9,6 +9,7 @@ const schema = {
 
 const validator = Joi.object(schema);
 
+// not used
 const insertMedRec = async (req, res) => {
     // validate input
     const validatedResult = validator.validate({project_id: req.params.id, record: req.body})
